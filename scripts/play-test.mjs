@@ -102,6 +102,9 @@ const end = await game();
 report.scoreAtEnd = end.score;
 await page.waitForTimeout(900);
 await page.screenshot({ path: '.tmp/play-finished.png' });
+// 揭晓序列到灯泡亮起约 1.6s，再补一张点亮的终局
+await page.waitForTimeout(1400);
+await page.screenshot({ path: '.tmp/play-lit.png' });
 
 const stlHref = await page.locator('a[download]').getAttribute('href').catch(() => null);
 report.stlHref = stlHref;

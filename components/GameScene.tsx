@@ -49,6 +49,9 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     let maxSize = 1;
     let stagePos: any = null;
     let modelBoxCache: any = null;
+    let sceneCache: any = null;
+    let bulbLight: any = null;
+    const timers: any[] = [];
     let bug: any = null; // 引擎模块，供 tween 里构造向量用
 
     const parts: {
@@ -158,47 +161,66 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       setPhase('finished');
       setFeedback(null);
       publish('finished');
-      // 零件都归位了，把相机收到只剩模型本身的范围，让完整物体占满画面
+
+      // 揭晓分四拍：停半拍 → 炸开再合拢 → 镜头拉远 → 灯泡亮起
       const modelBox = modelBoxCache;
       const modelCenter = modelBox.getCenter(new bug.Vector3());
       const modelSize = modelBox.getSize(new bug.Vector3());
       const radius = (Math.max(modelSize.x, modelSize.y, modelSize.z) || 1) * 0.5;
       const dist = (radius / Math.tan((38 * Math.PI) / 180 / 2)) * 1.85;
       const dir = new bug.Vector3(0.28, 0.16, 1.0).normalize();
-      const target = new bug.Vector3(
+      const camTo = new bug.Vector3(
         modelCenter.x + dir.x * dist,
         modelCenter.y + dir.y * dist,
         modelCenter.z + dir.z * dist,
       );
-      // 底部有信息卡，视线中心略微上移，避免物体被卡片压住
       const lookAt = new bug.Vector3(modelCenter.x, modelCenter.y - modelSize.y * 0.04, modelCenter.z);
       const camFrom = camera.position.clone();
-      tween(700, (k) => {
-        const e = easeOutCubic(k);
-        camera.position.set(
-          camFrom.x + (target.x - camFrom.x) * e,
-          camFrom.y + (target.y - camFrom.y) * e,
-          camFrom.z + (target.z - camFrom.z) * e,
-        );
-        camera.lookAt(lookAt);
-      });
-      // 揭晓：整件物体炸开一次再合拢，作为"原来它是这个"的一瞬
-      const strength = maxSize * 0.42;
-      tween(
-        620,
-        (k) => {
-          const pull = Math.sin(Math.PI * easeOutCubic(k));
-          for (const part of parts) {
-            const dir = new bug.Box3()
-              .setFromObject(part.mesh)
-              .getCenter(new bug.Vector3())
-              .normalize();
-            part.mesh.position.set(dir.x * strength * pull, dir.y * strength * pull, dir.z * strength * pull);
-          }
-        },
-        () => {
-          for (const part of parts) part.mesh.position.set(0, 0, 0);
-        },
+
+      // 第一拍：安静半拍再动
+      timers.push(
+        setTimeout(() => {
+          const strength = maxSize * 0.42;
+          tween(
+            620,
+            (k) => {
+              const pull = Math.sin(Math.PI * easeOutCubic(k));
+              for (const part of parts) {
+                const c = new bug.Box3().setFromObject(part.mesh).getCenter(new bug.Vector3());
+                const d = c.normalize();
+                part.mesh.position.set(d.x * strength * pull, d.y * strength * pull, d.z * strength * pull);
+              }
+            },
+            () => {
+              for (const part of parts) part.mesh.position.set(0, 0, 0);
+            },
+          );
+        }, 280),
+      );
+
+      // 第二拍：镜头缓慢拉远，让整件物体占满画面
+      timers.push(
+        setTimeout(() => {
+          tween(700, (k) => {
+            const e = easeOutCubic(k);
+            camera.position.set(
+              camFrom.x + (camTo.x - camFrom.x) * e,
+              camFrom.y + (camTo.y - camFrom.y) * e,
+              camFrom.z + (camTo.z - camFrom.z) * e,
+            );
+            camera.lookAt(lookAt);
+          });
+        }, 900),
+      );
+
+      // 第三拍：灯泡亮起——这是整个 demo 唯一有情绪的一秒
+      timers.push(
+        setTimeout(() => {
+          if (!bulbLight) return;
+          tween(420, (k) => {
+            bulbLight.intensity = 3.6 * easeOutCubic(k);
+          });
+        }, 1600),
       );
     };
 
@@ -268,12 +290,16 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       viewer.setCamera(camera);
 
       const scene = viewer.getScene();
-      scene.add(new A.AmbientLight(0xffffff, 0.7));
-      const key = new A.DirectionalLight(0xffffff, 1.1);
-      key.position.set(2.5, 3.5, 2.5);
+      // 白物体靠"暖高光 + 冷暗部"才有体积，均匀光是白膜感的来源
+      scene.add(new A.AmbientLight(0x9fb0cc, 0.3));
+      const key = new A.DirectionalLight(0xfff2e2, 2.2);
+      key.position.set(2.6, 3.2, 2.4);
       scene.add(key);
-      const rim = new A.DirectionalLight(0xdfe7ff, 0.6);
-      rim.position.set(-2.5, 1.2, -3);
+      const fill = new A.DirectionalLight(0x8fa6cc, 0.65);
+      fill.position.set(-2.2, 1.4, 2.0);
+      scene.add(fill);
+      const rim = new A.DirectionalLight(0xffffff, 1.1);
+      rim.position.set(0.4, 1.6, -3.4);
       scene.add(rim);
 
       const response = await fetch(`/items/${meta.id}/model.glb`);
@@ -325,6 +351,14 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
 
       // 舞台槽：零件待拼的位置，放在模型右侧
       stagePos = new A.Vector3(maxSize * 1.15, 0, 0);
+
+      // 灯泡亮起用的点光源：先以 0 强度放在灯泡原位，拼完再点亮
+      const bulb = parts.find((p) => p.quiz.label === '灯泡') || parts[parts.length - 1];
+      bulbLight = new A.PointLight(0xffd6a0, 0);
+      bulbLight.position.set(bulb.restCenter.x, bulb.restCenter.y, bulb.restCenter.z);
+      bulbLight.distance = maxSize * 3.5;
+      scene.add(bulbLight);
+      sceneCache = scene;
 
       // 取景要同时包住"拼装区"和"零件区"
       const frameMin = box.min.clone();
@@ -564,6 +598,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       disposed = true;
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(raf);
+      timers.forEach((t) => clearTimeout(t));
       cleanup?.();
       try {
         viewer?.destroy?.();
