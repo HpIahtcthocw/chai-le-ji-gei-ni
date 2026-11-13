@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import ExplodeScene from '@/components/ExplodeScene';
+import GameScene from '@/components/GameScene';
 import { getItem, listItemIds } from '@/lib/items';
 
 export async function generateStaticParams() {
@@ -11,5 +11,5 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const meta = await getItem(id);
   if (!meta) notFound();
-  return <ExplodeScene meta={meta} />;
+  return <GameScene meta={meta} />;
 }

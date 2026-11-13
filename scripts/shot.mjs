@@ -8,12 +8,11 @@ const BASE = process.env.SHOT_BASE || 'http://localhost:3100';
 
 const shots = [
   { url: '/', out: '.tmp/shot-home.png', waitMs: 800 },
-  { url: '/item/lamp', out: '.tmp/shot-exploding.png', waitMs: 950 },
   {
     url: '/item/lamp',
-    out: '.tmp/shot-exploded.png',
-    waitMs: 300,
-    stopAt: 'window.__SCENE__ && window.__SCENE__.phase === "exploded"',
+    out: '.tmp/shot-playing.png',
+    waitMs: 320,
+    stopAt: 'window.__GAME__ && window.__GAME__.phase === "playing"',
   },
 ];
 
@@ -40,7 +39,7 @@ for (const shot of shots) {
   await page.waitForTimeout(shot.waitMs);
   await page.screenshot({ path: shot.out, fullPage: false });
 
-  const scene = await page.evaluate('window.__SCENE__ ?? null').catch(() => null);
+  const scene = await page.evaluate('window.__GAME__ ? { ...window.__GAME__ } : null').catch(() => null);
   log.push({ out: shot.out, url: shot.url, scene, errors });
   console.log(`${shot.out} ← ${shot.url} · scene=${JSON.stringify(scene)}${errors.length ? ` · ${errors.join(' | ')}` : ''}`);
   await page.close();

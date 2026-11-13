@@ -4,14 +4,14 @@
   "riddle": "它每天最后一个关掉自己。",
   "story": "寄件人留言：宿舍熄灯以后，我靠它写完最后一道题。拆成零件寄给你，拼回来看看你还认不认得它。",
   "partCount": 7,
-  "note": "Lux3D 拆分产物里的零件节点没有名字，partId 按 GLB 子节点顺序固定编号。每个零件的正确答案都是同一件物体，干扰项随零件推进而更具体，这样越早认出得分越高。",
+  "note": "Lux3D 拆分产物里的零件节点没有名字，partId 按 GLB 子节点顺序固定编号。parts 数组的顺序就是到货顺序：从最认不出的零件开始，越往后越明朗。每个零件的正确答案都是同一件物体，干扰项随零件推进而更具体，这样越早认出得分越高。",
   "parts": [
-    { "partId": "part-0", "label": "灯泡", "options": ["落地灯", "台灯", "吊灯"], "answerIndex": 1 },
-    { "partId": "part-1", "label": "灯臂", "options": ["台灯", "壁灯", "落地灯"], "answerIndex": 0 },
-    { "partId": "part-2", "label": "灯罩", "options": ["吊灯", "落地灯", "台灯"], "answerIndex": 2 },
-    { "partId": "part-3", "label": "灯头接头", "options": ["壁灯", "台灯", "音箱"], "answerIndex": 1 },
-    { "partId": "part-4", "label": "灯杆", "options": ["风扇", "台灯", "落地灯"], "answerIndex": 1 },
     { "partId": "part-5", "label": "电源线", "options": ["台灯", "加湿器", "落地灯"], "answerIndex": 0 },
-    { "partId": "part-6", "label": "底座", "options": ["台扇", "落地灯", "台灯"], "answerIndex": 2 }
+    { "partId": "part-6", "label": "底座", "options": ["台扇", "落地灯", "台灯"], "answerIndex": 2 },
+    { "partId": "part-4", "label": "灯杆", "options": ["风扇", "台灯", "落地灯"], "answerIndex": 1 },
+    { "partId": "part-1", "label": "灯臂", "options": ["台灯", "壁灯", "落地灯"], "answerIndex": 0 },
+    { "partId": "part-3", "label": "灯头接头", "options": ["壁灯", "台灯", "音箱"], "answerIndex": 1 },
+    { "partId": "part-2", "label": "灯罩", "options": ["吊灯", "落地灯", "台灯"], "answerIndex": 2 },
+    { "partId": "part-0", "label": "灯泡", "options": ["落地灯", "台灯", "吊灯"], "answerIndex": 1 }
   ]
 }
