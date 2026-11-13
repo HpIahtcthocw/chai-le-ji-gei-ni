@@ -31,6 +31,8 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   const [quiz, setQuiz] = useState<QuizState | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [narrow, setNarrow] = useState(false);
+  const [loadPct, setLoadPct] = useState<number | null>(null);
+  const [loadBytes, setLoadBytes] = useState<{ got: number; total: number } | null>(null);
 
   // 引擎侧的可变状态放 ref，避免 React 重渲染打断动画
   const ctrlRef = useRef<{ answer: (index: number) => void }>({ answer: () => {} });
@@ -363,9 +365,41 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       rim.position.set(0.4, 1.6, -3.4);
       scene.add(rim);
 
-      const response = await fetch(`/items/${meta.id}/model.glb`);
-      if (!response.ok) throw new Error(`模型载入失败 HTTP ${response.status}`);
-      const buffer = await response.arrayBuffer();
+      // 16 MB 模型下载期间必须有真实进度，否则玩家以为点了没反应。
+      // 从入口页客户端跳转进来时，偶发一次 ERR_CACHE_WRITE_FAILURE（缓存后端抖动），
+      // 所以这里带一次退避重试，真实网络抖动也能兜住
+      const loadBuffer = (attempt: number) =>
+        new Promise<ArrayBuffer>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', `/items/${meta.id}/model.glb${attempt > 0 ? `?retry=${attempt}` : ''}`);
+          xhr.responseType = 'arraybuffer';
+          let lastPct = -1;
+          xhr.onprogress = (event) => {
+            if (disposed) return;
+            const total = event.lengthComputable ? event.total : 0;
+            if (!total) return;
+            const pct = Math.min(1, event.loaded / total);
+            if (pct - lastPct >= 0.01 || pct >= 1) {
+              lastPct = pct;
+              setLoadPct(pct);
+              setLoadBytes({ got: event.loaded, total });
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response as ArrayBuffer);
+            else reject(new Error(`模型载入失败 HTTP ${xhr.status}`));
+          };
+          xhr.onerror = () => reject(new Error('模型载入失败：网络中断'));
+          xhr.send();
+        });
+
+      const buffer = await loadBuffer(0).catch(async (first: Error) => {
+        if (disposed) throw first;
+        setLoadPct(null);
+        setLoadBytes(null);
+        await new Promise((r) => setTimeout(r, 320));
+        return loadBuffer(1);
+      });
       const parsed = await A.GLTFLoader.loadGLTF(buffer, { textureLoader: A.downloadTexture });
       const model = parsed.scene as any;
       scene.add(model);
@@ -701,6 +735,26 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   return (
     <main style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
       <div ref={hostRef} style={{ position: 'absolute', inset: 0, touchAction: 'none' }} />
+
+      {/* 加载态：16 MB 模型下载期间必须有明确进度，否则看起来像点击没反应 */}
+      {phase === 'loading' && (
+        <div className="loader">
+          <div className="loader-label">正在拆包</div>
+          <div className="loader-bar">
+            {loadPct === null ? (
+              <div className="loader-fill loader-fill--idle" />
+            ) : (
+              <div className="loader-fill" style={{ width: `${Math.round(loadPct * 100)}%` }} />
+            )}
+          </div>
+          <div className="loader-note">
+            {loadBytes
+              ? `${(loadBytes.got / 1048576).toFixed(1)} / ${(loadBytes.total / 1048576).toFixed(1)} MB`
+              : '读取模型'}
+          </div>
+          <div className="loader-riddle">寄件人没有写名字，只留了这一句：{meta.riddle}</div>
+        </div>
+      )}
 
       {/* 落点指示：当前零件原位的屏幕投影处画一个虚线圈 */}
       <div

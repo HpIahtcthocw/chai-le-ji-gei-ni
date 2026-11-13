@@ -1,0 +1,269 @@
+html,
+body {
+  margin: 0;
+  background: #0f1115;
+  color: #e8eaf0;
+}
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- 入口页 ---------------- */
+.entry-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: clamp(48px, 9vh, 84px) 24px 56px;
+}
+.entry-wrap {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.entry-overline {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: #4d5566;
+}
+.entry-title {
+  margin: 18px 0 0;
+  font-size: clamp(40px, 7.6vw, 64px);
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.entry-lede {
+  margin: 22px 0 0;
+  max-width: 540px;
+  font-size: 14px;
+  line-height: 1.95;
+  color: #8f98a8;
+}
+.entry-lede b {
+  color: #e8eaf0;
+  font-weight: 500;
+}
+
+/* 流程细线：寄出 → 拆分 → 到货 → 拼回 → 猜 → 导出 */
+.entry-track {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: clamp(26px, 5vh, 44px);
+}
+.entry-track .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #39414f;
+}
+.entry-track .seg {
+  width: 20px;
+  height: 1px;
+  background: #242a36;
+}
+.entry-track .lab {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: #5d6575;
+  margin-right: 6px;
+}
+
+/* 物品行 */
+.entry-list {
+  max-width: 760px;
+  margin-top: clamp(30px, 6vh, 52px);
+  border-top: 1px solid #1d222c;
+}
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(26px, 4.4vh, 40px) 8px;
+  border-bottom: 1px solid #1d222c;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.3s ease, padding-left 0.3s ease;
+}
+.row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ffc98a;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.36s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.row:hover {
+  background: rgba(255, 255, 255, 0.022);
+  padding-left: 14px;
+}
+.row:hover::before {
+  transform: scaleY(1);
+}
+.row:active {
+  background: rgba(255, 201, 138, 0.06);
+}
+.row .num {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #4d5566;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+.row:hover .num {
+  color: #ffc98a;
+}
+.row .riddle {
+  display: block;
+  font-size: clamp(19px, 2.8vw, 25px);
+  line-height: 1.7;
+  color: #e8eaf0;
+  transition: transform 0.36s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.row:hover .riddle {
+  transform: translateX(2px);
+}
+.row .meta {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #6d7688;
+}
+.row .arrow {
+  font-size: 17px;
+  color: #6d7688;
+  text-align: right;
+  transition: transform 0.36s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.3s ease;
+}
+.row:hover .arrow {
+  transform: translateX(7px);
+  color: #ffc98a;
+}
+
+.entry-foot {
+  margin-top: clamp(30px, 6vh, 52px);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #39414f;
+  line-height: 2;
+}
+
+/* ---------------- 入场动效 ---------------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+  .row,
+  .row::before,
+  .row .riddle,
+  .row .arrow {
+    transition: none;
+  }
+}
+
+/* ---------------- 物品页加载中 ---------------- */
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #0f1115;
+}
+.loader-label {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: #5d6575;
+}
+.loader-bar {
+  width: min(300px, 62vw);
+  height: 1px;
+  background: #242a36;
+  overflow: hidden;
+}
+.loader-fill {
+  height: 100%;
+  width: 0;
+  background: #ffc98a;
+  transition: width 0.18s linear;
+}
+.loader-note {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #39414f;
+  font-variant-numeric: tabular-nums;
+}
+.loader-riddle {
+  max-width: min(420px, 78vw);
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.9;
+  color: #6d7688;
+}
+
+/* ---------------- 卡片入场 ---------------- */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.card-in {
+  animation: cardIn 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* 进度未知时的来回扫动，避免看起来卡在 0% */
+.loader-fill--idle {
+  width: 34%;
+  animation: loaderSweep 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes loaderSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+/* 窄屏：流程轨换行后间距收紧，避免出现半截连线的悬垂感 */
+@media (max-width: 680px) {
+  .entry-track {
+    gap: 5px;
+  }
+  .entry-track .seg {
+    width: 7px;
+  }
+  .entry-track .lab {
+    margin-right: 1px;
+    letter-spacing: 0.06em;
+  }
+}
