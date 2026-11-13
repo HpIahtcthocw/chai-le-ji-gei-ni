@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { ItemMeta } from '@/lib/items';
 
 // 一块一块到货：拼上的零件留在原位，未到的零件藏在画面外。
@@ -33,10 +34,13 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   const [narrow, setNarrow] = useState(false);
   const [loadPct, setLoadPct] = useState<number | null>(null);
   const [loadBytes, setLoadBytes] = useState<{ got: number; total: number } | null>(null);
+  const [burst, setBurst] = useState(false);
+  const burstedRef = useRef(false);
 
   // 引擎侧的可变状态放 ref，避免 React 重渲染打断动画
   const ctrlRef = useRef<{ answer: (index: number) => void }>({ answer: () => {} });
   const markerRef = useRef<HTMLDivElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onViewport = () => setNarrow(window.innerWidth < 680);
@@ -45,6 +49,14 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     return () => window.removeEventListener('resize', onViewport);
   }, []);
 
+  // 开场一拍：拆包瞬间炸出一圈纸屑，遮住"零件从哪冒出来"的空档
+  useEffect(() => {
+    if (phase === 'loading' || burstedRef.current) return;
+    burstedRef.current = true;
+    setBurst(true);
+    const timer = setTimeout(() => setBurst(false), 1000);
+    return () => clearTimeout(timer);
+  }, [phase]);
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -298,7 +310,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       tween(
         ARRIVE_MS,
         (k) => {
-          const e = easeOutCubic(k);
+          const e = easeOutBack(k);
           part.mesh.position.set(
             start.x + (target.x - start.x) * e,
             start.y + (target.y - start.y) * e,
@@ -491,7 +503,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       const fovX = 2 * Math.atan(Math.tan(fovY / 2) * (width / height));
       const fitHorizontal = frameSize.x / 2 / Math.tan(fovX / 2);
       // 桌面端沿用原来的垂直取景，只有竖屏水平视野不够时才把相机往外推
-      const distance = Math.max((frameRadius / Math.tan(fovY / 2)) * 0.95, fitHorizontal * 1.02);
+      const distance = Math.max((frameRadius / Math.tan(fovY / 2)) * 0.82, fitHorizontal * 1.02);
       const viewDir = new A.Vector3(0.55, 0.32, 1.0).normalize();
       camera.position.set(
         frameCenter.x + viewDir.x * distance,
@@ -608,6 +620,16 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
             },
             () => {
               mesh.position.set(0, 0, 0);
+              // 吸合瞬间在落点闪一圈，手感靠这个反馈立住
+              const flash = flashRef.current;
+              if (flash) {
+                const spot = toScreen(parts[activeIndex].restCenter);
+                flash.style.left = `${spot.x}px`;
+                flash.style.top = `${spot.y}px`;
+                flash.classList.remove('is-on');
+                void flash.offsetWidth;
+                flash.classList.add('is-on');
+              }
               parts[activeIndex].snapped = true;
               activeMesh = null; // 已合体，不能再拖
               click();
@@ -736,6 +758,20 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     <main style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
       <div ref={hostRef} style={{ position: 'absolute', inset: 0, touchAction: 'none' }} />
 
+      {/* 开场炸包：纸屑一圈炸开，作为"包裹被拆开"的第一拍 */}
+      {burst && <ParcelBurst />}
+
+      {/* 暗角：把纯黑视口压成有中心光的舞台，物体不像浮在虚空里 */}
+      <div className="stage-vignette" aria-hidden="true" />
+      <div className="stage-glow" aria-hidden="true" />
+      {/* 图纸角标：细线 L 角，几乎不花成本但能把整体气质拉到"工程图" */}
+      <div className="corners" aria-hidden="true">
+        <i className="tl" />
+        <i className="tr" />
+        <i className="bl" />
+        <i className="br" />
+      </div>
+
       {/* 加载态：16 MB 模型下载期间必须有明确进度，否则看起来像点击没反应 */}
       {phase === 'loading' && (
         <div className="loader">
@@ -781,6 +817,9 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       >
         {String(Math.min(placed + 1, meta.parts.length)).padStart(2, '0')}
       </div>
+
+      {/* 吸合闪光环，位置由引擎在吸合瞬间写入 */}
+      <div ref={flashRef} className="flash-ring" aria-hidden="true" />
 
       {error && (
         <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(15,17,21,0.92)' }}>
@@ -856,6 +895,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       {/* 猜谜卡片：窄屏改成底部抽屉，拇指够得着 */}
       {quiz && (
         <div
+          className={narrow ? 'card-sheet' : 'card-center'}
           style={{
             position: 'absolute',
             left: narrow ? 0 : '50%',
@@ -881,6 +921,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
               <button
                 key={option}
                 type="button"
+                className="opt"
                 onClick={() => ctrlRef.current.answer(index)}
                 style={{
                   flex: narrow ? '1 1 100%' : '1 1 140px',
@@ -904,6 +945,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       {/* 拼完 */}
       {phase === 'finished' && (
         <div
+          className={narrow ? 'card-sheet' : 'card-center'}
           style={{
             position: 'absolute',
             left: narrow ? 0 : '50%',
@@ -983,6 +1025,37 @@ function Track({ solved, finished, compact = false }: { solved: boolean; finishe
             )}
           </span>
         </span>
+      ))}
+    </div>
+  );
+}
+
+/** 开场纸屑：纯 DOM + CSS 变量，不依赖 3D 能力 */
+function ParcelBurst() {
+  const shards = Array.from({ length: 18 }, (_, i) => {
+    const angle = (i / 18) * Math.PI * 2 + (i % 2 ? 0.12 : -0.1);
+    const distance = 150 + (i % 4) * 46;
+    return {
+      dx: Math.cos(angle) * distance,
+      dy: Math.sin(angle) * distance * 0.72,
+      rot: (i % 2 ? 1 : -1) * (90 + i * 12),
+      delay: (i % 6) * 24,
+    };
+  });
+  return (
+    <div className="burst" aria-hidden="true">
+      {shards.map((item, index) => (
+        <i
+          key={index}
+          style={
+            {
+              '--dx': `${item.dx}px`,
+              '--dy': `${item.dy}px`,
+              '--rot': `${item.rot}deg`,
+              animationDelay: `${item.delay}ms`,
+            } as CSSProperties
+          }
+        />
       ))}
     </div>
   );

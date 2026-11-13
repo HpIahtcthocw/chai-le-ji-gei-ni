@@ -267,3 +267,145 @@ body {
     letter-spacing: 0.06em;
   }
 }
+/* ---------------- 卡片入场（桌面版要连 -50% 的居中位移一起动） ---------------- */
+@keyframes cardInCenter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes cardInSheet {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.card-center {
+  animation: cardInCenter 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.card-sheet {
+  animation: cardInSheet 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---------------- 猜谜选项 ---------------- */
+.opt {
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
+}
+.opt:hover {
+  background: rgba(255, 201, 138, 0.09);
+  border-color: #ffc98a;
+  color: #fff;
+}
+.opt:active {
+  transform: translateY(1px);
+  background: rgba(255, 201, 138, 0.15);
+}
+
+/* ---------------- 图纸角标 ---------------- */
+.corners {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  z-index: 5;
+}
+.corners i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 201, 138, 0.2);
+}
+.corners i.tl {
+  left: 0;
+  top: 0;
+  border-right: none;
+  border-bottom: none;
+}
+.corners i.tr {
+  right: 0;
+  top: 0;
+  border-left: none;
+  border-bottom: none;
+}
+.corners i.bl {
+  left: 0;
+  bottom: 0;
+  border-right: none;
+  border-top: none;
+}
+.corners i.br {
+  right: 0;
+  bottom: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* ---------------- 吸合闪光 ---------------- */
+.flash-ring {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  margin-top: -23px;
+  border-radius: 50%;
+  border: 1px solid #ffc98a;
+  opacity: 0;
+  pointer-events: none;
+}
+.flash-ring.is-on {
+  animation: flashOut 0.52s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes flashOut {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-center,
+  .card-sheet,
+  .flash-ring.is-on {
+    animation: none;
+  }
+}
+.stage-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    122% 92% at 50% 46%,
+    rgba(255, 246, 232, 0.05) 0%,
+    rgba(0, 0, 0, 0) 42%,
+    rgba(0, 0, 0, 0.52) 100%
+  );
+}
+/* 脚下的柔光：黑色视口里给物体一个"落点"，不然像浮在真空 */
+.stage-glow {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 58%;
+  height: 26%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 226, 186, 0.11) 0%,
+    rgba(255, 214, 160, 0.04) 42%,
+    rgba(0, 0, 0, 0) 70%
+  );
+}
