@@ -305,3 +305,11 @@ STL 校验（`scripts/inspect-stl.mjs`）：二进制、**271,602 三角面**、
 - 卡片：猜谜与终局卡片入场动画分两套——桌面要连着 translate(-50%) 一起动，窄屏抽屉从下往上推，两套 keyframes 不能共用一个 transform。
 - 场景：加细线 L 角标、暗角、脚下椭圆柔光；镜头系数 0.95→0.82，物体在画面里的占比明显变大（桌面端已验证拖拽与吸合不受影响）。
 - 踩坑：用 PowerShell 往 TSX 里插 JSX 注释时，`{/* ... */}` 的闭合 `}` 被吞掉过一次，导致 JSX 语法错误；改完必须跑 `npx tsc --noEmit`。
+## 10. 图生 3D 的图片格式口径（2026-11-13，未花额度）
+
+- `ImgTo3dRequest` 只有 `img`（单图 URL）与 `imgs`（1–32 张 URL），**没有格式白名单字段**，schema 不承诺支持哪些编码。
+- 官方示例里出现过两种 URL 形态：`/image/jpeg/....jpg` 与 `/image/png/....png`。**只有 jpeg 与 png 有官方示例背书**；webp / heic / avif 没有任何证据，不能承诺。
+- 手机拍照的坑：iPhone 原生是 HEIC，Safari 通过 `<input capture>` 上传时通常会自动转成 JPEG；Android 部分机型仍可能给 HEIC。所以前端必须先做归一化，不能直接透传。
+- 落地口径（等真正做上传时执行）：前端 `accept="image/png,image/jpeg"`，拿到文件先读成 ImageBitmap，超过 2048 边长的缩到 2048，统一 `canvas.toBlob('image/jpeg', 0.9)` 再走上传；HEIC/webp 一律先转 JPEG，转不了就明确报错，不猜服务端。
+- 尺寸与体积上限 schema 没写，必须实测；在此之前默认按"长边 ≤2048、≤5 MB"自我约束。
+- 仍未解决：本地文件→公网 URL 这一环（SDK 无 asset 上传导出），详见 §9 末尾的 A/B/C 三条路。
