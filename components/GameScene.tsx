@@ -51,6 +51,11 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     let modelBoxCache: any = null;
     let sceneCache: any = null;
     let bulbLight: any = null;
+    // 程序化铰链：灯杆顶端做支点，灯臂/灯头/灯罩/灯泡绕它转
+    let hingeWorld: any = null;
+    let headParts: any[] = [];
+    let bulbLocal: any = null;
+    let headGroupReady = false;
     const timers: any[] = [];
     let bug: any = null; // 引擎模块，供 tween 里构造向量用
 
@@ -61,6 +66,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       restCenter: any;
       snapRadius: number;
       size: any;
+      snapped?: boolean;
     }[] = [];
 
     let dragging = false;
@@ -115,7 +121,8 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         phase: nextPhase,
         score: scoreLocal,
         solved: solvedLocal,
-        placed: parts.filter((p) => p.mesh.position.length() < maxSize * 0.02).length,
+        // 头部零件挂到铰链支点后 position 不再是 0，所以用快照标记计数
+        placed: parts.filter((p) => p.snapped).length,
         total: parts.length,
         activeIndex,
         partsInfo: parts.map((p) => ({ order: p.order, label: p.quiz.label, size: p.size })),
@@ -213,14 +220,51 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         }, 900),
       );
 
-      // 第三拍：灯泡亮起——这是整个 demo 唯一有情绪的一秒
+      // 炸开结束时所有零件 position 已归零，抬臂从这里起步
+
+      // 第三拍：抬臂。灯杆顶端当铰链，头部四块绕 Z 轴抬 19°：
+      // 对"烘在世界坐标"的几何来说，绕 h 旋转等价于 rotation.z = a 且 position = h − R·h
+      timers.push(
+        setTimeout(() => {
+          if (!headGroupReady || !hingeWorld || headParts.length === 0) return;
+          const angle = 0.34;
+          const axis = new bug.Vector3(0, 0, 1);
+          tween(700, (k) => {
+            const a = angle * easeOutCubic(k);
+            const cos = Math.cos(a);
+            const sin = Math.sin(a);
+            for (const part of headParts) {
+              // 引擎的局部矩阵是 position + quaternion 合成的，改 rotation.z 不生效，
+              // 必须走 setRotationFromAxisAngle；改完再用 setMatrixDirty 通知渲染桥
+              part.mesh.setRotationFromAxisAngle?.(axis, a);
+              part.mesh.position.set(
+                hingeWorld.x - (cos * hingeWorld.x - sin * hingeWorld.y),
+                hingeWorld.y - (sin * hingeWorld.x + cos * hingeWorld.y),
+                0,
+              );
+              part.mesh.setMatrixDirty?.();
+            }
+            // 点光源在灯泡里，得跟着灯罩一起转，否则光会从灯罩里跑出来
+            if (bulbLight && bulbLocal) {
+              bulbLight.position.set(
+                hingeWorld.x + bulbLocal.x * cos - bulbLocal.y * sin,
+                hingeWorld.y + bulbLocal.x * sin + bulbLocal.y * cos,
+                hingeWorld.z + bulbLocal.z,
+              );
+              bulbLight.setMatrixDirty?.();
+            }
+          });
+        }, 1650),
+      );
+
+      // 第四拍：灯泡亮起——这是整个 demo 唯一有情绪的一秒
       timers.push(
         setTimeout(() => {
           if (!bulbLight) return;
           tween(420, (k) => {
             bulbLight.intensity = 3.6 * easeOutCubic(k);
           });
-        }, 1600),
+        }, 2400),
       );
     };
 
@@ -358,6 +402,27 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       bulbLight.position.set(bulb.restCenter.x, bulb.restCenter.y, bulb.restCenter.z);
       bulbLight.distance = maxSize * 3.5;
       scene.add(bulbLight);
+
+      // 铰链支点放在灯杆顶端。不新建父节点（场景级父节点的世界矩阵不会每帧刷新，
+      // 实测会把零件甩出画面），改成逐块算"绕支点旋转"的等价局部变换
+      const headLabels = ['灯臂', '灯头接头', '灯罩', '灯泡'];
+      headParts = parts.filter((p) => headLabels.includes(p.quiz.label));
+      const polePart = parts.find((p) => p.quiz.label === '灯杆');
+      if (headParts.length > 0 && polePart) {
+        // 必须用落位前的 rest 数据：此刻灯杆还被藏在 maxSize*10 的场外，
+        // 直接量包围盒会量到一个 4.9 米高的假铰链
+        hingeWorld = new A.Vector3(
+          polePart.restCenter.x,
+          polePart.restCenter.y + polePart.size.y / 2,
+          polePart.restCenter.z,
+        );
+        bulbLocal = new A.Vector3(
+          bulbLight.position.x - hingeWorld.x,
+          bulbLight.position.y - hingeWorld.y,
+          bulbLight.position.z - hingeWorld.z,
+        );
+        headGroupReady = true;
+      }
       sceneCache = scene;
 
       // 取景要同时包住"拼装区"和"零件区"
@@ -485,6 +550,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
             },
             () => {
               mesh.position.set(0, 0, 0);
+              parts[activeIndex].snapped = true;
               activeMesh = null; // 已合体，不能再拖
               click();
               const placedNow = parts.filter((p) => p.mesh.position.length() < maxSize * 0.02).length;
@@ -660,7 +726,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
             第 {Math.min(placed + 1, meta.parts.length)} / {meta.parts.length} 块 · 得分 {score}
           </div>
         </div>
-        <Track solved={solved} />
+        <Track solved={solved} finished={phase === 'finished'} />
       </header>
 
       {/* 底部提示 */}
@@ -791,11 +857,11 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   );
 }
 
-function Track({ solved }: { solved: boolean }) {
+function Track({ solved, finished }: { solved: boolean; finished: boolean }) {
   const steps = [
     { label: '图生 3D', done: true },
     { label: '拆分', done: true },
-    { label: '关节', done: false },
+    { label: '关节', done: finished },
     { label: '导出', done: true },
   ];
   return (

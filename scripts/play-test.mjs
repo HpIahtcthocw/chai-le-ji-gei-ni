@@ -102,8 +102,8 @@ const end = await game();
 report.scoreAtEnd = end.score;
 await page.waitForTimeout(900);
 await page.screenshot({ path: '.tmp/play-finished.png' });
-// 揭晓序列到灯泡亮起约 1.6s，再补一张点亮的终局
-await page.waitForTimeout(1400);
+// 揭晓序列：抬臂在 1650ms、灯泡在 2400ms，等到 3300ms 才是完整终局
+await page.waitForTimeout(2400);
 await page.screenshot({ path: '.tmp/play-lit.png' });
 
 const stlHref = await page.locator('a[download]').getAttribute('href').catch(() => null);
@@ -112,6 +112,8 @@ report.ok = end.phase === 'finished' && end.score === 86 && stlHref === '/items/
 if (!report.ok) report.errors.push(`终局状态不符: ${JSON.stringify(end)} · stl=${stlHref}`);
 
 // 这局结束后再截一张"进行中"的样子：重新开一页，拼两块停下
+// 先关掉第一页，软件渲染下同时挂两个 16MB 场景会把第二页拖到超时
+await page.close();
 const page2 = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 await page2.goto(`${BASE}/item/lamp`, { waitUntil: 'load', timeout: 90000 });
 await page2.waitForFunction('window.__GAME__ && window.__GAME__.phase === "playing"', null, { timeout: 60000 });
