@@ -11,7 +11,7 @@
     { "partId": "part-2", "label": "灯罩", "options": ["吊灯", "落地灯", "台灯"], "answerIndex": 2 },
     { "partId": "part-3", "label": "灯头接头", "options": ["壁灯", "台灯", "音箱"], "answerIndex": 1 },
     { "partId": "part-4", "label": "灯杆", "options": ["风扇", "台灯", "落地灯"], "answerIndex": 1 },
-    { "partId": "part-5", "label": "底座上片", "options": ["台灯", "加湿器", "落地灯"], "answerIndex": 0 },
+    { "partId": "part-5", "label": "电源线", "options": ["台灯", "加湿器", "落地灯"], "answerIndex": 0 },
     { "partId": "part-6", "label": "底座", "options": ["台扇", "落地灯", "台灯"], "answerIndex": 2 }
   ]
 }
