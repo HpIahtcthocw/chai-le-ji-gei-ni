@@ -30,10 +30,18 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   const [solved, setSolved] = useState(false);
   const [quiz, setQuiz] = useState<QuizState | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [narrow, setNarrow] = useState(false);
 
   // 引擎侧的可变状态放 ref，避免 React 重渲染打断动画
   const ctrlRef = useRef<{ answer: (index: number) => void }>({ answer: () => {} });
   const markerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onViewport = () => setNarrow(window.innerWidth < 680);
+    onViewport();
+    window.addEventListener('resize', onViewport);
+    return () => window.removeEventListener('resize', onViewport);
+  }, []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -174,7 +182,12 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       const modelCenter = modelBox.getCenter(new bug.Vector3());
       const modelSize = modelBox.getSize(new bug.Vector3());
       const radius = (Math.max(modelSize.x, modelSize.y, modelSize.z) || 1) * 0.5;
-      const dist = (radius / Math.tan((38 * Math.PI) / 180 / 2)) * 1.85;
+      // 竖屏同样要按水平视野算一次，否则拉远后左右两侧还是被裁
+      const fovY = (38 * Math.PI) / 180;
+      const aspect = (camera as any).aspect || 16 / 9;
+      const fovX = 2 * Math.atan(Math.tan(fovY / 2) * aspect);
+      const fitHorizontal = modelSize.x / 2 / Math.tan(fovX / 2);
+      const dist = Math.max((radius / Math.tan(fovY / 2)) * 1.85, fitHorizontal * 1.85);
       const dir = new bug.Vector3(0.28, 0.16, 1.0).normalize();
       const camTo = new bug.Vector3(
         modelCenter.x + dir.x * dist,
@@ -273,17 +286,21 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       const part = parts[index];
       part.mesh.visible = true;
       activeMesh = null; // 飞行中不可抓，落位后才交给玩家
-      // 从舞台槽更外侧飞入，做出"包裹里掉出来"的感觉
-      const start = new bug.Vector3(stagePos.x + maxSize * 0.55, stagePos.y + maxSize * 0.42, stagePos.z + maxSize * 0.3);
+      // 几何烘在世界坐标里，position 是"相对原位的偏移"，不是绝对坐标。
+      // 这里保持"所有零件用同一个偏移"的口径，视觉上零件都从同一个槽位飞入；
+      // 不同零件因自身高度不同会略微错开，但都在取景范围内
+      const target = new bug.Vector3(stagePos.x, stagePos.y, stagePos.z);
+      // 从槽位更外侧飞入，做出"包裹里掉出来"的感觉
+      const start = target.clone().add(new bug.Vector3(maxSize * 0.55, maxSize * 0.42, maxSize * 0.3));
       part.mesh.position.copy(start);
       tween(
         ARRIVE_MS,
         (k) => {
           const e = easeOutCubic(k);
           part.mesh.position.set(
-            start.x + (stagePos.x - start.x) * e,
-            start.y + (stagePos.y - start.y) * e,
-            start.z + (stagePos.z - start.z) * e,
+            start.x + (target.x - start.x) * e,
+            start.y + (target.y - start.y) * e,
+            start.z + (target.z - start.z) * e,
           );
         },
         () => {
@@ -393,7 +410,8 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         mesh.position.set(0, maxSize * 10, 0);
       });
 
-      // 舞台槽：零件待拼的位置，放在模型右侧
+      // 舞台槽：零件待拼的位置，放在模型右侧。竖屏也不改位置——
+      // 试过移到上方，会和"几何烘在世界坐标"的偏移口径打架，高的零件被顶出画面
       stagePos = new A.Vector3(maxSize * 1.15, 0, 0);
 
       // 灯泡亮起用的点光源：先以 0 强度放在灯泡原位，拼完再点亮
@@ -425,15 +443,21 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       }
       sceneCache = scene;
 
-      // 取景要同时包住"拼装区"和"零件区"
+      // 取景要同时包住"拼装区"和"零件区"。
+      // 竖屏的水平视野比垂直窄，只按垂直视野算距离会把左右两侧裁掉，
+      // 所以垂直、水平各算一个距离，取大的
       const frameMin = box.min.clone();
       const frameMax = box.max.clone();
-      frameMax.x = Math.max(frameMax.x, stagePos.x + maxSize * 0.35);
+      frameMax.x = Math.max(frameMax.x, stagePos.x + maxSize * 0.3);
+      frameMax.y = Math.max(frameMax.y, stagePos.y + maxSize * 0.3);
       const frameCenter = frameMin.clone().add(frameMax).multiplyScalar(0.5);
       const frameSize = frameMax.clone().sub(frameMin);
       const frameRadius = Math.max(frameSize.x, frameSize.y, frameSize.z) * 0.5 || 1;
       const fovY = (38 * Math.PI) / 180;
-      const distance = (frameRadius / Math.tan(fovY / 2)) * 0.95;
+      const fovX = 2 * Math.atan(Math.tan(fovY / 2) * (width / height));
+      const fitHorizontal = frameSize.x / 2 / Math.tan(fovX / 2);
+      // 桌面端沿用原来的垂直取景，只有竖屏水平视野不够时才把相机往外推
+      const distance = Math.max((frameRadius / Math.tan(fovY / 2)) * 0.95, fitHorizontal * 1.02);
       const viewDir = new A.Vector3(0.55, 0.32, 1.0).normalize();
       camera.position.set(
         frameCenter.x + viewDir.x * distance,
@@ -694,8 +718,15 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           opacity: 0,
           pointerEvents: 'none',
           transition: 'opacity 160ms linear',
+          display: 'grid',
+          placeItems: 'center',
+          fontSize: 11,
+          letterSpacing: 1,
+          color: 'rgba(255,201,138,0.55)',
         }}
-      />
+      >
+        {String(Math.min(placed + 1, meta.parts.length)).padStart(2, '0')}
+      </div>
 
       {error && (
         <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(15,17,21,0.92)' }}>
@@ -712,7 +743,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           top: 0,
           left: 0,
           right: 0,
-          padding: '20px 24px',
+          padding: narrow ? '14px 14px' : '20px 24px',
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
@@ -720,13 +751,15 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           pointerEvents: 'none',
         }}
       >
-        <div>
-          <div style={{ fontSize: 15, letterSpacing: 2, color: '#e8eaf0' }}>拆了寄给你</div>
-          <div style={{ fontSize: 11, color: '#6d7688', marginTop: 6, letterSpacing: 1 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: narrow ? 14 : 15, letterSpacing: 2, color: '#e8eaf0', whiteSpace: 'nowrap' }}>
+            拆了寄给你
+          </div>
+          <div style={{ fontSize: 11, color: '#6d7688', marginTop: 6, letterSpacing: 1, whiteSpace: 'nowrap' }}>
             第 {Math.min(placed + 1, meta.parts.length)} / {meta.parts.length} 块 · 得分 {score}
           </div>
         </div>
-        <Track solved={solved} finished={phase === 'finished'} />
+        <Track solved={solved} finished={phase === 'finished'} compact={narrow} />
       </header>
 
       {/* 底部提示 */}
@@ -736,7 +769,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
             position: 'absolute',
             left: 0,
             right: 0,
-            bottom: 26,
+            bottom: narrow ? 10 : 26,
             textAlign: 'center',
             fontSize: 12,
             letterSpacing: 1,
@@ -766,18 +799,23 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         </div>
       )}
 
-      {/* 猜谜卡片 */}
+      {/* 猜谜卡片：窄屏改成底部抽屉，拇指够得着 */}
       {quiz && (
         <div
           style={{
             position: 'absolute',
-            left: '50%',
-            bottom: 56,
-            transform: 'translateX(-50%)',
-            width: 'min(560px, calc(100% - 48px))',
-            background: 'rgba(18,22,29,0.92)',
+            left: narrow ? 0 : '50%',
+            right: narrow ? 0 : 'auto',
+            bottom: narrow ? 0 : 56,
+            transform: narrow ? 'none' : 'translateX(-50%)',
+            width: narrow ? 'auto' : 'min(560px, calc(100% - 48px))',
+            background: 'rgba(18,22,29,0.96)',
             border: '1px solid #2a3140',
-            padding: '18px 20px 20px',
+            borderLeft: narrow ? 'none' : '1px solid #2a3140',
+            borderRight: narrow ? 'none' : '1px solid #2a3140',
+            borderBottom: narrow ? 'none' : '1px solid #2a3140',
+            borderRadius: narrow ? '14px 14px 0 0' : 0,
+            padding: narrow ? '16px 16px calc(18px + env(safe-area-inset-bottom))' : '18px 20px 20px',
           }}
         >
           <div style={{ fontSize: 13, color: '#e8eaf0', lineHeight: 1.9 }}>{meta.riddle}</div>
@@ -791,12 +829,12 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
                 type="button"
                 onClick={() => ctrlRef.current.answer(index)}
                 style={{
-                  flex: '1 1 140px',
+                  flex: narrow ? '1 1 100%' : '1 1 140px',
                   border: '1px solid #333c4d',
                   background: 'rgba(28,33,43,0.9)',
                   color: '#d6dbe6',
-                  fontSize: 13,
-                  padding: '11px 8px',
+                  fontSize: narrow ? 15 : 13,
+                  padding: narrow ? '15px 8px' : '11px 8px',
                   borderRadius: 2,
                   cursor: 'pointer',
                   letterSpacing: 1,
@@ -814,17 +852,22 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         <div
           style={{
             position: 'absolute',
-            left: '50%',
-            bottom: 48,
-            transform: 'translateX(-50%)',
-            width: 'min(560px, calc(100% - 48px))',
-            background: 'rgba(18,22,29,0.94)',
+            left: narrow ? 0 : '50%',
+            right: narrow ? 0 : 'auto',
+            bottom: narrow ? 0 : 48,
+            transform: narrow ? 'none' : 'translateX(-50%)',
+            width: narrow ? 'auto' : 'min(560px, calc(100% - 48px))',
+            background: 'rgba(18,22,29,0.96)',
             border: '1px solid #2a3140',
-            padding: '22px 24px',
+            borderLeft: narrow ? 'none' : '1px solid #2a3140',
+            borderRight: narrow ? 'none' : '1px solid #2a3140',
+            borderBottom: narrow ? 'none' : '1px solid #2a3140',
+            borderRadius: narrow ? '14px 14px 0 0' : 0,
+            padding: narrow ? '18px 16px calc(20px + env(safe-area-inset-bottom))' : '22px 24px',
           }}
         >
           <div style={{ fontSize: 12, color: '#6d7688', letterSpacing: 2 }}>你拼回来的是</div>
-          <div style={{ fontSize: 24, margin: '6px 0 12px', letterSpacing: 2 }}>{meta.name}</div>
+          <div style={{ fontSize: narrow ? 21 : 24, margin: '6px 0 12px', letterSpacing: 2 }}>{meta.name}</div>
           <div style={{ fontSize: 12, color: '#8f98a8', lineHeight: 1.9 }}>{meta.story}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 18, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, color: '#ffc98a', letterSpacing: 1 }}>
@@ -857,7 +900,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   );
 }
 
-function Track({ solved, finished }: { solved: boolean; finished: boolean }) {
+function Track({ solved, finished, compact = false }: { solved: boolean; finished: boolean; compact?: boolean }) {
   const steps = [
     { label: '图生 3D', done: true },
     { label: '拆分', done: true },
@@ -865,10 +908,10 @@ function Track({ solved, finished }: { solved: boolean; finished: boolean }) {
     { label: '导出', done: true },
   ];
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 6 : 8, flexShrink: 0 }}>
       {steps.map((step, index) => (
         <span key={step.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {index > 0 && <span style={{ width: 14, height: 1, background: solved ? '#2c3340' : '#242a36' }} />}
+          {index > 0 && <span style={{ width: compact ? 8 : 14, height: 1, background: solved ? '#2c3340' : '#242a36' }} />}
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span
               style={{
@@ -879,9 +922,11 @@ function Track({ solved, finished }: { solved: boolean; finished: boolean }) {
                 display: 'inline-block',
               }}
             />
-            <span style={{ fontSize: 10, letterSpacing: 1, color: step.done ? '#b9c1d0' : '#5d6575' }}>
-              {step.label}
-            </span>
+            {!compact && (
+              <span style={{ fontSize: 10, letterSpacing: 1, color: step.done ? '#b9c1d0' : '#5d6575', whiteSpace: 'nowrap' }}>
+                {step.label}
+              </span>
+            )}
           </span>
         </span>
       ))}
