@@ -1,0 +1,20 @@
+{
+  "generate": {
+    "kind": "text-to-3d",
+    "prompt": "一台白色简约台灯，圆形配重底座、细金属灯杆、可调节灯臂、圆锥形灯罩，结构清晰、部件分明，写实产品摄影，纯白背景",
+    "taskId": 6974188
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/genesis3d/inference/20261113/ec063a1e744b4094b4cb682949649d25/results/tex_mesh/attempt-1/tex_mesh.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 6974827
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL3JEMAKTJJSAAABAAAAADI8.glb",
+  "splitStatus": 3,
+  "export": {
+    "from": "source",
+    "modelUrl": "https://qhsmodel.kujiale.com/genesis3d/inference/20261113/ec063a1e744b4094b4cb682949649d25/results/tex_mesh/attempt-1/tex_mesh.glb",
+    "taskId": 6977071
+  },
+  "stlUrl": "https://qhsmodel.kujiale.com/glbMultiExportResult/NL3JCOQKTKXZQAABAAAAABI8/printable.stl"
+}

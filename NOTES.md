@@ -106,17 +106,67 @@ action.weight = 1;                          // ← 淡入靠补 weight，不靠 
 `app/lab` 已写好，`next build` 通过，但**还没在浏览器里跑过**——启动浏览器属于"控制本机"，按既定要求需先取得同意，已发问未获回复。
 
 因此以下四项仍是**未验证**，不得当成结论：
-1. 真机加载后 GLB 的 5 个节点是否各自独立（引擎是否有 mesh merge / instance 合并）
+1. 引擎加载后 GLB 的节点是否各自独立（引擎是否有 mesh merge / instance 合并）
 2. 逐节点 `position` 改动后画面是否只动该零件
 3. `active + weight` 是否真的驱动 `arm-lift` 关节动画
 4. `Picker.pick` 的坐标口径（NDC 还是像素）
 
 其它未验证行为（都记着，不猜）：
 - 引擎世界坐标是否 Z 轴朝上（walk-demo 用 `camera.up.set(0,0,1)`，getting-started 的 3DGS 例子用 `(0,-1,0)`，两者都是 3DGS，网格场景没给准话）
-- Lux3D `partSplit` 产出的 GLB 里零件节点是否独立、命名规律
 - Lux3D `articulationAnimation` 结果格式，能否被 `AnimationMixer` 吃下
 - 拆分并发限制：OpenAPI 说同账号同时只能一个拆分任务，Lux3D 技能包说每账号 5 个 —— **以 OpenAPI 为准，但需实测**
-- 每次调用消耗多少积分
+- 每次调用消耗多少积分（API 无余额/用量查询接口）
+
+### 1.6 真实 Lux3D 链路：台灯（2026-11-13 跑通）
+
+脚本 `scripts/lux3d/pipeline.mjs`，可断点续跑，状态写 `public/items/<id>/pipeline.json`。
+
+| 步骤 | 调用 | 结果 |
+| --- | --- | --- |
+| 生成 | `textTo3d.create({ prompt, version:'G1-Turbo', style:'photorealistic', faceCount:200000, outputFormat:['glb'], enablePbr:true })` | taskId **6974188**，status 3；1～2 分钟 |
+| 拆分 | `partSplit.create({ glbUrl: 生成产物URL })` | taskId **6974827**，status 3；数分钟 |
+| 导出 | `multiFormatExport.create({ modelUrl: 生成产物URL, outputFormat:['stl'] })` | taskId **6977071**，status 3；`printable.stl` 12.95 MB |
+
+产物全部落盘 `public/items/lamp/`：`source.glb` 16.15 MB、`model.glb` 16.21 MB、`export.stl` 12.95 MB。
+三个任务共花 **3 个任务额度**。
+
+**拆分结构判定（go/no-go 关键）：7 个 Mesh 节点、7 meshes、7 materials、2 textures、0 animations，每节点单 primitive。**
+独立零件数 7 ≥ 5，**这一项通过**。
+
+顶点数（按 GLB 内顺序）：part-0 26,432 / part-1 11,315 / part-2 50,347 / part-3 8,983 / part-4 12,926 / part-5 36,842 / part-6 25,562。
+
+两个必须记录的新事实：
+
+1. **所有节点 `name` 为空**，`scripts/inspect-glb.mjs` 与 `analyze-parts.mjs` 都返回 `(unnamed)`。
+2. **所有节点 `translation` 均为 `[0,0,0]`**，几何直接烘进世界坐标。
+
+`scripts/analyze-parts.mjs` 给出的包围盒事实：整体 `min[-0.195,-0.24,-0.117]` / `max[0.195,0.24,0.117]`，
+`totalSize [0.39, 0.48, 0.234]`，`center [0,0,0]`（正好原点居中），`longestAxis = 1` → **Y-up（glTF 标准），约 0.48 m 高**。
+
+逐块推断（尺寸单位 m，看得出的语义）：
+
+| 块 | size | center | 推断 |
+| --- | --- | --- | --- |
+| part-6 | 0.389×0.052×0.185 | (0, −0.214, −0.025) | 底座（最底部、最扁） |
+| part-5 | 0.181×0.027×0.184 | (0.009, −0.226, 0.025) | 底座上盖 / 配重片 |
+| part-4 | 0.034×0.318×0.043 | (−0.046, −0.057, 0.025) | 灯杆（竖向细长） |
+| part-1 | 0.207×0.177×0.025 | (−0.062, 0.079, 0.025) | 灯臂（斜向薄板） |
+| part-2 | 0.139×0.154×0.127 | (0.113, 0.155, 0.03) | 灯罩（右上方体积最大） |
+| part-0 | 0.094×0.115×0.089 | (0.103, 0.166, 0.025) | 灯泡（在灯罩内部） |
+| part-3 | 0.059×0.091×0.071 | (0.056, 0.195, 0.024) | 灯头接头（灯罩根部） |
+
+**导出接口的一个硬约束（实测得出，文档没写全）：**
+`multiFormatExport` 传**拆分产物 URL**（`glbPartsReconstructResult/...glb`）→ 任务 status=4 失败，且 `tasks.retrieve` 不回任何失败原因；
+改传**生成产物 URL**（`genesis3d/.../tex_mesh.glb`）→ 成功。所以 STL 只能从生成产物导出（这刚好也符合产品语义：玩家下载的是拼好的整件物体）。
+
+STL 校验（`scripts/inspect-stl.mjs`）：二进制、**271,602 三角面**、字节长度自洽；
+包围盒 `64.87 × 39.04 × 80`，与 GLB 等比但做了 **Y-up → Z-up** 转换并放大 ×166.6 倍（典型 3D 打印导出行为）。
+
+**由这些事实直接改掉的设计（已写进下面的数据层方案）：**
+
+- `meta.json` 不能用 `nodeName` 做零件键 —— 节点没有名字。改为按 GLB 内子节点顺序赋稳定 id `part-0..part-N`，载入后遍历时按索引对齐。
+- 因为节点变换是单位矩阵、几何在世界坐标系里，**逐零件平移 = 直接加节点 `position`** 即可；但**绕零件自身中心旋转**会绕世界原点转，必须额外套一层 pivot `Object3D`（正好对应简报里"程序化铰链"的退路）。
+- 16 MB / 件的体积对移动端网络偏重，需要后续用 glTF-Transform 做 weld/simplify 或降 `faceCount` 再生成。
 
 ---
 
@@ -127,6 +177,9 @@ action.weight = 1;                          // ← 淡入靠补 weight，不靠 
 3. **`loadGLTF` 不是顶层导出**，挂在 `GLTFLoader.loadGLTF` 命名空间下（d.ts:8964–8971）。
 4. **`Animation` 是命名空间**（`Animation.AnimationPlugin` / `Animation.AnimationMixer`），不是平铺导出。
 5. 简报提到"3–4 件预置物品"，但 Lux3D 拆分是**同账号串行**，且下载链接 2 小时失效 —— 3 件排队生成属于关键路径，不是收尾工作。
+6. **拆分产物里零件节点没有名字**，简报的数据格式 `parts[{ nodeName, ... }]` 无法照写，改用 `partId`（见 §1.6）。
+7. **`multiFormatExport` 不接受拆分产物 URL**（实测 status=4），只能从生成产物导出 STL（见 §1.6）。
+8. **导出任务的失败原因查不到**：`tasks.retrieve` 只给 `{ taskId, bizId, status:4, outputs:[] }`，没有错误信息。所以每次失败都要靠换参数二分定位，成本是任务额度。
 
 ---
 
@@ -138,27 +191,31 @@ action.weight = 1;                          // ← 淡入靠补 weight，不靠 
 - 从类型声明与官方 llm 文档中整理出可用 API 清单（§1.4），纠正了 3 处与简报不一致的调用
 - 合成 5 零件 + 关节动画 GLB，并用 glTF-Transform 校验结构
 - `/lab` 实验页：装载 → 遍历 → 逐节点位移 → 动画播放 → 拾取，结果写到 `window.__LAB__`
+- **真实 Lux3D 全链路跑通**（生成 → 拆分 → 导出），台灯一件三类产物落盘（§1.6）
+- 资产分析工具：`scripts/inspect-glb.mjs`（结构）、`scripts/analyze-parts.mjs`（逐块包围盒）、`scripts/inspect-stl.mjs`（STL 校验）
 
 **未完成**
-- 浏览器里跑通 `/lab`（缺授权）
-- 真实 Lux3D 拆分资产（缺 Key / GLB）
+- 浏览器里跑通 `/lab`（缺授权）→ §1.5 四项仍未验证
+- 第二、三件物品（拆分同账号串行，需排队）
+- 关节动画任务未跑（`articulationAnimation.create`）
+- `meta.json` 未写
 - 阶段 2 全部
 
 ---
 
 ## 4. 阻塞项（需要用户输入）
 
-1. **已拆分的 GLB 或 Lux3D Key**：这是 go/no-go 的最后一步，也决定 §1.5 的 4 个未验证项能否收敛。
-   没有 Key 时按约定用你给的 GLB 继续，但注意：**Lux3D 必须参与核心 3D 内容**（评审里"群核技术栈应用"占 30%），
-   若最终资产不是 Lux3D 产出，这一项会直接失分，需要在报告书里如实说明。
-2. **是否允许无头浏览器自动验证**：待回复。
+1. **是否允许启动本地浏览器做运行期验证**：待回复。
+   替代方案：你自己 `npm run dev` 打开 `http://localhost:3000/lab`，右侧日志面板会直接列出四项结论。
+2. **积分预算**：API 没有余额查询接口，只能按任务数自律。台灯一共创建了 4 个任务（生成 / 拆分 / 一次失败的导出 / 一次成功的导出），
+   其中失败的那次是为定位"导出不吃拆分 URL"付的学费。后续每件物品至少还需 3 个任务（生成 + 拆分 + 导出）。
 
 ---
 
 ## 5. 下一步
 
-1. 拿到授权后跑 `/lab`，把 §1.5 四项变成确定结论，回填本文档。
-2. 拿到拆分 GLB 后，用同一套实验脚本复跑，统计独立零件数与命名规律，决定是否需要 glTF-Transform 二次拆分。
-3. 数据层：`public/items/<id>/` 按 `model.glb + meta.json + export.stl` 落地，`meta.json` 字段：
-   `name, riddle, story, parts[{ nodeName, options[3], answerIndex }]`。
-4. 阶段 2 顺序：物品选择页 → 炸开 → 拖拽吸合 → 三选一计分 → 关节动画 + 一句话 + STL 下载 → 顶部流程轨。
+1. 用同一套脚本复跑第二件物品（换结构清楚的：手持风扇 / 闹钟 / 订书机），确认"7 块"不是台灯的偶然结果。
+2. 数据层：`public/items/<id>/` 落 `model.glb + meta.json + export.stl`；`meta.json` 字段改为
+   `name, riddle, story, parts[{ partId, options[3], answerIndex }]`（原因见 §1.6）。
+3. 阶段 2 顺序：物品选择页 → 炸开 → 拖拽吸合 → 三选一计分 → 关节动画 + 一句话 + STL 下载 → 顶部流程轨。
+4. 体积治理：16 MB/件对移动端偏重，优先降 `faceCount` 重新生成，其次 glTF-Transform weld/simplify。

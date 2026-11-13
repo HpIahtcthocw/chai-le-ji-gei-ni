@@ -7,3 +7,6 @@ build/
 .env.local
 .DS_Store
 next-env.d.ts
+
+# 本地临时产物（脚本导出、调试中间文件），不进版本库
+.tmp/

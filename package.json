@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@gltf-transform/core": "4.5.1",
+    "@manycore/aholo-sdk-lux3d": "^1.9.0",
     "@types/node": "22.19.4",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
