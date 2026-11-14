@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 
 const MAX_EDGE = 2048;
@@ -26,12 +27,35 @@ async function normalize(file: File): Promise<{ blob: Blob; width: number; heigh
 }
 
 export default function SendPage() {
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>('idle');
   const [message, setMessage] = useState('');
   const [preview, setPreview] = useState('');
   const [remoteUrl, setRemoteUrl] = useState('');
   const [meta, setMeta] = useState('');
+  const [sender, setSender] = useState('');
+  const [packing, setPacking] = useState(false);
+
+  const pack = useCallback(async () => {
+    if (!remoteUrl || packing) return;
+    setPacking(true);
+    setMessage('正在装盒…');
+    try {
+      const res = await fetch('/api/parcel', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ assetId: 'lamp', sender, image: remoteUrl }),
+      });
+      const json = (await res.json()) as { code?: string; error?: string };
+      if (!res.ok || !json.code) throw new Error(json.error || `装盒失败 ${res.status}`);
+      router.push(`/s/${encodeURIComponent(json.code)}`);
+    } catch (err) {
+      setPhase('error');
+      setPacking(false);
+      setMessage(err instanceof Error ? err.message : '装盒失败');
+    }
+  }, [remoteUrl, packing, sender, router]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -114,17 +138,32 @@ export default function SendPage() {
 
         {remoteUrl && (
           <div className="send-url">
-            <div className="send-url-label">图片已入库，可交给 3D 生成</div>
+            <div className="send-url-label">照片已入库，接下来装盒</div>
             <a className="send-url-value" href={remoteUrl} target="_blank" rel="noreferrer">{remoteUrl}</a>
           </div>
         )}
+
+        <label className="send-sign">
+          <span>署名</span>
+          <input
+            value={sender}
+            onChange={(e) => setSender(e.target.value)}
+            placeholder="不写也行，收件人猜不到是谁寄的"
+            maxLength={12}
+          />
+        </label>
 
         <div className="send-foot">
           <div className="send-note">
             支持 JPG / PNG / WebP；HEIC 会在这里自动转成 JPEG，长边压到 2048。
           </div>
-          <button type="button" className="send-next" disabled>
-            下一步：拆开装盒
+          <button
+            type="button"
+            className="send-next"
+            disabled={!remoteUrl || packing}
+            onClick={() => void pack()}
+          >
+            {packing ? '装盒中…' : '下一步：拆开装盒'}
           </button>
         </div>
       </div>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>方向 D · 无名件</title>
+<style>
+  :root {
+    --paper: #f0efeb;
+    --ink: #111214;
+    --rule: #d5d3cc;
+    --mid: #6f6d66;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(90deg, var(--rule) 1px, transparent 1px),
+      linear-gradient(0deg, var(--rule) 1px, transparent 1px);
+    background-size: 120px 120px;
+    opacity: 0.55;
+  }
+  .page {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 26px 34px 20px;
+  }
+
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+    font-family: "Consolas", "SF Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--mid);
+  }
+  .bar b { color: var(--ink); font-weight: 500; }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 0 14px;
+  }
+
+  .title {
+    font-size: clamp(64px, 11.4vw, 156px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.94;
+  }
+  .title span { display: block; }
+  .title .thin {
+    font-size: 0.26em;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    color: var(--mid);
+    margin-top: 14px;
+  }
+  .copy {
+    margin-top: 26px;
+    max-width: 380px;
+    font-size: 14px;
+    line-height: 2;
+    color: #33353a;
+  }
+  .copy b { font-weight: 600; }
+
+  .riddle {
+    margin-top: 22px;
+    font-family: "Consolas", monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--mid);
+  }
+  .riddle strong {
+    display: block;
+    margin-top: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+
+  .object {
+    position: relative;
+    justify-self: center;
+    width: min(420px, 92%);
+    aspect-ratio: 400 / 552;
+    align-self: end;
+  }
+  .object img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: invert(1) grayscale(1) contrast(0.86) brightness(1.06);
+    mix-blend-mode: multiply;
+  }
+  .object .dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, #000 0.9px, transparent 1.1px);
+    background-size: 3px 3px;
+    mix-blend-mode: multiply;
+    opacity: 0.26;
+    pointer-events: none;
+  }
+  .object .baseline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4%;
+    height: 1px;
+    background: var(--ink);
+  }
+  .object .tag {
+    position: absolute;
+    left: 0;
+    bottom: -22px;
+    font-family: "Consolas", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+  }
+
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px;
+    font-family: "Consolas", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+  }
+  .strip b { color: var(--ink); font-weight: 500; }
+
+  .cta {
+    min-width: 210px;
+    min-height: 56px;
+    padding: 0 34px;
+    border: none;
+    background: var(--ink);
+    color: #f7f6f2;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 0.34em;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), letter-spacing 0.25s ease;
+  }
+  .cta:hover { transform: translateY(-2px); letter-spacing: 0.42em; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; gap: 8px; }
+    .object { width: min(300px, 82%); justify-self: start; margin-top: 8px; }
+    .title { font-size: clamp(52px, 17vw, 96px); }
+    .page { padding: 18px 20px 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="page">
+    <div class="bar">
+      <span><b>AHOLO 3D</b> / HACKATHON 2026.11</span>
+      <span>NO. 07 · 寄件人不详</span>
+    </div>
+
+    <div class="main">
+      <div>
+        <h1 class="title">
+          <span>无名</span>
+          <span>件</span>
+          <span class="thin">UNNAMED PIECE</span>
+        </h1>
+        <p class="copy">
+          有人把它拆成 <b>七块</b>，一块一块寄来。<br />
+          装回去的过程中，你得一直猜它是什么——<br />
+          猜对了，它才真正有名字。
+        </p>
+        <div class="riddle">
+          寄件人只在箱子上留了一句
+          <strong>「它每天最后一个关掉自己。」</strong>
+        </div>
+      </div>
+
+      <div class="object">
+        <img src="./assets/lamp-crop.png" alt="尚未命名的物件，网点印刷效果" />
+        <div class="dots" aria-hidden="true"></div>
+        <div class="baseline" aria-hidden="true"></div>
+        <span class="tag">ONE OBJECT / SEVEN PARTS / 0.48 KG</span>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="strip">
+        <span>件数 <b>7</b></span>
+        <span>状态 <b>已拆散</b></span>
+        <span>可导出 <b>STL</b></span>
+      </div>
+      <button class="cta" type="button">拆开它</button>
+    </div>
+  </div>
+</body>
+</html>

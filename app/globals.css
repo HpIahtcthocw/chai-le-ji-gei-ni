@@ -703,3 +703,297 @@ body {
     order: 3;
   }
 }
+/* ---------------- 首屏 3D ---------------- */
+.hero-page {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: #08090b;
+}
+.hero-stage,
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+}
+.hero-canvas { touch-action: none; }
+.hero-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: #6d7688;
+}
+.hero-loading-pct { color: #ffc98a; }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 26px 30px 30px;
+  pointer-events: none;
+}
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: #5a6373;
+}
+.hero-bottom { max-width: 420px; }
+.hero-title {
+  margin: 0;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+  font-size: clamp(46px, 6vw, 76px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  color: #f2ece1;
+}
+.hero-lede {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.95;
+  color: #9aa3b2;
+}
+.hero-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 12px 22px;
+  pointer-events: auto;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: #0a0c10;
+  background: #ffc98a;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.25s ease;
+}
+.hero-enter:hover { transform: translateY(-2px); background: #ffd9ad; }
+@media (max-width: 680px) {
+  .hero-overlay { padding: 18px 20px 22px; }
+  .hero-title { font-size: clamp(40px, 13vw, 60px); }
+  .hero-lede { max-width: 82vw; }
+}
+/* ---------------- 寄件署名 ---------------- */
+.send-sign {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #6d7688;
+}
+.send-sign span { flex: none; }
+.send-sign input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 2px;
+  font-size: 13px;
+  color: #e8eaf0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #2b3240;
+  outline: none;
+}
+.send-sign input:focus { border-color: #ffc98a; }
+.send-sign input::placeholder { color: #4b5464; }
+
+/* ---------------- 分享 / 装盒页 ---------------- */
+.share-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #08090b;
+  color: #e8eaf0;
+}
+.share-stage { position: absolute; inset: 0; }
+.share-panel {
+  position: relative;
+  z-index: 2;
+  width: min(420px, 90vw);
+  margin-left: clamp(24px, 7vw, 120px);
+  padding: 34px 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.share-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-family: "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: #5a6373;
+}
+.share-back { color: #5a6373; text-decoration: none; }
+.share-back:hover { color: #ffc98a; }
+.share-title {
+  margin: 0;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: clamp(38px, 5vw, 54px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: 0.1em;
+  color: #f4ede2;
+}
+.share-title span { display: block; font-size: 1.28em; letter-spacing: 0.04em; }
+.share-lede {
+  margin: 0;
+  max-width: 340px;
+  font-size: 13px;
+  line-height: 2;
+  color: #9aa3b2;
+}
+.share-qr {
+  width: 156px;
+  height: 156px;
+  padding: 10px;
+  border: 1px solid #2b3240;
+  background: rgba(255, 255, 255, 0.02);
+}
+.share-qr svg { width: 100%; height: 100%; display: block; }
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #232936;
+}
+.share-link code {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: #7c8699;
+}
+.share-copy {
+  flex: none;
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #ffc98a;
+  background: transparent;
+  border: 1px solid #3a3128;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.share-copy:hover { background: rgba(255, 201, 138, 0.08); }
+.share-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.share-primary {
+  padding: 13px 22px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: #0a0c10;
+  background: #ffc98a;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.share-primary:hover { transform: translateY(-2px); }
+.share-ghost {
+  padding: 13px 20px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: #9aa3b2;
+  border: 1px solid #232936;
+  border-radius: 2px;
+  text-decoration: none;
+}
+.share-ghost:hover { color: #e8eaf0; border-color: #3a4152; }
+.share-note {
+  margin: 6px 0 0;
+  max-width: 330px;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #565f6f;
+}
+@media (max-width: 760px) {
+  .share-panel { width: auto; margin: 0; padding: 22px 20px 30px; }
+  .share-qr { width: 132px; height: 132px; }
+}
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 20px; }
+.hero-ghost {
+  padding: 12px 20px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: #9aa3b2;
+  border: 1px solid #262c37;
+  border-radius: 2px;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+.hero-ghost:hover { color: #e8eaf0; border-color: #3c4556; }
+/* 装盒清单：没有 3D，纯排版，但要像一张真的装箱单 */
+.share-box {
+  border: 1px solid #232936;
+  padding: 16px 16px 12px;
+  max-width: 340px;
+}
+.share-box-side {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #2b3240;
+}
+.share-box-stamp {
+  font-family: "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: #c0554a;
+}
+.share-box-code { font-family: "Consolas", monospace; font-size: 10px; letter-spacing: 0.2em; color: #5a6373; }
+.share-manifest { list-style: none; margin: 10px 0 0; padding: 0; }
+.share-manifest li { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+.share-manifest-num { font-family: "Consolas", monospace; font-size: 10px; color: #5a6373; }
+.share-manifest-line { flex: 1; height: 1px; background: #1b212c; }
+.share-manifest-mark { font-size: 11px; color: #ffc98a; }
+.share-box-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #2b3240;
+  font-family: "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #5a6373;
+}
+/* 分享页：右半边放寄件人真拍的那张照片 */
+.share-page { display: flex; align-items: stretch; }
+.share-panel { flex: none; margin-left: clamp(24px, 5vw, 72px); }
+.share-photo { position: relative; flex: 1; margin: 0; min-height: 100vh; overflow: hidden; }
+.share-photo img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.82; filter: grayscale(0.1) contrast(1.02); }
+.share-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #08090b 0%, rgba(8, 9, 11, 0.6) 18%, rgba(8, 9, 11, 0) 44%); pointer-events: none; }
+.share-photo figcaption { position: absolute; left: 46%; bottom: 26px; display: flex; gap: 14px; font-family: "Consolas", monospace; font-size: 10px; letter-spacing: 0.2em; color: #8b8f99; }
+@media (max-width: 860px) {
+  .share-page { flex-direction: column; }
+  .share-photo { min-height: 32vh; order: -1; }
+  .share-photo::after { background: linear-gradient(180deg, rgba(8, 9, 11, 0.72) 0%, rgba(8, 9, 11, 0) 60%); }
+  .share-panel { margin-left: 0; }
+}
+/* 分享页压到一屏：标题、清单、码、按钮都收一点，别让页面滚起来 */
+.share-page { height: 100vh; overflow: hidden; }
+.share-panel { gap: 13px; padding: 26px 0 22px; justify-content: center; }
+.share-title { font-size: clamp(30px, 3.4vw, 42px); line-height: 1.1; }
+.share-title span { font-size: 1.24em; }
+.share-lede { font-size: 12.5px; line-height: 1.85; }
+.share-box { padding: 12px 14px 10px; }
+.share-manifest li { padding: 2px 0; }
+.share-qr { width: 126px; height: 126px; padding: 8px; }
+.share-note { font-size: 10.5px; line-height: 1.75; }
+.share-photo { height: 100vh; min-height: 0; }

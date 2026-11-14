@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>方向 B · 暗房</title>
+<style>
+  :root {
+    --amber: #ffb26b;
+    --paper: #efe6d6;
+    --soft: #8f8477;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #060709;
+    color: var(--paper);
+    font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+  }
+  .pool {
+    position: fixed;
+    left: 50%;
+    top: 46%;
+    width: min(720px, 92vw);
+    height: 520px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      ellipse at 50% 46%,
+      rgba(255, 178, 107, 0.16) 0%,
+      rgba(255, 178, 107, 0.055) 34%,
+      rgba(255, 178, 107, 0.014) 56%,
+      transparent 72%
+    );
+    filter: blur(6px);
+  }
+  .grain {
+    position: fixed;
+    inset: -40px;
+    opacity: 0.14;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: grainShift 0.9s steps(3) infinite;
+  }
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 46%, transparent 40%, rgba(0, 0, 0, 0.72) 100%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 3;
+    width: min(760px, 88vw);
+    text-align: center;
+  }
+  .kicker {
+    font-family: "Consolas", "SF Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.42em;
+    color: #6f665c;
+    text-transform: uppercase;
+  }
+
+  .parcel {
+    position: relative;
+    width: 208px;
+    height: 146px;
+    margin: 42px auto 0;
+    background: linear-gradient(158deg, #33302a 0%, #1d1b16 62%, #131210 100%);
+    border: 1px solid rgba(255, 214, 170, 0.14);
+    border-radius: 2px;
+    box-shadow:
+      0 40px 70px -30px rgba(0, 0, 0, 0.9),
+      0 0 0 1px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 228, 196, 0.12);
+    transform: perspective(1000px) rotateX(4deg) rotate(-1.6deg);
+  }
+  .parcel::after {
+    content: "";
+    position: absolute;
+    left: 18%;
+    top: -34px;
+    width: 1px;
+    height: 34px;
+    background: linear-gradient(to top, rgba(255, 190, 130, 0.5), transparent);
+  }
+  .tape {
+    position: absolute;
+    left: 50%;
+    top: -1px;
+    bottom: -1px;
+    width: 30px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, rgba(255, 190, 130, 0.2), rgba(255, 190, 130, 0.07));
+    border-left: 1px solid rgba(255, 200, 150, 0.22);
+    border-right: 1px solid rgba(255, 200, 150, 0.22);
+  }
+  .parcel-shadow {
+    width: 190px;
+    height: 26px;
+    margin: 18px auto 0;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.62), transparent 70%);
+    filter: blur(4px);
+  }
+
+  h1 {
+    margin-top: 34px;
+    font-size: clamp(40px, 6.4vw, 68px);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    line-height: 1.2;
+    color: #f3ebdd;
+    text-shadow: 0 1px 26px rgba(255, 178, 107, 0.18);
+  }
+  .lede {
+    margin: 18px auto 0;
+    max-width: 430px;
+    font-size: 15px;
+    line-height: 2.1;
+    color: #a49a8d;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .riddle {
+    display: inline-block;
+    margin-top: 26px;
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 178, 107, 0.5);
+    font-size: 19px;
+    line-height: 1.7;
+    color: #d8cdbd;
+    text-align: left;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 44px;
+    margin-top: 40px;
+    padding: 0 4px 6px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 178, 107, 0.55);
+    color: var(--amber);
+    font-family: "Songti SC", serif;
+    font-size: 17px;
+    letter-spacing: 0.28em;
+    cursor: pointer;
+    transition: border-color 0.35s ease, color 0.35s ease;
+  }
+  .cta:hover { border-color: var(--amber); color: #ffd2a4; }
+  .cta-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 178, 107, 0.75);
+    box-shadow: 0 0 12px rgba(255, 178, 107, 0.9);
+    animation: pulse 3.4s ease-in-out infinite;
+  }
+  .foot {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 26px;
+    text-align: center;
+    font-family: "Consolas", monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #4b453e;
+  }
+
+  .dust { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+  .dust span {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(255, 210, 170, 0.5);
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    0% { transform: translateY(20px); opacity: 0; }
+    18% { opacity: 0.9; }
+    100% { transform: translateY(-120px); opacity: 0; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  @keyframes grainShift {
+    0% { transform: translate(0, 0); }
+    33% { transform: translate(-6px, 4px); }
+    66% { transform: translate(4px, -5px); }
+  }
+  @media (max-width: 640px) {
+    .parcel { width: 160px; height: 112px; margin-top: 30px; }
+    h1 { letter-spacing: 0.14em; }
+    .lede { font-size: 14px; }
+    .riddle { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="pool"></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="3" stitchTiles="stitch" />
+    </filter>
+  </svg>
+  <div class="grain" style="filter: url(#noise)"></div>
+
+  <div class="dust" aria-hidden="true">
+    <span style="left:18%;bottom:26%;animation-duration:9s;animation-delay:0s"></span>
+    <span style="left:26%;bottom:18%;animation-duration:11s;animation-delay:1.4s"></span>
+    <span style="left:34%;bottom:12%;animation-duration:10s;animation-delay:2.6s"></span>
+    <span style="left:47%;bottom:8%;animation-duration:13s;animation-delay:0.6s"></span>
+    <span style="left:56%;bottom:14%;animation-duration:9.5s;animation-delay:3.2s"></span>
+    <span style="left:64%;bottom:22%;animation-duration:12s;animation-delay:1.9s"></span>
+    <span style="left:74%;bottom:30%;animation-duration:10.5s;animation-delay:4.1s"></span>
+    <span style="left:82%;bottom:38%;animation-duration:11.5s;animation-delay:2.2s"></span>
+    <span style="left:40%;bottom:42%;animation-duration:14s;animation-delay:5s"></span>
+    <span style="left:60%;bottom:48%;animation-duration:12.5s;animation-delay:3.8s"></span>
+  </div>
+
+  <div class="vignette"></div>
+
+  <main class="wrap">
+    <div class="kicker">夜里十一点 · 门口有个箱子</div>
+
+    <div class="parcel">
+      <div class="tape"></div>
+    </div>
+    <div class="parcel-shadow"></div>
+
+    <h1>拆了寄给你</h1>
+    <p class="lede">
+      一件东西被拆成七块，寄到你手上。<br />
+      每装上一块，就要猜一次它原来是什么。
+    </p>
+
+    <div class="riddle">「它每天最后一个关掉自己。」</div>
+
+    <div>
+      <button class="cta" type="button">
+        <span class="cta-dot" aria-hidden="true"></span>
+        拆 开 它
+      </button>
+    </div>
+  </main>
+
+  <div class="foot">LUX3D · AHOLO VIEWER · STL</div>
+</body>
+</html>

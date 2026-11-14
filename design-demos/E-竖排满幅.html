@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>方向 E · 竖排满幅</title>
+<style>
+  :root {
+    --paper: #f7f6f2;
+    --ink: #121212;
+    --seal: #b02a1c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+
+  /* 物体：满幅，从右上方出血，被画框切掉一截 */
+  .object {
+    position: absolute;
+    right: -4%;
+    top: -2%;
+    width: 58%;
+    height: 118%;
+    pointer-events: none;
+  }
+  .object img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 6%;
+    filter: invert(1) grayscale(1) contrast(0.84) brightness(1.05);
+    mix-blend-mode: multiply;
+  }
+  .object::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, #000 0.85px, transparent 1.05px);
+    background-size: 3px 3px;
+    mix-blend-mode: multiply;
+    opacity: 0.22;
+  }
+
+  /* 竖排主标题 */
+  .name {
+    position: absolute;
+    left: 7vw;
+    top: 5vh;
+    writing-mode: vertical-rl;
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    font-size: clamp(96px, 17vh, 210px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+
+  /* 竖排说明，压在标题右侧 */
+  .note {
+    position: absolute;
+    left: calc(7vw + clamp(96px, 17vh, 210px) + 46px);
+    top: 6vh;
+    writing-mode: vertical-rl;
+    font-size: 13px;
+    line-height: 2.35;
+    letter-spacing: 0.16em;
+    color: #4a4a46;
+    max-height: 64vh;
+  }
+  .note b { font-weight: 600; color: var(--ink); }
+
+  /* 红印：既是署名，也是入口 */
+  .seal {
+    position: absolute;
+    left: 7vw;
+    bottom: 8vh;
+    width: 92px;
+    height: 92px;
+    display: grid;
+    place-items: center;
+    background: var(--seal);
+    color: #fff8f2;
+    border: none;
+    cursor: pointer;
+    transform: rotate(-2.5deg);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.3s ease;
+  }
+  .seal span {
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 21px;
+    line-height: 1.1;
+    letter-spacing: 0.24em;
+    writing-mode: vertical-rl;
+    text-indent: 0.24em;
+  }
+  .seal:hover { transform: rotate(-2.5deg) scale(1.06); background: #c0361f; }
+
+  .meta {
+    position: absolute;
+    right: 24px;
+    bottom: 20px;
+    font-family: "Consolas", monospace;
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    color: #8b8b83;
+    text-align: right;
+    line-height: 2;
+  }
+  .topmeta {
+    position: absolute;
+    right: 24px;
+    top: 22px;
+    font-family: "Consolas", monospace;
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    color: #8b8b83;
+  }
+  .rule {
+    position: absolute;
+    left: 7vw;
+    right: 7vw;
+    bottom: 0;
+    height: 0;
+  }
+
+  @media (max-width: 820px) {
+    .object { width: 96%; right: -22%; top: -6%; height: 108%; }
+    .name {
+      writing-mode: horizontal-tb;
+      left: 24px;
+      top: 40px;
+      font-size: clamp(60px, 19vw, 110px);
+      letter-spacing: 0.02em;
+    }
+    .note {
+      writing-mode: horizontal-tb;
+      left: 24px;
+      top: auto;
+      bottom: 128px;
+      max-height: none;
+      max-width: 78vw;
+      font-size: 12px;
+      line-height: 2.05;
+    }
+    .seal { width: 76px; height: 76px; left: auto; right: 24px; bottom: 30px; }
+    .seal span { font-size: 17px; }
+    .meta { left: 24px; right: auto; bottom: 18px; text-align: left; }
+  }
+</style>
+</head>
+<body>
+  <div class="object" aria-hidden="true">
+    <img src="./assets/lamp-crop.png" alt="" />
+  </div>
+
+  <div class="topmeta">NO.07 / 寄件人不详</div>
+
+  <h1 class="name">无名件</h1>
+
+  <div class="note">
+    有人把它拆成 <b>七块</b>，一块一块寄来。<br />
+    每装上一块，你得猜一次它是什么。<br />
+    装完那一刻，它才真的有名字。
+  </div>
+
+  <button class="seal" type="button"><span>拆开</span></button>
+
+  <div class="meta">
+    AHOLO 3D AI HACKATHON 2026<br />
+    7 PARTS · 0.48 KG · STL
+  </div>
+</body>
+</html>
