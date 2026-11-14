@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 
 type Piece = {
+  /** 起飞次序 */
+  rank?: number;
   mesh: any;
   /** 在整件东西里的相对高度：-0.5 底座，+0.5 灯头 */
   yNorm: number;
-  /** 横向偏移（只给线和插头一点，避免全挤在一条轴上） */
-  drift: number;
+  /** 从整体中心指向这一块的单位向量：它沿着自己的真实方位飞出去 */
+  dir: { x: number; y: number; z: number };
+  axis: any;
+  spin: number;
   seed: number;
 };
 
@@ -123,19 +127,41 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
         return s - Math.floor(s);
       };
 
-      // 竖向爆炸图：每块按自己在整件里的高度分开，顺序不乱，像一张装配示意
+      // 离心爆开：每块沿自己相对整件中心的方向飞出去，方位就是它原本的方位
       const pieces: Piece[] = meshes.map((mesh, index) => {
         const c = new A.Box3().setFromObject(mesh).getCenter(new A.Vector3());
         const yNorm = size.y > 0 ? (c.y - center.y) / size.y : 0;
+        const dx = c.x - center.x;
+        const dy = c.y - center.y;
+        const dz = c.z - center.z;
+        const len = Math.hypot(dx, dy, dz) || 1;
+        // 中心附近的零件（灯泡、垫圈）方位退化，按索引绕一圈分开
+        const tiny = len < maxSize * 0.045;
+        const ang = (index / Math.max(1, meshes.length)) * Math.PI * 2;
         const r1 = rnd(index);
         return {
           mesh,
           yNorm,
-          drift: (r1 - 0.5) * maxSize * 0.1,
+          dir: tiny
+            ? { x: Math.cos(ang) * 0.8, y: 0.5, z: Math.sin(ang) * 0.8 }
+            : { x: dx / len, y: dy / len, z: dz / len },
+          axis: new A.Vector3(rnd(index + 3) - 0.5, rnd(index + 5) - 0.5, rnd(index + 11) - 0.5).normalize(),
+          spin: 0.16 + r1 * 0.2,
           seed: r1,
         };
       });
 
+      // 起飞次序：离中心越远越早，跟参考里"零件错开飞出"一致
+      const bySpread = [...pieces].sort(
+        (a, b) =>
+          Math.hypot(b.dir.x, b.dir.y, b.dir.z) - Math.hypot(a.dir.x, a.dir.y, a.dir.z),
+      );
+      pieces.forEach((piece) => {
+        piece.rank = 0;
+      });
+      bySpread.forEach((piece, i) => {
+        piece.rank = i;
+      });
       // 把每块的实际高度写进 CSS 变量，让右页边的清单跟零件对齐（自上而下）
       const ordered = [...pieces].sort((a, b) => b.yNorm - a.yNorm);
       const tops = ordered.map((pc) => 50 - pc.yNorm * 74);
@@ -179,45 +205,49 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
         const p = smooth;
 
         // 平光 → 立体：光在 0.04→0.30 之间渐次上来
-        const lit = easeInOut(clamp((p - 0.04) / 0.26));
+        const lit = easeInOut(clamp((p - 0.05) / 0.2));
         ambient.intensity = 1.05 - 0.83 * lit;
         key.intensity = 2.0 * lit;
         fill.intensity = 0.55 * lit;
         rim.intensity = 1.7 * lit;
 
         let openSum = 0;
+        let openPeak = 0;
         pieces.forEach((piece, i) => {
           const rev = pieces.length - 1 - i;
           let o: number;
-          if (p < 0.62) {
-            o = easeOut(clamp((p - 0.14 - i * 0.022) / 0.3));
+          if (p < 0.82) {
+            // 第一拍先停着，第二拍按次序错开飞出
+            o = easeOut(clamp((p - 0.34 - (piece.rank ?? 0) * 0.017) / 0.17));
           } else {
-            const k = clamp((p - 0.62 - rev * 0.012) / 0.16);
-            // 合体时给一点过冲：先冲过头再弹回来
-            o = 1 - easeIn(k) - Math.sin(k * Math.PI) * 0.045 * (1 - k);
+            // 第三拍：落稳之后才收，收的时候冲过头再弹回来
+            const k = clamp((p - 0.82 - rev * 0.006) / 0.14);
+            o = 1 - easeIn(k) - Math.sin(k * Math.PI) * 0.055 * (1 - k);
           }
           openSum += o;
+          openPeak = Math.max(openPeak, o);
 
-          // 竖向位移：上半部的零件往上走，下半部的往下走，间隔均匀
-          const lift = piece.yNorm * maxSize * 1.15 * o;
+          // 沿自身方位飞出，越在外面的走得越远；带一点重力下坠和自转
+          const spread = maxSize * 0.36 * o;
           const breathe = Math.sin(t * 0.9 + piece.seed * 6.28) * maxSize * 0.012 * Math.max(0, Math.min(1, (o - 0.6) / 0.4));
           piece.mesh.position.set(
-            piece.drift * o * 0.5,
-            lift + breathe,
-            0,
+            piece.dir.x * spread * 1.2,
+            piece.dir.y * spread + breathe - o * o * maxSize * 0.05,
+            piece.dir.z * spread * 1.0,
           );
-          piece.mesh.quaternion.set(0, 0, 0, 1);
+          piece.mesh.quaternion.setFromAxisAngle(piece.axis, piece.spin * o);
         });
 
         // 亮灯：p=1 之前一瞬，纸面上洇开一团影
-        const glow = clamp((p - 0.86) / 0.1);
+        const glow = clamp((p - 0.9) / 0.08);
         lightLevel += (glow * 4.4 - lightLevel) * 0.1;
         bulb.intensity = lightLevel;
         bulb.position.set(center.x, center.y + size.y * 0.26, center.z);
 
-        const openAvg = openSum / Math.max(1, pieces.length);
-        const zoom = (1 + (1 - clamp(p / 0.28)) * 0.05) * (1 + openAvg * 0.95);
-        const a = 0.14 - p * 0.22 + mouseRef.current * 0.30;
+        // 第三拍只属于镜头：散完之后再慢慢退，退的过程里零件是静的
+        const pullBack = easeInOut(clamp((p - 0.46) / 0.32));
+        const zoom = 1.02 * (1 + openPeak * 0.72 + pullBack * 0.26);
+        const a = 0.22 + p * 0.42 + mouseRef.current * 0.34;
         camera.position.set(
           lookAt.x + Math.sin(a) * dist * zoom,
           lookAt.y + dist * (0.14 + p * 0.05),
@@ -236,7 +266,7 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
         center: { x: center.x, y: center.y, z: center.z },
         radius,
         dist,
-        pieces: pieces.map((x) => ({ yNorm: x.yNorm, drift: x.drift })),
+        pieces: pieces.map((x) => ({ yNorm: x.yNorm, dir: x.dir })),
       };
       setReady(true);
       raf = requestAnimationFrame(frame);
