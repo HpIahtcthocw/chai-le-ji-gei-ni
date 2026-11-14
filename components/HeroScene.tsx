@@ -4,13 +4,20 @@ import { useEffect, useRef, useState } from 'react';
 
 type Piece = {
   mesh: any;
-  dir: { x: number; y: number; z: number };
-  bob: number;
+  /** 在整件东西里的相对高度：-0.5 底座，+0.5 灯头 */
+  yNorm: number;
+  /** 横向偏移（只给线和插头一点，避免全挤在一条轴上） */
+  drift: number;
+  seed: number;
 };
 
 /**
- * 首页那只"会自己拆开又装回去"的灯。
- * 时间轴循环：静置 → 炸开 → 悬浮 → 合体 → 抬头亮灯 → 熄灭重来。
+ * 首页：滚动驱动的"印刷图站起来"。
+ * 0    —— 平光黑剪影，像印在纸上的一枚图
+ * 0.1  —— 光渐亮，它从纸面立起来
+ * 0.15 —— 七块沿着各自的轴脱开，边转边退
+ * 0.8  —— 反序合体，带一点过冲
+ * 1    —— 底座亮起，纸面上洇开一团影
  */
 export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -25,6 +32,7 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
     if (!host) return;
 
     let viewer: any = null;
+    let progress = 0;
 
     const boot = async () => {
       const A: any = await import('@manycore/aholo-viewer');
@@ -52,14 +60,15 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
       viewer.setCamera(camera);
 
       const scene = viewer.getScene();
-      scene.add(new A.AmbientLight(0x8b9bb8, 0.22));
-      const key = new A.DirectionalLight(0xfff1de, 2.0);
+      const ambient = new A.AmbientLight(0xffffff, 1);
+      scene.add(ambient);
+      const key = new A.DirectionalLight(0xfff1de, 0);
       key.position.set(2.4, 3.0, 2.2);
       scene.add(key);
-      const fill = new A.DirectionalLight(0x7f96c4, 0.55);
+      const fill = new A.DirectionalLight(0x7f96c4, 0);
       fill.position.set(-2.4, 1.2, 1.8);
       scene.add(fill);
-      const rim = new A.DirectionalLight(0xffd7ae, 1.6);
+      const rim = new A.DirectionalLight(0xffd7ae, 0);
       rim.position.set(-0.6, 1.2, -3.2);
       scene.add(rim);
       const bulb = new A.PointLight(0xffb273, 0);
@@ -86,7 +95,6 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
           xhr.send();
         });
 
-      // 页面间快速跳转会打断在途的 16MB 请求（dev 下表现为 ERR_CACHE_WRITE_FAILURE）
       const buffer = await loadBuffer(0).catch(async (first) => {
         if (disposed) throw first;
         await new Promise((r) => setTimeout(r, 320));
@@ -108,106 +116,146 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
       const size = box.getSize(new A.Vector3());
       const center = box.getCenter(new A.Vector3());
       const maxSize = Math.max(size.x, size.y, size.z) || 1;
-      const radius = Math.max(size.x, size.y, size.z) * 0.5;
+      const radius = maxSize * 0.5;
 
+      const rnd = (n: number) => {
+        const s = Math.sin(n * 127.1 + 31.7) * 43758.5453;
+        return s - Math.floor(s);
+      };
+
+      // 竖向爆炸图：每块按自己在整件里的高度分开，顺序不乱，像一张装配示意
       const pieces: Piece[] = meshes.map((mesh, index) => {
         const c = new A.Box3().setFromObject(mesh).getCenter(new A.Vector3());
-        const dx = c.x - center.x;
-        const dy = c.y - center.y;
-        const dz = c.z - center.z;
-        const len = Math.hypot(dx, dy, dz) || 1;
-        // 方向几乎重合的零件（比如灯泡与灯罩）靠索引错开，避免全部叠在一条线上
-        const jitter = index % 2 === 0 ? 0.12 : -0.12;
+        const yNorm = size.y > 0 ? (c.y - center.y) / size.y : 0;
+        const r1 = rnd(index);
         return {
           mesh,
-          dir: { x: dx / len + jitter, y: dy / len, z: dz / len + jitter * 0.4 },
-          bob: index * 0.7,
+          yNorm,
+          drift: (r1 - 0.5) * maxSize * 0.1,
+          seed: r1,
         };
       });
 
-      // 取景：让整灯在竖屏也不被裁
+      // 把每块的实际高度写进 CSS 变量，让右页边的清单跟零件对齐（自上而下）
+      const ordered = [...pieces].sort((a, b) => b.yNorm - a.yNorm);
+      const tops = ordered.map((pc) => 50 - pc.yNorm * 74);
+      // 高度太近的零件会把标签叠在一起，按最小行距往下推开
+      for (let i = 1; i < tops.length; i += 1) tops[i] = Math.max(tops[i], tops[i - 1] + 3.4);
+      const shift = Math.min(0, 94 - tops[tops.length - 1]);
+      tops.forEach((t, i) => {
+        const top = Math.max(8, Math.min(92, t + shift));
+        document.documentElement.style.setProperty(`--m${i + 1}`, `${top.toFixed(1)}%`);
+      });
       const fovY = (camera.fov * Math.PI) / 180;
       const distV = (radius * 1.18) / Math.tan(fovY / 2);
       const aspect = width / height;
       const distH = aspect < 1 ? (radius * 1.22) / Math.tan(fovY / 2) / aspect : distV;
-      let dist = Math.max(distV, distH) * 1.16;
+      const dist = Math.max(distV, distH) * 1.14;
 
       const lookAt = new A.Vector3(center.x, center.y - size.y * 0.02, center.z);
       const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
       const easeOut = (k: number) => 1 - Math.pow(1 - k, 3);
+      const easeIn = (k: number) => k * k * k;
       const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
-      const LOOP = 13.2;
-      const t0 = performance.now();
+      const onScroll = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const raw = max > 0 ? window.scrollY / max : 0;
+        progress = clamp(raw);
+        (window as any).__HERO_PROGRESS__ = progress;
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+
+      let smooth = 0;
       let lightLevel = 0;
+      const t0 = performance.now();
 
       const frame = () => {
         if (disposed) return;
-        const t = ((performance.now() - t0) / 1000) % LOOP;
+        const t = (performance.now() - t0) / 1000;
+        smooth += (progress - smooth) * 0.085;
+        const p = smooth;
 
-        // 每个零件自己的开合进度：错峰 60ms，合体时反序
-        const openOf = (i: number) => {
-          const stagger = i * 0.07;
-          if (t < 1.7) return 0;
-          if (t < 3.5) return easeOut(clamp((t - 1.7 - stagger) / 1.35));
-          if (t < 6.4) return 1;
-          if (t < 8.0) {
-            const rev = pieces.length - 1 - i;
-            return 1 - easeInOut(clamp((t - 6.4 - rev * 0.07) / 1.4));
-          }
-          return 0;
-        };
+        // 平光 → 立体：光在 0.04→0.30 之间渐次上来
+        const lit = easeInOut(clamp((p - 0.04) / 0.26));
+        ambient.intensity = 1.05 - 0.83 * lit;
+        key.intensity = 2.0 * lit;
+        fill.intensity = 0.55 * lit;
+        rim.intensity = 1.7 * lit;
 
         let openSum = 0;
-        pieces.forEach((p, i) => {
-          const open = openOf(i);
-          openSum += open;
-          const spread = maxSize * 0.36 * open;
-          const bobY = Math.sin(t * 1.15 + p.bob) * maxSize * 0.028 * open;
-          p.mesh.position.set(p.dir.x * spread, p.dir.y * spread + bobY, p.dir.z * spread);
+        pieces.forEach((piece, i) => {
+          const rev = pieces.length - 1 - i;
+          let o: number;
+          if (p < 0.62) {
+            o = easeOut(clamp((p - 0.14 - i * 0.022) / 0.3));
+          } else {
+            const k = clamp((p - 0.62 - rev * 0.012) / 0.16);
+            // 合体时给一点过冲：先冲过头再弹回来
+            o = 1 - easeIn(k) - Math.sin(k * Math.PI) * 0.045 * (1 - k);
+          }
+          openSum += o;
+
+          // 竖向位移：上半部的零件往上走，下半部的往下走，间隔均匀
+          const lift = piece.yNorm * maxSize * 1.15 * o;
+          const breathe = Math.sin(t * 0.9 + piece.seed * 6.28) * maxSize * 0.012 * Math.max(0, Math.min(1, (o - 0.6) / 0.4));
+          piece.mesh.position.set(
+            piece.drift * o * 0.5,
+            lift + breathe,
+            0,
+          );
+          piece.mesh.quaternion.set(0, 0, 0, 1);
         });
 
-        // 亮灯：8.2s 起爬升，10.6s 到顶，12.6s 熄灭
-        let target = 0;
-        if (t > 8.2) target = clamp((t - 8.2) / 0.55) * 4.2;
-        if (t > 10.9) target = 4.2;
-        if (t > 12.5) target = 0;
-        lightLevel += (target - lightLevel) * 0.12;
+        // 亮灯：p=1 之前一瞬，纸面上洇开一团影
+        const glow = clamp((p - 0.86) / 0.1);
+        lightLevel += (glow * 4.4 - lightLevel) * 0.1;
         bulb.intensity = lightLevel;
-        const bulbCenter = new A.Vector3(center.x, center.y + size.y * 0.28, center.z);
-        bulb.position.set(bulbCenter.x, bulbCenter.y, bulbCenter.z);
+        bulb.position.set(center.x, center.y + size.y * 0.26, center.z);
 
-        // 镜头：极缓环绕 + 鼠标横移带来的偏转
-        const swing = Math.sin(t * 0.16) * 0.12 + mouseRef.current * 0.5;
-        const a = 0.42 + swing;
-        // 炸开时镜头跟着退，合体时再压回来：拆得越开，看得越全
         const openAvg = openSum / Math.max(1, pieces.length);
-        const dolly = 1 + openAvg * 0.62;
-        const zoom = (1 - clamp((t - 8.2) / 3.2) * 0.06) * dolly;
+        const zoom = (1 + (1 - clamp(p / 0.28)) * 0.05) * (1 + openAvg * 0.95);
+        const a = 0.14 - p * 0.22 + mouseRef.current * 0.30;
         camera.position.set(
           lookAt.x + Math.sin(a) * dist * zoom,
-          lookAt.y + dist * 0.16,
+          lookAt.y + dist * (0.14 + p * 0.05),
           lookAt.z + Math.cos(a) * dist * zoom,
         );
         camera.lookAt(lookAt);
         camera.updateMatrixWorld?.(true);
 
-        // 引擎不自动出图，每帧显式渲染
         model.updateMatrixWorld(true);
         viewer.render();
-
         raf = requestAnimationFrame(frame);
       };
 
-      (window as any).__HERO__ = { size: { x: size.x, y: size.y, z: size.z }, center: { x: center.x, y: center.y, z: center.z }, radius, dist, pieces: pieces.map((p) => ({ dir: p.dir })) };
+      (window as any).__HERO__ = {
+        size: { x: size.x, y: size.y, z: size.z },
+        center: { x: center.x, y: center.y, z: center.z },
+        radius,
+        dist,
+        pieces: pieces.map((x) => ({ yNorm: x.yNorm, drift: x.drift })),
+      };
       setReady(true);
       raf = requestAnimationFrame(frame);
+
+      return () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      };
     };
 
-    boot().catch((err) => {
-      if (!disposed) setPct(0);
-      console.error('[hero]', err);
-    });
+    let cleanup: void | (() => void);
+    boot()
+      .then((fn) => {
+        cleanup = fn as any;
+      })
+      .catch((err) => {
+        if (!disposed) setPct(0);
+        console.error('[hero]', err);
+      });
 
     const onMove = (e: PointerEvent) => {
       const rect = host.getBoundingClientRect();
@@ -219,6 +267,11 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
       disposed = true;
       cancelAnimationFrame(raf);
       host.removeEventListener('pointermove', onMove);
+      try {
+        cleanup?.();
+      } catch {
+        /* ignore */
+      }
       try {
         viewer?.dispose?.();
       } catch {

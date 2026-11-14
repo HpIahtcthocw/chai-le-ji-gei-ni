@@ -1097,3 +1097,230 @@ body {
 .home-copy { bottom: 96px; }
 .home-rule-bottom { padding: 14px 0 20px; }
 .home-title { letter-spacing: 0.06em; }
+/* ---------------- 滚动驱动的首页 ---------------- */
+.home-scroll { position: relative; }
+.home-track { height: 240vh; }
+.home-fix {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #f6f5f1;
+  color: #111214;
+  z-index: 0;
+}
+.home-stage { position: absolute; inset: 0; }
+
+/* 海报文字随滚动退场，把纸面让给散开的零件 */
+@supports (animation-timeline: scroll()) {
+  .home-copy {
+    animation: home-copy-out linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 2% 42%;
+  }
+  .home-hint {
+    animation: home-hint-out linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 14%;
+  }
+  .home-rule-bottom {
+    animation: home-copy-out linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 2% 42%;
+  }
+}
+@keyframes home-copy-out { to { opacity: 0.1; transform: translateY(-10px); } }
+@keyframes home-hint-out { to { opacity: 0; } }
+
+.home-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: #7b786f;
+  pointer-events: none;
+}
+.home-hint i {
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(#111214, rgba(17, 18, 20, 0));
+  animation: hint-drop 1.8s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes hint-drop {
+  0% { transform: scaleY(0.1); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0.1); opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-copy, .home-rule-bottom, .home-hint { animation: none; }
+  .home-hint i { animation: none; }
+}
+/* 首屏收口：文字退干净、留一条装订线、末尾一盏灯把纸照亮 */
+@keyframes home-copy-out { to { opacity: 0; transform: translateY(-6px); } }
+.home-fix::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(17, 18, 20, 0.14);
+  pointer-events: none;
+}
+.home-lamp { display: none; }
+/* 末尾：灯亮，纸面洇开一块暖光 */
+.home-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(58% 46% at 56% 33%, rgba(255, 176, 94, 0.62), rgba(255, 176, 94, 0.2) 46%, rgba(255, 176, 94, 0) 74%);
+  mix-blend-mode: multiply;
+}
+@supports (animation-timeline: scroll()) {
+  .home-glow {
+    animation: glow-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 76% 96%;
+  }
+}
+@keyframes glow-in { to { opacity: 1; } }
+/* 首页：灯落在纸上的影子，以及末尾海报归位 */
+.home-glow { display: none; }
+.home-shadow {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  width: 26%;
+  height: 5.4%;
+  margin-left: -13%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(17, 18, 20, 0.34), rgba(17, 18, 20, 0) 72%);
+  filter: blur(3px);
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .home-shadow {
+    animation: shadow-out linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 18%;
+  }
+  .home-copy, .home-rule-bottom {
+    animation: home-copy-io linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 2% 40%;
+  }
+  .home-copy {
+    animation-name: home-copy-io;
+  }
+}
+@keyframes shadow-out { to { opacity: 0; } }
+@keyframes home-copy-io {
+  0% { opacity: 1; }
+  100% { opacity: 1; }
+  45% { opacity: 0; }
+  92% { opacity: 0; }
+  100% { opacity: 1; }
+}
+/* 修正：海报随滚动完整退场，到底再回来；去掉穿过物体中线 */
+.home-fix::after { display: none; }
+@supports (animation-timeline: scroll()) {
+  .home-copy, .home-rule-bottom {
+    animation: home-copy-cycle linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 100%;
+  }
+}
+@keyframes home-copy-cycle {
+  0% { opacity: 1; }
+  6% { opacity: 1; }
+  42% { opacity: 0; }
+  90% { opacity: 0; }
+  100% { opacity: 1; }
+}
+/* 零件散开时，右页边浮出装箱清单 */
+.home-manifest {
+  position: absolute;
+  right: 30px;
+  top: 11%;
+  height: 74%;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  opacity: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  pointer-events: none;
+}
+.home-manifest li { display: flex; align-items: baseline; gap: 12px; }
+.home-manifest i {
+  font-family: "Consolas", monospace;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: #8d8a80;
+}
+.home-manifest span { font-size: 13px; letter-spacing: 0.04em; color: #26272a; }
+@supports (animation-timeline: scroll()) {
+  .home-manifest {
+    animation: manifest-cycle linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 100%;
+  }
+}
+@keyframes manifest-cycle {
+  0% { opacity: 0; transform: translateX(10px); }
+  24% { opacity: 0; transform: translateX(10px); }
+  40% { opacity: 1; transform: translateX(0); }
+  80% { opacity: 1; transform: translateX(0); }
+  92% { opacity: 0; transform: translateX(0); }
+  100% { opacity: 0; }
+}
+@media (max-width: 760px) {
+  .home-manifest { display: none; }
+}
+/* 清单按零件真实高度落位 */
+.home-manifest { display: block; }
+.home-manifest li {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(17, 18, 20, 0.18);
+}
+.home-manifest li:nth-child(1) { top: var(--m1, 12%); }
+.home-manifest li:nth-child(2) { top: var(--m2, 20%); }
+.home-manifest li:nth-child(3) { top: var(--m3, 32%); }
+.home-manifest li:nth-child(4) { top: var(--m4, 46%); }
+.home-manifest li:nth-child(5) { top: var(--m5, 58%); }
+.home-manifest li:nth-child(6) { top: var(--m6, 76%); }
+.home-manifest li:nth-child(7) { top: var(--m7, 86%); }
+/* 影子跟着循环：合体时影子回来 */
+@supports (animation-timeline: scroll()) {
+  .home-shadow {
+    animation: shadow-cycle linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 100%;
+  }
+}
+@keyframes shadow-cycle {
+  0% { opacity: 1; }
+  16% { opacity: 0; }
+  90% { opacity: 0; }
+  100% { opacity: 1; }
+}
+/* 组装段提前收尾，避免滚到底还没合上 */
+.home-manifest > li { transition: opacity 0.2s linear; }

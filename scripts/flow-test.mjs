@@ -36,11 +36,11 @@ try {
   await step('首页', async () => {
     await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.screenshot({ path: '.tmp/flow-1-home.png' });
-    return page.locator('.hero-title').innerText();
+    return page.locator('.home-title').innerText();
   });
 
   await step('进寄件页', async () => {
-    await page.getByRole('link', { name: '我也要寄一件' }).click();
+    await page.locator('.home-cta').click();
     await page.waitForURL('**/send', { timeout: 30000 });
     return page.url();
   });
