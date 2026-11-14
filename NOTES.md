@@ -313,3 +313,18 @@ STL 校验（`scripts/inspect-stl.mjs`）：二进制、**271,602 三角面**、
 - 落地口径（等真正做上传时执行）：前端 `accept="image/png,image/jpeg"`，拿到文件先读成 ImageBitmap，超过 2048 边长的缩到 2048，统一 `canvas.toBlob('image/jpeg', 0.9)` 再走上传；HEIC/webp 一律先转 JPEG，转不了就明确报错，不猜服务端。
 - 尺寸与体积上限 schema 没写，必须实测；在此之前默认按"长边 ≤2048、≤5 MB"自我约束。
 - 仍未解决：本地文件→公网 URL 这一环（SDK 无 asset 上传导出），详见 §9 末尾的 A/B/C 三条路。
+## 11. Asset 上传接口（2026-11-14 实测跑通，不花生成额度）
+
+之前判断"SDK 没有上传能力"是错的：**上传能力在 OpenAPI 里，只是 SDK 没导出**。实测三步：
+
+1. `GET https://api.aholo.cn/asset/v1/token`，头 `Authorization: <api key>` → `{ ousToken(36位), globalDomain, blockSize=5242880 }`
+2. `POST {globalDomain}/ous/api/v2/single/upload`（multipart，头 `ous-token-v2`），表单必须有 **file、md5、size、name**（少 md5 会报 `Required String parameter 'md5' is not present`）→ 返回 `d.obsTaskId`
+3. `GET {globalDomain}/ous/api/v2/upload/status?taskId=...`（同一个 token）→ `d.status=5` 时 `d.url` 就是公网地址
+
+实测返回：`https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/14/NL34L6YKTLGAMAABAAAAACI8.png`
+
+**关键坑**：token 与任务是绑定的，用新 token 查旧 taskId 会报 `{"c":"12","m":"Token未绑定任务"}`——所以取凭证、上传、轮询必须在同一次请求里连续做完。
+
+**格式更正**：OpenAPI schema 明确写"生成任务输入资源仅支持 image，支持 `.jpg / .jpeg / .png / .webp`"。webp 有官方支持，HEIC 不在列 → iPhone 原生照片必须在前端转 JPEG。
+
+已落地：`app/api/upload/route.ts`（服务端转发上传，返回 URL）+ `app/send/page.tsx`（拍照/选图，canvas 压到长边 2048、toBlob JPEG 0.9，HEIC 顺带转掉）。curl 实测走通。

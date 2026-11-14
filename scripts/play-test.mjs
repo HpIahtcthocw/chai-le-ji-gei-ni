@@ -55,7 +55,9 @@ async function answer(index) {
 }
 
 await page.goto(`${BASE}/item/lamp`, { waitUntil: 'load', timeout: 90000 });
-await waitPhase('playing', 60000);
+await waitPhase('sealed', 60000);
+await page.click('[data-action="unpack"]');
+await waitPhase('playing', 30000);
 report.steps.push({ step: 'loaded', game: await game() });
 
 // 第 1 块：故意猜错，验证扣分与再问一次
@@ -116,7 +118,9 @@ if (!report.ok) report.errors.push(`终局状态不符: ${JSON.stringify(end)} �
 await page.close();
 const page2 = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 await page2.goto(`${BASE}/item/lamp`, { waitUntil: 'load', timeout: 90000 });
-await page2.waitForFunction('window.__GAME__ && window.__GAME__.phase === "playing"', null, { timeout: 60000 });
+await page2.waitForFunction('window.__GAME__ && window.__GAME__.phase === "sealed"', null, { timeout: 60000 });
+  await page2.click('[data-action="unpack"]');
+  await page2.waitForFunction('window.__GAME__ && window.__GAME__.phase === "playing"', null, { timeout: 60000 });
 await page2.screenshot({ path: '.tmp/play-arrive.png' });
 
 await browser.close();

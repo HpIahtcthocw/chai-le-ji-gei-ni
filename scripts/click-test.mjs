@@ -25,7 +25,9 @@ const navMs = Date.now() - start;
 let readyMs = null;
 if (navigated) {
   try {
-    await page.waitForFunction('window.__GAME__ && window.__GAME__.phase !== "loading"', null, { timeout: 30000 });
+    await page.waitForFunction('window.__GAME__ && window.__GAME__.phase === "sealed"', null, { timeout: 30000 });
+  await page.click('[data-action="unpack"]');
+  await page.waitForFunction('window.__GAME__ && window.__GAME__.phase === "playing"', null, { timeout: 30000 });
     readyMs = Date.now() - start;
   } catch {}
 }

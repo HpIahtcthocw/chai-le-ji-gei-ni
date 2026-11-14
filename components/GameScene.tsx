@@ -7,7 +7,7 @@ import type { ItemMeta } from '@/lib/items';
 // 一块一块到货：拼上的零件留在原位，未到的零件藏在画面外。
 // 猜谜按"第 k 块猜中得 round(100 × (N−k+1)/N)"记分，猜错扣 10 分（最低 10）。
 
-type Phase = 'loading' | 'playing' | 'ask' | 'finished' | 'error';
+type Phase = 'loading' | 'sealed' | 'opening' | 'playing' | 'ask' | 'finished' | 'error';
 
 const SNAP_RATIO = 0.08; // 吸合半径 = 模型最大尺寸 × 8%
 const ARRIVE_MS = 420;
@@ -38,7 +38,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   const burstedRef = useRef(false);
 
   // 引擎侧的可变状态放 ref，避免 React 重渲染打断动画
-  const ctrlRef = useRef<{ answer: (index: number) => void }>({ answer: () => {} });
+  const ctrlRef = useRef<{ answer: (index: number) => void; unpack: () => void }>({ answer: () => {}, unpack: () => {} });
   const markerRef = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
 
@@ -49,15 +49,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     return () => window.removeEventListener('resize', onViewport);
   }, []);
 
-  // 开场一拍：拆包瞬间炸出一圈纸屑，遮住"零件从哪冒出来"的空档
-  useEffect(() => {
-    if (phase === 'loading' || burstedRef.current) return;
-    burstedRef.current = true;
-    setBurst(true);
-    const timer = setTimeout(() => setBurst(false), 1000);
-    return () => clearTimeout(timer);
-  }, [phase]);
-  useEffect(() => {
+ useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
@@ -712,8 +704,22 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
         setTimeout(advance, 900);
       };
 
-      if (parts.length > 0) arrive(0);
-      else throw new Error('没有可拼的零件');
+      if (!parts.length) throw new Error('没有可拼的零件');
+
+      // 开场不让玩家直接干活：先给一只封着的包裹，拆开才开始到货
+      setPhase('sealed');
+      publish('sealed');
+      let unpacked = false;
+      ctrlRef.current.unpack = () => {
+        if (unpacked || disposed) return;
+        unpacked = true;
+        click();
+        setBurst(true);
+        setTimeout(() => setBurst(false), 1000);
+        setPhase('opening');
+        publish('opening');
+        arrive(0);
+      };
 
       return () => {
         host.removeEventListener('pointerdown', onPointerDown);
@@ -758,7 +764,29 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
     <main style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
       <div ref={hostRef} style={{ position: 'absolute', inset: 0, touchAction: 'none' }} />
 
-      {/* 开场炸包：纸屑一圈炸开，作为"包裹被拆开"的第一拍 */}
+      {/* 开场：一只封着的包裹，拆开才开始到货 */}
+      {phase === 'sealed' && (
+        <div className="sealed-layer">
+          <div className="parcel" aria-hidden="true">
+            <span className="parcel-tape" />
+            <span className="parcel-label">给：你</span>
+          </div>
+          <div className="sealed-copy">有人把它拆成零件寄过来了</div>
+          <div className="sealed-sub">
+            {meta.parts.length} 个零件 · 寄件人没有写名字，只留了这一句：{meta.riddle}
+          </div>
+          <button
+            type="button"
+            data-action="unpack"
+            className="sealed-btn"
+            onClick={() => ctrlRef.current.unpack()}
+          >
+            拆 开
+          </button>
+        </div>
+      )}
+
+      {/* 开场炸包：纸屑一圈炸开，接住拆包那一拍 */}
       {burst && <ParcelBurst />}
 
       {/* 暗角：把纯黑视口压成有中心光的舞台，物体不像浮在虚空里 */}
@@ -856,7 +884,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       </header>
 
       {/* 底部提示 */}
-      {phase !== 'finished' && (
+      {(phase === 'playing' || phase === 'ask') && (
         <div
           style={{
             position: 'absolute',

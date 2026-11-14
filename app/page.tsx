@@ -56,6 +56,12 @@ export default async function Home() {
           ))}
         </div>
 
+        <Link href="/send" className="entry-cta rise" style={{ animationDelay: '340ms' }}>
+          <span>我也要寄一件</span>
+          <span className="entry-cta-note">拍一张照片，拆开装盒，生成带走它的链接</span>
+          <span className="arrow">→</span>
+        </Link>
+
         <p className="entry-foot">
           3D 资产由 Lux3D 生成并拆分 · 渲染由 aholo-viewer 驱动
         </p>

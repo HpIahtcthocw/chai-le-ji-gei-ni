@@ -54,7 +54,9 @@ async function dragActivePart() {
 }
 
 await page.goto(`${BASE}/item/lamp`, { waitUntil: 'load', timeout: 90000 });
-await waitPhase('playing', 60000);
+await waitPhase('sealed', 60000);
+await page.tap('[data-action="unpack"]');
+await waitPhase('playing', 30000);
 report.steps.push({ step: 'loaded', game: await game() });
 
 // 第 1 块：拖上去 → 应弹底部抽屉。先验触摸链路，链路不通再退回鼠标并记录证据

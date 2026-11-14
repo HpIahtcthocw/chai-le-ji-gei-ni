@@ -8,6 +8,7 @@ const BASE = process.env.SHOT_BASE || 'http://localhost:3100';
 
 const shots = [
   { url: '/', out: '.tmp/shot-home.png', waitMs: 800 },
+  { url: '/send', out: '.tmp/shot-send.png', waitMs: 700 },
   {
     url: '/item/lamp',
     out: '.tmp/shot-playing.png',
