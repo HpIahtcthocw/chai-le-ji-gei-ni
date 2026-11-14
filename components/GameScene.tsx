@@ -874,13 +874,13 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       >
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: narrow ? 14 : 15, letterSpacing: 2, color: '#e8eaf0', whiteSpace: 'nowrap' }}>
-            拆了寄给你
+            无名件
           </div>
           <div style={{ fontSize: 11, color: '#6d7688', marginTop: 6, letterSpacing: 1, whiteSpace: 'nowrap' }}>
             第 {Math.min(placed + 1, meta.parts.length)} / {meta.parts.length} 块 · 得分 {score}
           </div>
         </div>
-        <Track solved={solved} finished={phase === 'finished'} compact={narrow} />
+        <Track placed={placed} total={meta.parts.length} compact={narrow} />
       </header>
 
       {/* 底部提示 */}
@@ -1024,36 +1024,25 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
   );
 }
 
-function Track({ solved, finished, compact = false }: { solved: boolean; finished: boolean; compact?: boolean }) {
-  const steps = [
-    { label: '图生 3D', done: true },
-    { label: '拆分', done: true },
-    { label: '关节', done: finished },
-    { label: '导出', done: true },
-  ];
+/** 只表示"到货了几块"，不暴露任何制作流程 */
+function Track({ placed, total, compact = false }: { placed: number; total: number; compact?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 6 : 8, flexShrink: 0 }}>
-      {steps.map((step, index) => (
-        <span key={step.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {index > 0 && <span style={{ width: compact ? 8 : 14, height: 1, background: solved ? '#2c3340' : '#242a36' }} />}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: 3,
-                background: step.done ? '#ffc98a' : '#39414f',
-                display: 'inline-block',
-              }}
-            />
-            {!compact && (
-              <span style={{ fontSize: 10, letterSpacing: 1, color: step.done ? '#b9c1d0' : '#5d6575', whiteSpace: 'nowrap' }}>
-                {step.label}
-              </span>
-            )}
-          </span>
-        </span>
-      ))}
+    <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 5 : 7, flexShrink: 0 }}>
+      {Array.from({ length: total }, (_, index) => {
+        const on = index < placed;
+        return (
+          <span
+            key={index}
+            style={{
+              width: compact ? 5 : 6,
+              height: compact ? 5 : 6,
+              borderRadius: 6,
+              background: on ? '#ffc98a' : 'rgba(255,255,255,0.16)',
+              display: 'inline-block',
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

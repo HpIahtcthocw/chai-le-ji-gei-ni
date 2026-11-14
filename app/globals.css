@@ -997,3 +997,103 @@ body {
 .share-qr { width: 126px; height: 126px; padding: 8px; }
 .share-note { font-size: 10.5px; line-height: 1.75; }
 .share-photo { height: 100vh; min-height: 0; }
+/* ---------------- 首页：白纸 + 网点黑物体 ---------------- */
+.home-paper {
+  position: fixed;
+  inset: 0;
+  background: #f6f5f1;
+  color: #111214;
+  overflow: hidden;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.home-stage { position: absolute; inset: 0; }
+.home-stage .hero-canvas { position: absolute; inset: 0; }
+/* 深色渲染反相成"黑物体+白纸"，跟参考一样用印刷语言 */
+.home-stage canvas {
+  filter: invert(1) grayscale(1) contrast(0.92) brightness(1.02);
+}
+.home-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.55) 0.7px, transparent 1.1px);
+  background-size: 3px 3px;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.home-rule {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 0;
+  font-family: "Consolas", "SF Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: #6f6d66;
+  border-color: #111214;
+  pointer-events: none;
+}
+.home-rule-top { top: 0; border-bottom: 1px solid #111214; }
+.home-rule-bottom { bottom: 0; border-top: 1px solid #111214; color: #4a4842; }
+
+.home-copy {
+  position: absolute;
+  left: 28px;
+  bottom: 74px;
+  max-width: 560px;
+  pointer-events: none;
+}
+.home-title {
+  margin: 0;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: clamp(72px, 12vw, 168px);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: 0.02em;
+  color: #101113;
+}
+.home-lede {
+  margin: 18px 0 0;
+  font-size: 14px;
+  line-height: 1.95;
+  color: #3c3d40;
+}
+.home-actions { display: flex; align-items: center; gap: 22px; margin-top: 26px; pointer-events: auto; }
+.home-cta {
+  min-height: 54px;
+  padding: 0 40px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: #f7f6f1;
+  background: #101113;
+  text-decoration: none;
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1), letter-spacing 0.22s ease;
+}
+.home-cta:hover { transform: translateY(-2px); letter-spacing: 0.38em; }
+.home-alt {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: #101113;
+  text-decoration: none;
+  border-bottom: 1px solid #101113;
+  padding-bottom: 3px;
+}
+.home-alt:hover { color: #6b3a2a; border-color: #6b3a2a; }
+
+@media (max-width: 760px) {
+  .home-copy { left: 20px; right: 20px; bottom: 62px; max-width: none; }
+  .home-title { font-size: clamp(56px, 21vw, 96px); }
+  .home-lede { font-size: 13px; }
+  .home-rule { left: 20px; right: 20px; font-size: 9px; letter-spacing: 0.16em; }
+  .home-actions { gap: 16px; margin-top: 20px; }
+  .home-cta { min-height: 48px; padding: 0 28px; }
+}
+/* 首页收口：正文别贴着底线，底部那条留出呼吸 */
+.home-copy { bottom: 96px; }
+.home-rule-bottom { padding: 14px 0 20px; }
+.home-title { letter-spacing: 0.06em; }

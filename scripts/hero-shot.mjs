@@ -26,7 +26,7 @@ page.on('console', (m) => {
   if (m.type() === 'error') errors.push(`console: ${m.text()}`);
 });
 
-await page.goto(`${BASE}/show`, { waitUntil: 'load', timeout: 90000 });
+await page.goto(BASE, { waitUntil: 'load', timeout: 90000 });
 await page.waitForSelector('.hero-loading', { state: 'detached', timeout: 60000 }).catch(() => errors.push('加载态没有结束'));
 
 const t0 = Date.now();
