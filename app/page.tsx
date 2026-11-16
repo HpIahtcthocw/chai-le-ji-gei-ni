@@ -26,8 +26,8 @@ export default async function Home() {
         <div className="home-copy">
           <h1 className="home-title">无名件</h1>
           <p className="home-lede">
-            一件东西拆成七块，一句想说的话藏在最里面那块。<br />
-            收件人拼回去，才知道寄来的是什么，才知道你说了什么。
+            一件东西拆成几块，一句想说的话藏在最里面那块。<br />
+            收件人一块一块拆开，才知道寄来的是什么，才知道你说了什么。
           </p>
           <div className="home-actions">
             <Link href="/send" className="home-cta">

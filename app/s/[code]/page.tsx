@@ -43,8 +43,8 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
           <span>七块</span>
         </h1>
         <p className="share-lede">
-          把码给对方。他打开就是一只纸箱，拆开以后一块一块到货，
-          每块猜一次——拼完才知道自己收下的是什么。
+          把码给对方。他打开就是一件被拆散的东西，一块一块往外拉，
+          最后一块里夹着你写的那句话。
         </p>
 
         <div className="share-box">

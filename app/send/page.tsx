@@ -97,7 +97,7 @@ export default function SendPage() {
         <h1 className="send-title">拍一件<br />你愿意拆开的东西</h1>
         <p className="send-lead">
           它会被拆成零件，装进盒子寄出去。<br />
-          收件人拿到链接，一块一块拼回来，看看还认不认得。
+          收件人拿到链接，一块一块拆出来，看看还认不认得。
         </p>
 
         <button
