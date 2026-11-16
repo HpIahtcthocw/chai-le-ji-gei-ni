@@ -65,23 +65,17 @@ try {
   await step('收件人视角', async () => {
     await page.click('.share-primary');
     await page.waitForURL('**/p/**', { timeout: 60000 });
-    await page.waitForSelector('[data-action="unpack"]', { timeout: 60000 });
+    await page.waitForFunction(() => window.__PROTO_API__ && window.__PROTO__, null, { timeout: 120000 });
+    await page.waitForTimeout(1600);
     await page.screenshot({ path: '.tmp/flow-3-parcel.png' });
     return page.url();
   });
 
   await step('拆包开玩', async () => {
-    // ctrlRef 在模型下载完成后才挂上，太早点击会被吞掉
-    await page.waitForFunction(() => window.__GAME__?.phase === 'sealed', null, { timeout: 60000 });
-    await page.waitForTimeout(1200);
-    await page.click('[data-action="unpack"]');
-    await page.waitForFunction(() => window.__GAME__?.phase !== 'sealed', null, { timeout: 40000 });
-    await page.waitForTimeout(2200);
+    // 收件页现在挂的是 LockProto：模型下载完、__PROTO__ 出来才算真的开门
+    await page.waitForTimeout(800);
     await page.screenshot({ path: '.tmp/flow-4-playing.png' });
-    return page.evaluate(() => {
-      const s = window.__GAME__;
-      return s ? { phase: s.phase ?? null, score: s.score ?? null } : null;
-    });
+    return page.evaluate(() => ({ parts: window.__PROTO__?.parts?.length ?? null }));
   });
 
   report.ok = true;

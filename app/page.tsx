@@ -20,14 +20,14 @@ export default async function Home() {
 
         <div className="home-rule home-rule-top">
           <span>AHOLO 3D AI HACKATHON</span>
-          <span>NO.07 / UNCLAIMED</span>
+          <span>七件 · 未署名</span>
         </div>
 
         <div className="home-copy">
           <h1 className="home-title">无名件</h1>
           <p className="home-lede">
-            拆成七块，一块一块寄出去。<br />
-            收件人拼回去，才认得出它是什么。
+            一件东西拆成七块，一句想说的话藏在最里面那块。<br />
+            收件人拼回去，才知道寄来的是什么，才知道你说了什么。
           </p>
           <div className="home-actions">
             <Link href="/send" className="home-cta">
@@ -42,7 +42,7 @@ export default async function Home() {
         </div>
 
         <div className="home-rule home-rule-bottom">
-          <span>7 PARTS · STL</span>
+          <span>七件 · 可导出 STL</span>
           <span>{demo ? demo.riddle : ''}</span>
         </div>
 
@@ -56,7 +56,7 @@ export default async function Home() {
           <li><i>07</i><span>连着的</span></li>
         </ol>
         <div className="home-hint" aria-hidden="true">
-          <span>往下滚</span>
+          <span>往下滚，看它怎么拆</span>
           <i />
         </div>
       </div>

@@ -1048,18 +1048,20 @@ body {
 }
 .home-title {
   margin: 0;
-  font-family: "Songti SC", "STSong", serif;
-  font-size: clamp(72px, 12vw, 168px);
-  font-weight: 700;
-  line-height: 0.94;
-  letter-spacing: 0.02em;
+  font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(64px, 11vw, 150px);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
   color: #101113;
 }
 .home-lede {
-  margin: 18px 0 0;
-  font-size: 14px;
-  line-height: 1.95;
-  color: #3c3d40;
+  margin: 30px 0 0;
+  max-width: 30em;
+  font-size: 15px;
+  line-height: 1.92;
+  letter-spacing: 0.01em;
+  color: #2f3033;
 }
 .home-actions { display: flex; align-items: center; gap: 22px; margin-top: 26px; pointer-events: auto; }
 .home-cta {
@@ -1095,8 +1097,8 @@ body {
 }
 /* 首页收口：正文别贴着底线，底部那条留出呼吸 */
 .home-copy { bottom: 96px; }
-.home-rule-bottom { padding: 14px 0 20px; }
-.home-title { letter-spacing: 0.06em; }
+.home-rule-bottom { padding: 14px 0 20px 46px; }
+.home-title { letter-spacing: 0.005em; }
 /* ---------------- 滚动驱动的首页 ---------------- */
 .home-scroll { position: relative; }
 .home-track { height: 240vh; }
@@ -1141,9 +1143,9 @@ body {
   align-items: center;
   gap: 8px;
   font-family: "Consolas", monospace;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  color: #7b786f;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: #57554e;
   pointer-events: none;
 }
 .home-hint i {
@@ -1271,6 +1273,7 @@ body {
   color: #8d8a80;
 }
 .home-manifest span { font-size: 13px; letter-spacing: 0.04em; color: #26272a; }
+.home-manifest li::after { content: ""; flex: 1; align-self: center; margin: 0 0 0 10px; border-bottom: 1px dotted rgba(17, 18, 20, 0.34); transform: translateY(-1px); }
 @supports (animation-timeline: scroll()) {
   .home-manifest {
     animation: manifest-cycle linear both;
@@ -1361,7 +1364,7 @@ body {
 .lp-finish button:hover { color: #8a3a24; }
 
 .lp-loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Consolas", monospace; font-size: 12px; color: #6f6d66; letter-spacing: 0.3em; pointer-events: none; }
-.lp-hint { position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-size: 14px; letter-spacing: 0.2em; color: #3c3d40; pointer-events: none; animation: lp-fade 0.3s ease both; }
+.lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: 0.24em; color: #14151a; pointer-events: none; animation: lp-fade 0.3s ease both; }
 
 /* 纸条：手写体，白边加细墨线，像夹在零件里抽出来的 */
 .lp-note { position: absolute; right: 7vw; top: 50%; width: min(360px, calc(100% - 40px)); padding: 26px 28px 22px; background: #fbfaf6; box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgba(17, 18, 20, 0.55), 0 22px 40px -18px rgba(30, 28, 22, 0.35); transform-origin: 20% 0; animation: lp-slip 0.7s cubic-bezier(0.24, 1.28, 0.4, 1) both; }
@@ -1376,7 +1379,8 @@ body {
 /* 货架编号：圆点 + 等宽编号 + 名称 */
 .lp-tags { position: absolute; inset: 0; pointer-events: none; }
 .lp-tag { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 7px; white-space: nowrap; opacity: 0; font-size: 12px; color: #111214; will-change: transform, opacity; }
-.lp-tag i { width: 5px; height: 5px; border-radius: 50%; background: #111214; }
+.lp-tag i { position: relative; width: 5px; height: 5px; border-radius: 50%; background: #111214; }
+.lp-tag i::before { content: ""; position: absolute; left: 2px; bottom: 5px; width: 1px; height: 13px; background: rgba(17, 18, 20, 0.42); }
 .lp-tag-no { font-family: "Consolas", "SF Mono", monospace; font-size: 11px; letter-spacing: 0.12em; color: #6f6d66; }
 .lp-tag-name { letter-spacing: 0.1em; }
 .lp-tag-name em { font-style: normal; margin-left: 8px; padding-bottom: 1px; font-size: 11px; color: #8a3a24; border-bottom: 1px solid currentColor; }

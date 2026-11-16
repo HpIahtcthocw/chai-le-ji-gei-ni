@@ -85,7 +85,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
   const [progress, setProgress] = useState(0);
   const [removed, setRemoved] = useState(0);
   const [total, setTotal] = useState(0);
-  const [hint, setHint] = useState<string | null>('按住零件，往外拉');
+  const [hint, setHint] = useState<string | null>('按住一块，往外拉');
   const [finish, setFinish] = useState<Finish>('ink');
   const [spreadDone, setSpreadDone] = useState(false);
   const [coreLabel, setCoreLabel] = useState('最里面');
@@ -795,6 +795,14 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
           jiggle.part.mesh.position.set(Math.sin(t * 74) * amp, 0, Math.cos(t * 58) * amp * 0.5);
         }
       }
+      // 一进来不知道该干嘛：让唯一能拆的那块轻轻呼吸，手指就知道往哪放
+      if (removedCount === 0 && !drag && !hovered) {
+        const cue = parts.find((part) => !part.removed && part.free.length > 0);
+        if (cue) {
+          cue.rim.uniforms.uColor.value.copy(RIM_HOVER);
+          cue.rimTarget = 0.16 + 0.1 * (0.5 + 0.5 * Math.sin(now / 620));
+        }
+      }
       for (const p of parts) {
         const u = p.rim.uniforms.uIntensity;
         u.value = THREE.MathUtils.damp(u.value, p.rimTarget, 12, dt);
@@ -850,7 +858,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
 
       <div className="lp-rule lp-rule-top">
         <span>
-          {sender} 寄来的{itemName}
+          {sender} 寄来一件东西
         </span>
         <span className="lp-rule-right">
           {total > 0 && (

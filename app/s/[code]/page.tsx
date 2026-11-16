@@ -35,7 +35,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
           <Link href="/" className="share-back">
             ← 门口
           </Link>
-          <span className="share-step">03 · 装盒完成</span>
+          <span className="share-step">装盒完成</span>
         </div>
 
         <h1 className="share-title">
@@ -50,7 +50,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
         <div className="share-box">
           <div className="share-box-side">
             <span className="share-box-stamp">已封箱</span>
-            <span className="share-box-code">NO.07</span>
+            <span className="share-box-code">{meta.name}</span>
           </div>
           <ul className="share-manifest">
             {meta.parts.map((part, index) => (
@@ -63,7 +63,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
           </ul>
           <div className="share-box-foot">
             <span>{meta.parts.length} / {meta.parts.length} 件</span>
-            <span>未署名</span>
+            <span>{parcel.s?.trim() || '未署名'}</span>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
         </div>
 
         <p className="share-note">
-          包裹里现在是预置的台灯资产：照片那一步已经真实上传，生成那一步还没接上。
+          这一版先用预置的台灯把拆包走一遍；你拍的那张照片已经存下来了，就贴在右边。
         </p>
       </div>
 
