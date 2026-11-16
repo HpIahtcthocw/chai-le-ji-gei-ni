@@ -328,3 +328,21 @@ STL 校验（`scripts/inspect-stl.mjs`）：二进制、**271,602 三角面**、
 **格式更正**：OpenAPI schema 明确写"生成任务输入资源仅支持 image，支持 `.jpg / .jpeg / .png / .webp`"。webp 有官方支持，HEIC 不在列 → iPhone 原生照片必须在前端转 JPEG。
 
 已落地：`app/api/upload/route.ts`（服务端转发上传，返回 URL）+ `app/send/page.tsx`（拍照/选图，canvas 压到长边 2048、toBlob JPEG 0.9，HEIC 顺带转掉）。curl 实测走通。
+## §12 原型 + 手势跑通（2026-11-16）
+
+跑 `SHOT_BASE=http://localhost:3100 node scripts/proto-test.mjs`，结果：
+
+- 台灯实测：`parts=7`、`depth=6`、`initialFree=[0,0,0,0,0,1,1]`，满足入选标准（零件 ≥6、深度 ≥4）。
+- 7 块全部 `removed:true`；第 0 轮走的是手势接口（`hand.grab → hand.move → hand.release`）。
+- `errors` 为空；`handSpreadClose=0.78`（双手合拢生效）；`handStatus=把手举到摄像头前`（假摄像头没有手，正常）。
+- `04-message.png` 托盘零件不出画；`05c-shelf.png` 七块全在画面内、编号与名称对得上；`07-hands.png` 右下角有摄像头小窗与三行说明。
+
+本轮修掉的问题：
+
+1. **第 6 块（电源线）抓不住**：测试的抓取点只在 8 方向 × 44px 粗网格里找，细长件整块漏掉 → `grabPoint` 改 24 方向 × 3px 步进螺旋。
+2. **摄像头 `play()` 报 `The play() request was interrupted`**：连着开关时必然发生 → `HandInput` 里 try/catch 后重试一次。
+3. **装回去后相机没回位**（零件缩在右下角、台灯被裁）：`orbitPose` 原本在“摊开”启动那一刻抓，那时相机已按托盘构图推远 → 改成 `openingPose()`，按**装好之后的包围盒**重算取景（3/4 视角 + 0.95 系数），不再依赖时间点。
+4. **清单 06/07 名称反了**：截图确认圆盘是底座、线是电源线，`meta.json` 里 part-5/part-6 的 label 互换。
+5. 底部横线左侧文字被左下角圆标压住 → `padding-left:46px`；「纸条在这里」原来是描边框，改成红色下划线。
+
+`npx tsc --noEmit` 通过。
