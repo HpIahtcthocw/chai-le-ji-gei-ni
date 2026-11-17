@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { Job } from '@/lib/jobs';
 
-const STATE_TEXT: Record<string, string> = { wait: '等着', run: '在做', done: '好了', fail: '卡住了' };
+const STATE_TEXT: Record<string, string> = { wait: '等着', run: '在做', done: '', fail: '卡住了' };
 
 export default function JobView({ id }: { id: string }) {
   const [job, setJob] = useState<Job | null>(null);
