@@ -1,0 +1,50 @@
+{
+  "id": "jmwkpt3mu8o6hb",
+  "image": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg",
+  "sentence": "这盏灯陪我熬过整个毕业季，拆开你就知道它哪块最旧。",
+  "sender": "自测",
+  "name": "无名件",
+  "status": "done",
+  "steps": [
+    {
+      "key": "intake",
+      "label": "收到照片",
+      "state": "done",
+      "note": "照片已入库"
+    },
+    {
+      "key": "understand",
+      "label": "读懂这张照片",
+      "state": "done",
+      "note": "任务 8235025"
+    },
+    {
+      "key": "shape",
+      "label": "长出形状",
+      "state": "done",
+      "note": "形状已生成"
+    },
+    {
+      "key": "split",
+      "label": "拆成零件",
+      "state": "done",
+      "note": "14.8 MB"
+    },
+    {
+      "key": "pack",
+      "label": "装进盒子",
+      "state": "done",
+      "note": "7 件"
+    },
+    {
+      "key": "ready",
+      "label": "等你打开",
+      "state": "done"
+    }
+  ],
+  "createdAt": 1794921316518,
+  "updatedAt": 1794921316518,
+  "itemId": "genmwkpt3mu8o6hb",
+  "code": "eyJhIjoiZ2VubXdrcHQzbXU4bzZoYiIsInMiOiLoh6rmtYsiLCJ0IjoxNzk0OTIxODc3NzE0fQ",
+  "partCount": 7
+}

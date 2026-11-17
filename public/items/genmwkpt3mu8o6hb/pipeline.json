@@ -1,0 +1,12 @@
+{
+  "generate": {
+    "kind": "img-to-3d",
+    "image": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg",
+    "taskId": 8235025
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/lux3dPbrEmbedResult/da0adcd1d47e43b6a890d35edd4c7ffc/textured.glb",
+  "split": {
+    "taskId": 8235303
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6FKVQKTKJFSAABAAAAAAQ8.glb"
+}

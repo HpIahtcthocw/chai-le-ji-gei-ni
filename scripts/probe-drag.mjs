@@ -1,0 +1,20 @@
+import { chromium } from 'playwright-core';
+const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const BASE = 'http://localhost:3100';
+const code = process.argv[2];
+const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto(`${BASE}/p/${encodeURIComponent(code)}`, { waitUntil: 'domcontentloaded', timeout: 120000 });
+await page.waitForTimeout(8000);
+const box = await page.locator('canvas').first().boundingBox();
+// 小距离试探：只拉 60px 后停住，看零件是否跟手、其余是否不动
+await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5);
+await page.mouse.down();
+await page.mouse.move(box.x + box.width * 0.5 + 40, box.y + box.height * 0.5 + 55, { steps: 10 });
+await page.waitForTimeout(600);
+await page.screenshot({ path: '.tmp/gen-probe-hold.png' });
+await page.mouse.up();
+await page.waitForTimeout(1200);
+await page.screenshot({ path: '.tmp/gen-probe-back.png' });
+console.log(await page.evaluate(() => document.querySelector('.lp-progress')?.textContent));
+await browser.close();

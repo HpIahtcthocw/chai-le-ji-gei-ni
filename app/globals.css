@@ -544,7 +544,7 @@ body {
   color: #ffc98a;
 }
 .send-step {
-  color: #ffc98a;
+  color: #71767e;
 }
 .send-title {
   margin: 26px 0 0;
@@ -1410,3 +1410,37 @@ body {
 .hi-close { all: unset; cursor: pointer; position: absolute; right: 6px; top: 2px; color: #f6f5f1; font-size: 16px; }
 .hi-legend { position: fixed; right: 28px; bottom: 218px; z-index: 25; margin: 0; padding: 0; list-style: none; text-align: right; font-size: 12px; line-height: 1.9; letter-spacing: 0.1em; color: #3c3d40; pointer-events: none; }
 @media (max-width: 680px) { .hi-cam, .hi-legend { display: none; } }
+
+/* 寄件页：写那句话 */
+.send-line { display: block; margin-top: 20px; }
+.send-line span { display: block; font-size: 12px; letter-spacing: 0.14em; color: #71767e; }
+.send-line textarea { margin-top: 8px; width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid rgba(17, 18, 20, 0.16); border-radius: 10px; background: rgba(255, 255, 255, 0.72); font: inherit; font-size: 15px; line-height: 1.75; color: #111214; resize: vertical; }
+.send-line textarea::placeholder { color: #8a9099; }
+.send-line textarea:focus { outline: none; border-color: #2f6bf6; }
+.send-line em { display: block; margin-top: 6px; font-style: normal; font-size: 11px; text-align: right; color: #8a9099; }
+
+/* 生成进度页 */
+.job-page { min-height: 100vh; padding: 30px 24px 96px; background: linear-gradient(180deg, #f7f8fa 0%, #eef1f3 58%, #e5e9ec 100%); color: #111214; }
+.job-inner { max-width: 620px; margin: 0 auto; }
+.job-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.1em; color: #71767e; }
+.job-title { margin: 36px 0 12px; font-size: 38px; line-height: 1.18; letter-spacing: -0.02em; font-weight: 500; color: #111214; }
+.job-lead { margin: 0; font-size: 15px; line-height: 1.9; color: #4a4d52; }
+.job-source { margin: 28px 0 0; }
+.job-source img { display: block; max-width: 100%; width: 220px; border-radius: 10px; box-shadow: 0 18px 40px rgba(17, 18, 20, 0.12); }
+.job-source figcaption { margin-top: 12px; font-size: 14px; line-height: 1.8; color: #3c3d40; }
+.job-steps { list-style: none; margin: 32px 0 0; padding: 0; border-top: 1px solid rgba(17, 18, 20, 0.14); }
+.job-step { display: flex; align-items: center; gap: 14px; padding: 15px 2px; border-bottom: 1px solid rgba(17, 18, 20, 0.14); font-size: 14px; }
+.job-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #c9ced4; }
+.job-step.is-run .job-dot { background: #2f6bf6; animation: jobpulse 1.5s ease-in-out infinite; }
+.job-step.is-done .job-dot { background: #111214; }
+.job-step.is-fail .job-dot { background: #8a3a24; }
+.job-name { color: #111214; }
+.job-step.is-wait .job-name { color: #8a9099; }
+.job-note { margin-left: auto; font-size: 12px; letter-spacing: 0.04em; color: #7d828a; }
+.job-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.job-primary { display: inline-block; padding: 13px 28px; border-radius: 999px; background: #111214; color: #fff; text-decoration: none; font-size: 14px; transition: background 0.16s ease; }
+.job-primary:hover { background: #2f6bf6; }
+.job-ghost { display: inline-block; padding: 13px 22px; border-radius: 999px; border: 1px solid rgba(17, 18, 20, 0.2); color: #111214; text-decoration: none; font-size: 14px; }
+.job-error { margin-top: 16px; font-size: 13px; line-height: 1.7; color: #8a3a24; }
+@keyframes jobpulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(47, 107, 246, 0.12); } 50% { box-shadow: 0 0 0 8px rgba(47, 107, 246, 0.04); } }
+@media (max-width: 680px) { .job-title { font-size: 26px; } .job-page { padding: 22px 18px 72px; } }

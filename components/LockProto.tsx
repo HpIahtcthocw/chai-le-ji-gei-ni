@@ -77,6 +77,7 @@ const clamp01 = (k: number) => Math.min(1, Math.max(0, k));
 const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 const easeOutExpo = (k: number) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
 const easeOutBack = (k: number) => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
+const easeOutCubic = (k: number) => 1 - Math.pow(1 - k, 3);
 
 export default function LockProto({ src, sender, itemName, message, labels }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -362,6 +363,8 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
     };
 
     let coreIndex = -1;
+    let maxPartSize = 1;
+    let itemHeight = 1;
     let shelf = { width: 1, height: 1 };
 
     const loader = new GLTFLoader();
@@ -388,6 +391,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
           .makeScale(scale, scale, scale)
           .multiply(new THREE.Matrix4().makeTranslation(-center.x, -all.min.y, -center.z));
         const height = size.y * scale;
+        itemHeight = height;
         // 放射中心取整体 45% 高度，而不是几何中心：底座和灯头才会往相反方向走
         const blastCenter = new THREE.Vector3(0, height * 0.45, 0);
 
@@ -450,6 +454,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
           });
         });
 
+        maxPartSize = parts.reduce((m, p) => Math.max(m, p.size), 0.001);
         applyFinish('ink');
         computeFreedom();
         const initialFree = parts.map((p) => p.free.length);
@@ -516,7 +521,23 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
       raycaster.setFromCamera(pointer, camera);
       raycaster.far = Infinity;
       const hit = raycaster.intersectObjects(parts.filter((p) => !p.removed).map((p) => p.mesh), false)[0];
-      return hit ? parts[hit.object.userData.partIndex as number] : null;
+      if (hit) return parts[hit.object.userData.partIndex as number];
+      // 细杆、线缆这类零件太细，点不准就按屏幕距离取最近的一块（44px 内）
+      const r = renderer.domElement.getBoundingClientRect();
+      const px = x - r.left;
+      const py = y - r.top;
+      let best: Part | null = null;
+      let bestD = 44;
+      for (const part of parts) {
+        if (part.removed) continue;
+        const c = project(part.center.clone().add(part.mesh.position));
+        const d = Math.hypot(c.x - px, c.y - py);
+        if (d < bestD) {
+          bestD = d;
+          best = part;
+        }
+      }
+      return best;
     };
 
     const flashBlockers = (part: Part) => {
@@ -721,24 +742,37 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
     };
 
     const applySpread = (p: number) => {
-      const blast = 0.38;
-      const a = easeInOut(clamp01(p / 0.45));
-      const b = easeInOut(clamp01((p - 0.45) / 0.4));
+      const t = clamp01(p);
+      const k = easeInOut(clamp01((t - 0.1) / 0.62));
+      // 合拢前最后一点：整体轻轻一“咔”，才像是装回去
+      const pulse = t < 0.12 ? Math.sin((t / 0.12) * Math.PI) * 0.03 : 0;
       parts.forEach((part, i) => {
-        const stagger = clamp01(a * 1.25 - (i / Math.max(1, parts.length - 1)) * 0.25);
-        const out = part.radial.clone().multiplyScalar(blast * stagger);
-        const cellOffset = part.cell.clone().sub(part.center);
-        part.mesh.position.copy(out.lerp(cellOffset, b));
-        part.mesh.rotation.y = Math.sin(stagger * Math.PI) * 0.18 * (i % 2 ? 1 : -1) * (1 - b);
+        // 不是所有零件同时炸开：从底座往上依次离开，再落到台面上各自的格位
+        const wave = clamp01(part.center.y / Math.max(0.001, itemHeight)) * 0.24;
+        const raw = clamp01((t * 1.2 - wave) / 0.86);
+        const e = easeInOut(raw);
+        const end = part.cell.clone().sub(part.center);
+        // 控制点抬高再落：像有人把零件端起来、放到桌面上，而不是炸飞
+        const ctrl = new THREE.Vector3(end.x * 0.32, 0.5 + 0.06, end.z * 0.32 + 0.22);
+        const w0 = (1 - e) * (1 - e);
+        const w1 = 2 * (1 - e) * e;
+        const w2 = e * e;
+        part.mesh.position.set(
+          w1 * ctrl.x + w2 * end.x,
+          w1 * ctrl.y + w2 * end.y,
+          w1 * ctrl.z + w2 * end.z,
+        );
+        const flight = Math.sin(e * Math.PI);
+        part.mesh.rotation.y = flight * 0.16 * (i % 2 ? 1 : -1);
+        part.mesh.rotation.x = flight * 0.05 * (i % 2 ? -1 : 1);
+        part.mesh.scale.setScalar(1 + pulse);
       });
       const f = frontPose();
-      const k = easeInOut(clamp01((p - 0.4) / 0.5));
       camera.position.copy(orbitPose.pos).lerp(f.pos, k);
       controls.target.copy(orbitPose.target).lerp(f.target, k);
       camera.lookAt(controls.target);
-      ground.material.opacity = 0.2 * (1 - b * 0.7);
+      ground.material.opacity = 0.2 * (1 - easeInOut(clamp01((t - 0.3) / 0.5)) * 0.7);
     };
-
     ctrlRef.current.spread = () => {
       setPhase('spread');
       parts.forEach((p) => (p.rimTarget = 0));
@@ -784,6 +818,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
       pick: (x: number, y: number) => pickAt(x, y)?.index ?? -1,
       phase: () => (finished ? 'done' : 'playing'),
       spread: () => spread,
+      openSpread: () => ctrlRef.current.spread(),
       setSpread: (v: number) => (spreadTarget = clamp01(v)),
       hand: ctrlRef.current.hand,
       state: () =>

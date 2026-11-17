@@ -35,27 +35,28 @@ export default function SendPage() {
   const [remoteUrl, setRemoteUrl] = useState('');
   const [meta, setMeta] = useState('');
   const [sender, setSender] = useState('');
+  const [line, setLine] = useState('');
   const [packing, setPacking] = useState(false);
 
   const pack = useCallback(async () => {
-    if (!remoteUrl || packing) return;
+    if (!remoteUrl || packing || !line.trim()) return;
     setPacking(true);
-    setMessage('正在装盒…');
+    setMessage('正在排生成任务…');
     try {
-      const res = await fetch('/api/parcel', {
+      const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ assetId: 'lamp', sender, image: remoteUrl }),
+        body: JSON.stringify({ image: remoteUrl, sentence: line, sender }),
       });
-      const json = (await res.json()) as { code?: string; error?: string };
-      if (!res.ok || !json.code) throw new Error(json.error || `装盒失败 ${res.status}`);
-      router.push(`/s/${encodeURIComponent(json.code)}`);
+      const json = (await res.json()) as { id?: string; error?: string };
+      if (!res.ok || !json.id) throw new Error(json.error || `排任务失败 ${res.status}`);
+      router.push(`/job/${json.id}`);
     } catch (err) {
       setPhase('error');
       setPacking(false);
-      setMessage(err instanceof Error ? err.message : '装盒失败');
+      setMessage(err instanceof Error ? err.message : '排任务失败');
     }
-  }, [remoteUrl, packing, sender, router]);
+  }, [remoteUrl, packing, line, sender, router]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -138,7 +139,7 @@ export default function SendPage() {
 
         {remoteUrl && (
           <div className="send-url">
-            <div className="send-url-label">照片已入库，接下来装盒</div>
+            <div className="send-url-label">照片已入库，可以写那句话了</div>
             <a className="send-url-value" href={remoteUrl} target="_blank" rel="noreferrer">{remoteUrl}</a>
           </div>
         )}
@@ -153,6 +154,18 @@ export default function SendPage() {
           />
         </label>
 
+        <label className="send-line">
+          <span>藏一句话</span>
+          <textarea
+            value={line}
+            onChange={(e) => setLine(e.target.value)}
+            placeholder="收件人拆到最后一块才读得到。写一句只有你们俩懂的话。"
+            maxLength={80}
+            rows={3}
+          />
+          <em>{line.length}/80</em>
+        </label>
+
         <div className="send-foot">
           <div className="send-note">
             支持 JPG / PNG / WebP；HEIC 会在这里自动转成 JPEG，长边压到 2048。
@@ -160,10 +173,10 @@ export default function SendPage() {
           <button
             type="button"
             className="send-next"
-            disabled={!remoteUrl || packing}
+            disabled={!remoteUrl || packing || !line.trim()}
             onClick={() => void pack()}
           >
-            {packing ? '装盒中…' : '下一步：拆开装盒'}
+            {packing ? '排任务中…' : '下一步：长出它'}
           </button>
         </div>
       </div>
