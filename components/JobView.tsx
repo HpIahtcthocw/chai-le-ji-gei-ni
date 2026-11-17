@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { Job } from '@/lib/jobs';
 
-const STATE_TEXT: Record<string, string> = { wait: '还没到', run: '正在做', done: '好了', fail: '停在这里' };
+const STATE_TEXT: Record<string, string> = { wait: '等着', run: '在做', done: '好了', fail: '卡住了' };
 
 export default function JobView({ id }: { id: string }) {
   const [job, setJob] = useState<Job | null>(null);
@@ -34,6 +34,7 @@ export default function JobView({ id }: { id: string }) {
     };
   }, [id]);
 
+  const loading = !job && !error;
   const done = job?.status === 'done' && job.code;
   const failed = job?.status === 'failed';
 
@@ -42,12 +43,12 @@ export default function JobView({ id }: { id: string }) {
       <div className="job-inner">
         <div className="job-top">
           <Link href="/send" className="send-back">← 重新寄一件</Link>
-          <div className="send-step">寄件 · 02 生成</div>
+          
         </div>
 
-        <h1 className="job-title">{done ? '盒子合上了' : failed ? '这一段没走通' : '正在长出你的那件东西'}</h1>
+        <h1 className="job-title">{loading ? '正在取这个任务' : done ? '长好了' : failed ? '这次没长成' : '它还在长'}</h1>
         <p className="job-lead">
-          {done ? '零件已经装好了。把链接发给收件人，剩下的事由他动手。' : '这一步是真的在生成：先长形状，再按结构拆成零件。几分钟到十几分钟，别关这一页。'}
+          {loading ? '稍等一下。' : done ? '零件都在里面了。链接发出去，剩下是他动手。' : '照片递进去了。先从照片里长出形状，再拆成零件，几分钟起步，不用守着。'}
         </p>
 
         {job?.image && (

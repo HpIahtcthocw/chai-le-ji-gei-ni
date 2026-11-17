@@ -92,13 +92,13 @@ export default function SendPage() {
       <div className="send-inner">
         <div className="send-top">
           <Link href="/" className="send-back">← 回到门口</Link>
-          <div className="send-step">寄件 · 01 拍照</div>
+          
         </div>
 
         <h1 className="send-title">拍一件<br />你愿意拆开的东西</h1>
         <p className="send-lead">
-          它会被拆成零件，装进盒子寄出去。<br />
-          收件人拿到链接，一块一块拆出来，看看还认不认得。
+          它会被拆开，装进一个盒子寄出去。<br />
+          他拿到链接，一块块拆出来，看还认不认得。
         </p>
 
         <button
@@ -139,7 +139,7 @@ export default function SendPage() {
 
         {remoteUrl && (
           <div className="send-url">
-            <div className="send-url-label">照片已入库，可以写那句话了</div>
+            <div className="send-url-label">照片收到了。写一句话，最后一块才给他看。</div>
             <a className="send-url-value" href={remoteUrl} target="_blank" rel="noreferrer">{remoteUrl}</a>
           </div>
         )}
@@ -155,11 +155,11 @@ export default function SendPage() {
         </label>
 
         <label className="send-line">
-          <span>藏一句话</span>
+          <span>那句话</span>
           <textarea
             value={line}
             onChange={(e) => setLine(e.target.value)}
-            placeholder="收件人拆到最后一块才读得到。写一句只有你们俩懂的话。"
+            placeholder="他拆到最后一块，才会看到这句。"
             maxLength={80}
             rows={3}
           />
@@ -168,7 +168,7 @@ export default function SendPage() {
 
         <div className="send-foot">
           <div className="send-note">
-            支持 JPG / PNG / WebP；HEIC 会在这里自动转成 JPEG，长边压到 2048。
+            手机原图直接传就行，大图会先压一下。
           </div>
           <button
             type="button"
@@ -176,7 +176,7 @@ export default function SendPage() {
             disabled={!remoteUrl || packing || !line.trim()}
             onClick={() => void pack()}
           >
-            {packing ? '排任务中…' : '下一步：长出它'}
+            {packing ? '等一下…' : '让它长出来'}
           </button>
         </div>
       </div>

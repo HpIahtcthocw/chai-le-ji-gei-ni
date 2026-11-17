@@ -72,7 +72,7 @@ const codeOf = (itemId, sender) => {
 };
 
 try {
-  mark('intake', 'done', '照片已入库');
+  mark('intake', 'done', '照片收到了');
   mark('understand', 'run');
 
   const taskId = await lux3d.imgTo3d.create({
@@ -83,13 +83,13 @@ try {
     enablePbr: true,
     aiPredictSize: true,
   });
-  mark('understand', 'done', `任务 ${taskId}`);
+  mark('understand', 'done', '知道它是什么了');
   mark('shape', 'run');
 
   const result = await lux3d.tasks.waitFor(taskId, WAIT);
   const glbUrl = glbUrlOf(result.outputs);
   if (!glbUrl) throw new Error(`生成任务没有 GLB 输出: ${JSON.stringify(result.outputs).slice(0, 200)}`);
-  mark('shape', 'done', '形状已生成');
+  mark('shape', 'done', '形状有了');
   mark('split', 'run');
 
   const splitId = await lux3d.partSplit.create({ glbUrl });
@@ -102,7 +102,7 @@ try {
   mkdirSync(itemDir, { recursive: true });
   const modelPath = resolve(itemDir, 'model.glb');
   const bytes = await download(splitUrl, modelPath);
-  mark('split', 'done', `${(bytes / 1024 / 1024).toFixed(1)} MB`);
+  mark('split', 'done', '拆开了');
 
   // 生成物的材质常常太亮，压一遍，和专业资产的观感对齐
   try {
@@ -131,7 +131,7 @@ try {
   job.itemId = itemId;
   job.code = codeOf(itemId, job.sender);
   job.partCount = partCount;
-  mark('pack', 'done', `${partCount} 件`);
+  mark('pack', 'done', `装好了，${partCount} 件`);
   mark('ready', 'done');
   job.status = 'done';
   save();

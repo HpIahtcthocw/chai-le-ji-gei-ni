@@ -982,7 +982,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
 
       {phase === 'spread' && (
         <div className="lp-rule lp-rule-bottom">
-          <span>{spreadDone ? `${itemName}，共 ${total} 件` : '滚动滚轮可以来回拨'}</span>
+          <span>{spreadDone ? `${itemName}，共 ${total} 件` : '滚轮能来回拨'}</span>
           <button type="button" className="lp-cta lp-cta-line" onClick={() => ctrlRef.current.fold()}>
             {spreadDone ? '装回去' : '摊开'}
           </button>

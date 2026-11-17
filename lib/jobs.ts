@@ -24,12 +24,12 @@ export type Job = {
 const DIR = resolve(process.cwd(), '.data/jobs');
 
 export const STEP_PLAN: JobStep[] = [
-  { key: 'intake', label: '收到照片', state: 'wait' },
-  { key: 'understand', label: '读懂这张照片', state: 'wait' },
-  { key: 'shape', label: '长出形状', state: 'wait' },
+  { key: 'intake', label: '照片到了', state: 'wait' },
+  { key: 'understand', label: '认出了它', state: 'wait' },
+  { key: 'shape', label: '正在长', state: 'wait' },
   { key: 'split', label: '拆成零件', state: 'wait' },
   { key: 'pack', label: '装进盒子', state: 'wait' },
-  { key: 'ready', label: '等你打开', state: 'wait' },
+  { key: 'ready', label: '等人打开', state: 'wait' },
 ];
 
 const ensureDir = () => mkdirSync(DIR, { recursive: true });

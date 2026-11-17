@@ -1,0 +1,13 @@
+import { chromium } from 'playwright-core';
+const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const BASE = 'http://localhost:3100';
+const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto(`${BASE}/send`, { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(1600);
+await page.screenshot({ path: '.tmp/send-copy.png' });
+await page.goto(`${BASE}/job/jmwkpt3mu8o6hb`, { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(6000);
+await page.screenshot({ path: '.tmp/job-page2.png' });
+console.log(await page.evaluate(() => document.querySelector('.job-steps')?.children.length));
+await browser.close();

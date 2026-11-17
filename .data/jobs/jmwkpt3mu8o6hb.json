@@ -8,37 +8,37 @@
   "steps": [
     {
       "key": "intake",
-      "label": "收到照片",
+      "label": "照片到了",
       "state": "done",
-      "note": "照片已入库"
+      "note": "照片收到了"
     },
     {
       "key": "understand",
-      "label": "读懂这张照片",
+      "label": "认出了它",
       "state": "done",
-      "note": "任务 8235025"
+      "note": "知道它是什么了"
     },
     {
       "key": "shape",
-      "label": "长出形状",
+      "label": "正在长",
       "state": "done",
-      "note": "形状已生成"
+      "note": "形状有了"
     },
     {
       "key": "split",
       "label": "拆成零件",
       "state": "done",
-      "note": "14.8 MB"
+      "note": "拆开了"
     },
     {
       "key": "pack",
       "label": "装进盒子",
       "state": "done",
-      "note": "7 件"
+      "note": "装好了，7 件"
     },
     {
       "key": "ready",
-      "label": "等你打开",
+      "label": "等人打开",
       "state": "done"
     }
   ],
