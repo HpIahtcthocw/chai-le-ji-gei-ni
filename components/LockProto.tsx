@@ -25,8 +25,8 @@ const RIM_HOVER = new THREE.Color('#111214');
 const RIM_CORE = new THREE.Color('#e8902f');
 const INK = new THREE.Color('#34322e');
 const RISO = ['#c8402a', '#24408e', '#e0a21a', '#2f6b4f', '#d77a8b', '#5b4ea0', '#1d1d1f'].map((c) => new THREE.Color(c));
-export type Finish = 'ink' | 'raw' | 'riso';
-const FINISH_NAME: Record<Finish, string> = { ink: '墨色', raw: '原色', riso: '套色' };
+export type Finish = 'ink' | 'raw' | 'riso' | 'line';
+const FINISH_NAME: Record<Finish, string> = { ink: '墨色', raw: '原色', riso: '套色', line: '线框' };
 
 /** 放大 2.2% 的菲涅尔壳层：只描边缘，不改零件本身的贴图（做法来自 CTViewer） */
 const RIM_VERT = `
@@ -213,13 +213,54 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
     const clickUp = (n: number) => tone(SCALE[Math.min(n, SCALE.length - 1)], 'triangle', 0.1, 0.11);
     const thud = () => tone(92, 'sine', 0.2, 0.3);
 
-    const originals: { m: THREE.MeshStandardMaterial; color: THREE.Color; rough: number }[] = [];
+    const originals: { m: THREE.MeshStandardMaterial; color: THREE.Color; rough: number; metal: number; map: THREE.Texture | null }[] = [];
+    const edgeOverlays = new Map<number, THREE.LineSegments>();
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x1b2027, transparent: true, opacity: 0.62 });
     const applyFinish = (f: Finish) => {
       originals.forEach((o, i) => {
-        if (f === 'raw') o.m.color.copy(o.color);
-        else if (f === 'ink') o.m.color.copy(o.color).multiply(INK);
-        else o.m.color.copy(o.color).multiply(RISO[i % RISO.length]);
-        o.m.roughness = f === 'raw' ? o.rough : Math.max(o.rough, 0.5);
+        if (f !== 'line' && o.m.map !== o.map) {
+          o.m.map = o.map;
+          o.m.needsUpdate = true;
+        }
+        if (f === 'raw') {
+          o.m.color.copy(o.color);
+          o.m.roughness = o.rough;
+          o.m.metalness = o.metal;
+        } else if (f === 'ink') {
+          o.m.color.copy(o.color).multiply(INK);
+          o.m.roughness = Math.max(o.rough, 0.5);
+          o.m.metalness = o.metal;
+        } else if (f === 'riso') {
+          o.m.color.copy(o.color).multiply(RISO[i % RISO.length]);
+          o.m.roughness = Math.max(o.rough, 0.5);
+          o.m.metalness = o.metal;
+        } else {
+          // 线框态：物件退成白模，只留结构线，像 Aholo 主视觉里那种发光骨架
+          o.m.color.set('#f4f6f8');
+          o.m.roughness = 0.92;
+          o.m.metalness = 0.02;
+          // 贴图里烤着原来的木纹和锈斑，白模要它干净，所以先摘掉
+          o.m.map = null;
+          o.m.needsUpdate = true;
+        }
+      });
+      parts.forEach((p) => {
+        if (f === 'line') {
+          let seg = edgeOverlays.get(p.index);
+          if (!seg) {
+            // 30° 折角才留线：够干净，也不会把 27 万面全画成网
+            const edges = new THREE.EdgesGeometry(p.mesh.geometry, 30);
+            seg = new THREE.LineSegments(edges, edgeMat);
+            seg.raycast = () => {};
+            seg.renderOrder = 1;
+            p.mesh.add(seg);
+            edgeOverlays.set(p.index, seg);
+          }
+          seg.visible = true;
+        } else {
+          const seg = edgeOverlays.get(p.index);
+          if (seg) seg.visible = false;
+        }
       });
     };
     ctrlRef.current.finish = applyFinish;
@@ -357,7 +398,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
           const material = (m.material as THREE.MeshStandardMaterial).clone();
           material.side = THREE.DoubleSide;
           material.envMapIntensity = 1;
-          originals.push({ m: material, color: material.color.clone(), rough: material.roughness });
+          originals.push({ m: material, color: material.color.clone(), rough: material.roughness, metal: material.metalness, map: material.map });
           const mesh = new THREE.Mesh(m.geometry, material);
           mesh.castShadow = true;
           mesh.receiveShadow = true;

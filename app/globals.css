@@ -1402,11 +1402,11 @@ body {
 .hi-cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
 .hi-cursor::before { content: ""; position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #111214; transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease; }
 .hi-cursor[data-state="pinch"]::before { transform: scale(0.55); background: rgba(17, 18, 20, 0.85); }
-.hi-cursor[data-state="grab"]::before { transform: scale(0.55); background: #c8402a; border-color: #c8402a; }
-.hi-cam { position: fixed; right: 28px; bottom: 64px; width: 192px; height: 144px; z-index: 25; background: #111214; box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgba(17, 18, 20, 0.55); overflow: hidden; }
+.hi-cursor[data-state="grab"]::before { transform: scale(0.55); background: #2f6bf6; border-color: #2f6bf6; }
+.hi-cam { position: fixed; right: 28px; bottom: 64px; width: 200px; height: 150px; z-index: 25; background: #111214; border-radius: 10px; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(17, 18, 20, 0.14), 0 18px 40px rgba(17, 18, 20, 0.12); overflow: hidden; }
 .hi-cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1) contrast(1.1); opacity: 0.75; }
 .hi-cam canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.hi-status { position: absolute; left: 0; right: 0; bottom: 0; padding: 6px 8px; font-size: 11px; letter-spacing: 0.12em; color: #f6f5f1; background: rgba(17, 18, 20, 0.7); }
+.hi-status { position: absolute; left: 0; right: 0; bottom: 0; padding: 7px 9px; font-size: 11px; line-height: 1.4; letter-spacing: 0.1em; color: #f6f5f1; background: rgba(17, 18, 20, 0.72); }
 .hi-close { all: unset; cursor: pointer; position: absolute; right: 6px; top: 2px; color: #f6f5f1; font-size: 16px; }
 .hi-legend { position: fixed; right: 28px; bottom: 218px; z-index: 25; margin: 0; padding: 0; list-style: none; text-align: right; font-size: 12px; line-height: 1.9; letter-spacing: 0.1em; color: #3c3d40; pointer-events: none; }
 @media (max-width: 680px) { .hi-cam, .hi-legend { display: none; } }

@@ -29,6 +29,9 @@ const PINCH_OFF = 0.46;
 // 只用画面中间 70% 映射到整块屏幕，手不用伸到摄像头边缘
 const REACH = 0.15;
 
+// MediaPipe 21 点的手部骨架：连着画才看得出这是手，而不是一串散点
+const HAND_LINKS: [number, number][] = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
+
 const dist = (a: NormalizedLandmark, b: NormalizedLandmark) => Math.hypot(a.x - b.x, a.y - b.y, (a.z - b.z) * 0.5);
 
 const isOpenPalm = (lm: NormalizedLandmark[]) =>
@@ -44,6 +47,13 @@ export default function HandInput({ getControls, onClose }: Props) {
   const dotsRef = useRef<HTMLCanvasElement>(null);
   const cursorRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
   const [status, setStatus] = useState('正在打开摄像头');
+  const statusRef = useRef('正在打开摄像头');
+  // 每帧都 setState 会把 React 拖成瓶颈，只有文案变了才提交一次
+  const say = (t: string) => {
+    if (statusRef.current === t) return;
+    statusRef.current = t;
+    setStatus(t);
+  };
 
   useEffect(() => {
     let stopped = false;
@@ -65,7 +75,7 @@ export default function HandInput({ getControls, onClose }: Props) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
       } catch {
-        setStatus('没有拿到摄像头权限');
+        say('没有拿到摄像头权限');
         return;
       }
       const video = videoRef.current!;
@@ -79,7 +89,7 @@ export default function HandInput({ getControls, onClose }: Props) {
         video.srcObject = stream;
         await video.play().catch(() => {});
       }
-      setStatus('正在加载手部识别');
+      say('正在加载手部识别');
       const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
       const fileset = await FilesetResolver.forVisionTasks('/mediapipe/wasm');
       landmarker = await HandLandmarker.createFromOptions(fileset, {
@@ -90,7 +100,7 @@ export default function HandInput({ getControls, onClose }: Props) {
         minTrackingConfidence: 0.5,
       });
       if (stopped) return;
-      setStatus('把手举到摄像头前');
+      say('把手举到摄像头前');
       loop();
     };
 
@@ -170,7 +180,16 @@ export default function HandInput({ getControls, onClose }: Props) {
         twoHandGap = null;
       }
 
-      setStatus(found.length ? '' : '把手举到摄像头前');
+      // 状态跟着手上的动作走，而不是只说「把手举起来」
+      const openCount = ordered.filter((lm) => isOpenPalm(lm)).length;
+      const anyGrab = hands.some((h) => h?.grabbed);
+      const anyPinch = hands.some((h) => h?.pinching);
+      if (!found.length) say('把手举到摄像头前');
+      else if (anyGrab) say('抓住了，往外拉');
+      else if (anyPinch) say('捏住了，别松手');
+      else if (openCount === 2) say('两只手拉开，就摊开了');
+      else if (openCount === 1) say('左右挥手，转着看');
+      else say('捏住食指和拇指');
     };
 
     const drawDots = (all: NormalizedLandmark[][]) => {
@@ -178,11 +197,30 @@ export default function HandInput({ getControls, onClose }: Props) {
       if (!cv) return;
       const ctx = cv.getContext('2d')!;
       ctx.clearRect(0, 0, cv.width, cv.height);
-      ctx.fillStyle = '#c8402a';
+      ctx.strokeStyle = 'rgba(47,107,246,0.5)';
+      ctx.lineWidth = 1;
+      for (const lm of all) {
+        for (const [a, b] of HAND_LINKS) {
+          ctx.beginPath();
+          ctx.moveTo((1 - lm[a].x) * cv.width, lm[a].y * cv.height);
+          ctx.lineTo((1 - lm[b].x) * cv.width, lm[b].y * cv.height);
+          ctx.stroke();
+        }
+      }
+      ctx.fillStyle = '#2f6bf6';
       for (const lm of all) {
         for (const p of lm) {
           ctx.beginPath();
-          ctx.arc((1 - p.x) * cv.width, p.y * cv.height, 2, 0, Math.PI * 2);
+          ctx.arc((1 - p.x) * cv.width, p.y * cv.height, 1.9, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      // 指尖加重：真正决定捏没捏住的是食指和拇指
+      ctx.fillStyle = '#1a3fb8';
+      for (const lm of all) {
+        for (const i of [4, 8]) {
+          ctx.beginPath();
+          ctx.arc((1 - lm[i].x) * cv.width, lm[i].y * cv.height, 2.9, 0, Math.PI * 2);
           ctx.fill();
         }
       }
