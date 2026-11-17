@@ -215,7 +215,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
 
     const originals: { m: THREE.MeshStandardMaterial; color: THREE.Color; rough: number; metal: number; map: THREE.Texture | null }[] = [];
     const edgeOverlays = new Map<number, THREE.LineSegments>();
-    const edgeMat = new THREE.LineBasicMaterial({ color: 0x1b2027, transparent: true, opacity: 0.62 });
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x0f1319, transparent: true, opacity: 0.92 });
     const applyFinish = (f: Finish) => {
       originals.forEach((o, i) => {
         if (f !== 'line' && o.m.map !== o.map) {
@@ -236,7 +236,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
           o.m.metalness = o.metal;
         } else {
           // 线框态：物件退成白模，只留结构线，像 Aholo 主视觉里那种发光骨架
-          o.m.color.set('#f4f6f8');
+          o.m.color.set('#fcfdfe');
           o.m.roughness = 0.92;
           o.m.metalness = 0.02;
           // 贴图里烤着原来的木纹和锈斑，白模要它干净，所以先摘掉

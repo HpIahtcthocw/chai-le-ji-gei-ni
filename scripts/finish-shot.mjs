@@ -71,5 +71,9 @@ if (go) {
 }
 await page.screenshot({ path: '.tmp/line-shelf.png' });
 
+await page.click('.lp-finish button:nth-child(1)');
+await page.waitForTimeout(2500);
+await page.screenshot({ path: '.tmp/ink-restored.png' });
+
 console.log(JSON.stringify({ errors }, null, 1));
 await browser.close();
