@@ -855,6 +855,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
       <div ref={hostRef} className="lp-stage" />
       <div className="lp-dots" aria-hidden="true" />
       <div ref={tagsRef} className="lp-tags" aria-hidden="true" />
+      <div className="lp-mark">Aholo Viewer 渲染 · Lux3D 生成</div>
 
       <div className="lp-rule lp-rule-top">
         <span>

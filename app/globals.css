@@ -1001,7 +1001,7 @@ body {
 .home-paper {
   position: fixed;
   inset: 0;
-  background: #f6f5f1;
+  background: linear-gradient(180deg, #f7f8fa 0%, #eef1f3 58%, #e5e9ec 100%);
   color: #111214;
   overflow: hidden;
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -1065,6 +1065,7 @@ body {
 }
 .home-actions { display: flex; align-items: center; gap: 22px; margin-top: 26px; pointer-events: auto; }
 .home-cta {
+  border-radius: 999px;
   min-height: 54px;
   padding: 0 40px;
   display: inline-flex;
@@ -1106,7 +1107,7 @@ body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #f6f5f1;
+  background: linear-gradient(180deg, #f7f8fa 0%, #eef1f3 58%, #e5e9ec 100%);
   color: #111214;
   z-index: 0;
 }
@@ -1348,23 +1349,23 @@ body {
 }
 
 /* ---- 拆开才看得到：玩法原型（跟首页同一套白纸、墨线、网点） ---- */
-.lp { position: fixed; inset: 0; background: #f6f5f1; color: #111214; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; overflow: hidden; }
+.lp { position: fixed; inset: 0; background: radial-gradient(125% 105% at 50% 26%, #fbfcfd 0%, #eceff2 46%, #dbe1e5 78%, #cdd4da 100%); color: #111214; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; overflow: hidden; }
 .lp-stage { position: absolute; inset: 0; touch-action: none; }
 .lp-stage canvas { display: block; transition: filter 0.5s ease; }
-.lp-dots { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.55) 0.7px, transparent 1.1px); background-size: 3px 3px; opacity: 0.16; mix-blend-mode: multiply; }
+.lp-dots { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.55) 0.7px, transparent 1.1px); background-size: 3px 3px; opacity: 0.07; mix-blend-mode: multiply; }
 
 .lp-rule { position: absolute; left: 28px; right: 28px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 12px 0; font-size: 13px; letter-spacing: 0.12em; color: #3c3d40; }
-.lp-rule-top { top: 0; border-bottom: 1px solid #111214; }
-.lp-rule-bottom { bottom: 0; padding-left: 46px; border-top: 1px solid #111214; animation: lp-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.lp-rule-top { top: 0; border-bottom: 1px solid rgba(17, 18, 20, 0.16); }
+.lp-rule-bottom { bottom: 0; padding-left: 46px; border-top: 1px solid rgba(17, 18, 20, 0.16); animation: lp-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .lp-rule-right { display: flex; align-items: center; gap: 22px; }
 .lp-count { font-family: "Consolas", "SF Mono", monospace; font-size: 12px; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
 .lp-finish { display: flex; gap: 14px; }
-.lp-finish button { all: unset; cursor: pointer; font-size: 12px; letter-spacing: 0.16em; color: #8b8a84; padding-bottom: 2px; border-bottom: 1px solid transparent; }
-.lp-finish button.is-on { color: #111214; border-color: #111214; }
-.lp-finish button:hover { color: #8a3a24; }
+.lp-finish button { all: unset; cursor: pointer; font-size: 12px; letter-spacing: 0.14em; color: #6b7078; padding: 4px 11px; border: 1px solid rgba(17, 18, 20, 0.14); border-radius: 999px; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
+.lp-finish button.is-on { color: #f7f8f9; background: #111214; border-color: #111214; }
+.lp-finish button:hover { color: #2f6bf6; border-color: #2f6bf6; }
 
 .lp-loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Consolas", monospace; font-size: 12px; color: #6f6d66; letter-spacing: 0.3em; pointer-events: none; }
-.lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: 0.24em; color: #14151a; pointer-events: none; animation: lp-fade 0.3s ease both; }
+.lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: 0.24em; color: #232830; pointer-events: none; animation: lp-fade 0.3s ease both; }
 
 /* 纸条：手写体，白边加细墨线，像夹在零件里抽出来的 */
 .lp-note { position: absolute; right: 7vw; top: 50%; width: min(360px, calc(100% - 40px)); padding: 26px 28px 22px; background: #fbfaf6; box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgba(17, 18, 20, 0.55), 0 22px 40px -18px rgba(30, 28, 22, 0.35); transform-origin: 20% 0; animation: lp-slip 0.7s cubic-bezier(0.24, 1.28, 0.4, 1) both; }
@@ -1372,18 +1373,20 @@ body {
 .lp-note-body { margin: 16px 0 12px; font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; font-size: 22px; line-height: 1.85; color: #1b1c1f; }
 .lp-note-sign { font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; font-size: 18px; text-align: right; color: #3c3d40; }
 .lp-note-sign::before { content: "—— "; }
-.lp-cta { margin-top: 22px; min-height: 46px; padding: 0 30px; border: 0; background: #101113; color: #f7f6f1; font-size: 14px; letter-spacing: 0.3em; cursor: pointer; transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1), letter-spacing 0.22s ease; }
-.lp-cta:hover { transform: translateY(-2px); letter-spacing: 0.38em; }
+.lp-cta { margin-top: 22px; min-height: 46px; padding: 0 30px; border: 0; border-radius: 999px; background: #101113; color: #f7f6f1; font-size: 14px; letter-spacing: 0.26em; cursor: pointer; transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1), letter-spacing 0.22s ease; }
+.lp-cta:hover { transform: translateY(-2px); letter-spacing: 0.3em; background: #2f6bf6; }
 .lp-cta-line { margin: 0; min-height: 36px; padding: 0 20px; }
 
 /* 货架编号：圆点 + 等宽编号 + 名称 */
 .lp-tags { position: absolute; inset: 0; pointer-events: none; }
 .lp-tag { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 7px; white-space: nowrap; opacity: 0; font-size: 12px; color: #111214; will-change: transform, opacity; }
 .lp-tag i { position: relative; width: 5px; height: 5px; border-radius: 50%; background: #111214; }
-.lp-tag i::before { content: ""; position: absolute; left: 2px; bottom: 5px; width: 1px; height: 13px; background: rgba(17, 18, 20, 0.42); }
-.lp-tag-no { font-family: "Consolas", "SF Mono", monospace; font-size: 11px; letter-spacing: 0.12em; color: #6f6d66; }
+.lp-tag i::before { content: ""; position: absolute; left: 2px; bottom: 5px; width: 1px; height: 13px; background: linear-gradient(rgba(17, 18, 20, 0.5), rgba(17, 18, 20, 0.12)); }
+.lp-tag-no { font-family: "Consolas", "SF Mono", monospace; font-size: 11px; letter-spacing: 0.12em; color: #71767e; }
+.lp-mark { position: absolute; left: 28px; top: 46px; font-size: 10px; letter-spacing: 0.14em; color: #7d828a; pointer-events: none; }
+
 .lp-tag-name { letter-spacing: 0.1em; }
-.lp-tag-name em { font-style: normal; margin-left: 8px; padding-bottom: 1px; font-size: 11px; color: #8a3a24; border-bottom: 1px solid currentColor; }
+.lp-tag-name em { font-style: normal; margin-left: 8px; padding-bottom: 1px; font-size: 11px; color: #2f6bf6; border-bottom: 1px solid currentColor; }
 
 @keyframes lp-slip { from { opacity: 0; transform: translateY(-38%) rotate(-4deg) scale(0.96); } to { opacity: 1; transform: translateY(-50%) rotate(-1deg); } }
 @keyframes lp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -1394,8 +1397,8 @@ body {
 }
 
 /* ---- 手势输入 ---- */
-.lp-hands { all: unset; cursor: pointer; font-size: 12px; letter-spacing: 0.16em; padding: 3px 10px; border: 1px solid #111214; }
-.lp-hands:hover, .lp-hands.is-on { background: #111214; color: #f6f5f1; }
+.lp-hands { all: unset; cursor: pointer; font-size: 12px; letter-spacing: 0.14em; padding: 5px 14px; border: 1px solid rgba(17, 18, 20, 0.18); border-radius: 999px; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+.lp-hands:hover, .lp-hands.is-on { background: #2f6bf6; border-color: #2f6bf6; color: #fff; }
 .hi-cursor { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
 .hi-cursor::before { content: ""; position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #111214; transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease; }
 .hi-cursor[data-state="pinch"]::before { transform: scale(0.55); background: rgba(17, 18, 20, 0.85); }
