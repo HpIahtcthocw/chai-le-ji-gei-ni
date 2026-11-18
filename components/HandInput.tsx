@@ -22,7 +22,11 @@ type HandState = {
   x: number;
   y: number;
   palmX: number | null;
+  seen: number;
 };
+
+// 识别偶尔掉一帧，不能让"少一帧"等于"松手"：连丢 260ms 才算手真的离开
+const LOST_GRACE = 260;
 
 const PINCH_ON = 0.32;
 const PINCH_OFF = 0.46;
@@ -46,6 +50,7 @@ export default function HandInput({ getControls, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const dotsRef = useRef<HTMLCanvasElement>(null);
   const cursorRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
+  const meterRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState('正在打开摄像头');
   const statusRef = useRef('正在打开摄像头');
   // 每帧都 setState 会把 React 拖成瓶颈，只有文案变了才提交一次
@@ -92,29 +97,43 @@ export default function HandInput({ getControls, onClose }: Props) {
       say('正在加载手部识别');
       const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
       const fileset = await FilesetResolver.forVisionTasks('/mediapipe/wasm');
-      landmarker = await HandLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: '/mediapipe/hand_landmarker.task', delegate: 'GPU' },
-        runningMode: 'VIDEO',
+      const options = (delegate: 'GPU' | 'CPU') => ({
+        baseOptions: { modelAssetPath: '/mediapipe/hand_landmarker.task', delegate },
+        runningMode: 'VIDEO' as const,
         numHands: 2,
         minHandDetectionConfidence: 0.6,
         minTrackingConfidence: 0.5,
       });
+      try {
+        landmarker = await HandLandmarker.createFromOptions(fileset, options('GPU'));
+      } catch {
+        landmarker = await HandLandmarker.createFromOptions(fileset, options('CPU'));
+      }
       if (stopped) return;
       say('把手举到摄像头前');
       loop();
     };
 
     let lastStamp = -1;
+    let frozen = false;
+    (window as any).__HAND_FREEZE__ = (v: boolean) => {
+      frozen = v;
+    };
     const loop = () => {
       if (stopped || !landmarker) return;
       raf = requestAnimationFrame(loop);
+      if (frozen) return;
       const video = videoRef.current!;
       if (video.readyState < 2) return;
       const now = performance.now();
       if (now === lastStamp) return;
       lastStamp = now;
       const res = landmarker.detectForVideo(video, now);
-      const found = res.landmarks ?? [];
+      process(res.landmarks ?? []);
+    };
+
+    const process = (found: NormalizedLandmark[][]) => {
+      const now = performance.now();
       const controls = getControls();
       drawDots(found);
 
@@ -129,16 +148,23 @@ export default function HandInput({ getControls, onClose }: Props) {
         const el = cursorRefs[i].current;
         if (!lm) {
           const h = hands[i];
-          if (h?.grabbed) controls?.release();
-          hands[i] = undefined as unknown as HandState;
-          if (el) el.style.opacity = '0';
+          if (h && now - h.seen > LOST_GRACE) {
+            if (h.grabbed) controls?.release();
+            hands[i] = undefined as unknown as HandState;
+            if (el) el.style.opacity = '0';
+          }
           continue;
         }
         const size = dist(lm[0], lm[9]) || 1e-3;
         const pinchRatio = dist(lm[4], lm[8]) / size;
         const tip = toScreen({ x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2, z: 0, visibility: 1 });
+        const el2 = meterRef.current;
+        if (el2 && i === 0) {
+          el2.textContent = `掌宽 ${Math.round(size * 100)} · 捏合 ${pinchRatio.toFixed(2)} · 阈值 ${PINCH_ON}`;
+        }
         const prev = hands[i];
-        const h: HandState = prev ?? { pinching: false, grabbed: false, x: tip.x, y: tip.y, palmX: null };
+        const h: HandState = prev ?? { pinching: false, grabbed: false, x: tip.x, y: tip.y, palmX: null, seen: now };
+        h.seen = now;
         // 速度越快平滑越少：慢移稳、快移跟手
         const speed = Math.hypot(tip.x - h.x, tip.y - h.y);
         const a = Math.min(0.85, 0.25 + speed / 120);
@@ -191,6 +217,7 @@ export default function HandInput({ getControls, onClose }: Props) {
       else if (openCount === 1) say('左右挥手，转着看');
       else say('捏住食指和拇指');
     };
+    (window as any).__HAND_FEED__ = process;
 
     const drawDots = (all: NormalizedLandmark[][]) => {
       const cv = dotsRef.current;
@@ -245,14 +272,15 @@ export default function HandInput({ getControls, onClose }: Props) {
         <video ref={videoRef} muted playsInline />
         <canvas ref={dotsRef} width={192} height={144} />
         {status && <div className="hi-status">{status}</div>}
+        <div ref={meterRef} className="hi-meter" />
         <button type="button" className="hi-close" onClick={onClose} aria-label="关闭手势">
           ×
         </button>
       </div>
       <ul className="hi-legend">
-        <li>捏住零件，往外拉</li>
-        <li>张开手掌左右挥，转着看</li>
-        <li>摊开以后，两只手拉开或合拢</li>
+        <li>捏住一件，往外拉</li>
+        <li>张手左右挥，转着看</li>
+        <li>双手拉开，就摊开</li>
       </ul>
     </>
   );

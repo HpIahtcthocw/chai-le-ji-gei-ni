@@ -1722,3 +1722,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   color: #3c3a33;
 }
 .lp-note-answer b { font-weight: 600; border-bottom: 1px solid rgba(60, 52, 38, 0.4); }
+
+.hi-legend { width: 190px; right: 36px; line-height: 1.7; }
+.hi-legend li { white-space: normal; }
+.hi-meter { position: absolute; left: 0; right: 0; bottom: 30px; padding: 0 9px; font-size: 10px; letter-spacing: 0.06em; color: #d8d9dc; opacity: 0.85; }
