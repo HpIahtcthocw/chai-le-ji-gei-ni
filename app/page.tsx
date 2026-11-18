@@ -39,8 +39,10 @@ export default async function Home() {
 
   // 门口还放着别的包裹：都能拆，说明这套流程不是只对一件东西成立
   const others = items.filter((it) => it.id !== demo.id && it.parts?.some((p) => p.label));
-  // 线上版跑不了分钟级生成（要独立进程 + 本地落盘），寄件入口只在本机出现
-  const canSend = process.env.NEXT_PUBLIC_DEMO !== '1';
+  // 线上版走无状态的现生成（提交 + 轮询）；本机版直接进本机生成流程
+  const online = process.env.NEXT_PUBLIC_ONLINE_GEN === '1';
+  const canSend = online || process.env.NEXT_PUBLIC_DEMO !== '1';
+  const sendHref = online ? '/live' : '/send';
 
   return (
     <>
@@ -55,10 +57,10 @@ export default async function Home() {
       <div className="home-jump">
         {canSend ? (
           <div className="home-jump-row">
-            <Link href="/send" className="home-jump-link">
+            <Link href={sendHref} className="home-jump-link">
               寄一件你自己的
             </Link>
-            <span className="home-jump-note">拍一张照，它会被拆成零件寄出去。</span>
+            <span className="home-jump-note">拍一张照，现场长出一件（要几分钟）</span>
           </div>
         ) : (
           <div className="home-jump-row">

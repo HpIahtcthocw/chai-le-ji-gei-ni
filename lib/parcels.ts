@@ -13,6 +13,8 @@ export type Parcel = {
   t: number;
   /** 夹在核心零件里那句话；没有就回落到 meta.story */
   m?: string;
+  /** 线上现生成件的模型地址（官方 CDN），有它就不用本地资产 a */
+  u?: string;
 };
 
 const ID_RE = /^[a-z0-9_-]+$/i;
