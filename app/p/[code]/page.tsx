@@ -21,6 +21,15 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
   // 纸条优先用包裹码里带的那句话（回信时会换人）；没有才回落到 meta 的故事
   const message = (parcel.m || meta.story).replace(/^寄件人留言：/, '');
 
+  // 零件自带的三个候选：拆出来先猜它是哪件东西上的
+  const quiz: Record<number, { options: string[]; answerIndex: number; label?: string }> = {};
+  for (const part of meta.parts) {
+    if (!part.options?.length) continue;
+    const index = Number(part.partId.replace(/^part-/, ''));
+    if (!Number.isFinite(index)) continue;
+    quiz[index] = { options: part.options, answerIndex: part.answerIndex, label: part.label };
+  }
+
   return (
     <LockProto
       src={`/items/${parcel.a}/model.glb`}
@@ -30,6 +39,7 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
       labels={labels}
       photo={parcel.i || meta.sourceImage}
       replyCode={code}
+      quiz={quiz}
     />
   );
 }
