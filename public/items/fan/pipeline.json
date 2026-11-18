@@ -1,0 +1,14 @@
+{
+  "generate": {
+    "kind": "text-to-3d",
+    "prompt": "八十年代的台式电风扇：圆形塑料护网罩、三片扇叶、金属中轴立柱、底部圆形底座带四个按键，网罩与扇叶明显分离，结构清晰、零件彼此分明，摄影棚白底，正面四分之三视角",
+    "taskId": 8310695
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/genesis3d/inference/20261118/0e199d2a56d248a1b24461760fba5350/results/tex_mesh/attempt-1/tex_mesh.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 8311013
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6Y2FQKTKYSYAABAAAAABQ8.glb",
+  "splitStatus": 3
+}

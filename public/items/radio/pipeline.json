@@ -1,0 +1,14 @@
+{
+  "generate": {
+    "kind": "text-to-3d",
+    "prompt": "八十年代的中波收音机：长方形深色塑料机身，正面左侧一块米色网格喇叭布，右侧三个旋钮，顶部一根可拉长的细金属天线，机身右侧有提手，四角有螺丝，结构清晰、零件彼此分明，摄影棚白底，正面四分之三视角",
+    "taskId": 8310067
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/genesis3d/inference/20261118/9738003012264de79d7eaf46cf5f5e4a/results/tex_mesh/attempt-1/tex_mesh.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 8310308
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6YYWYKTKULKAABAAAAAAQ8.glb",
+  "splitStatus": 3
+}

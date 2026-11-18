@@ -17,6 +17,8 @@ export type ItemMeta = {
   parts: ItemPart[];
   /** 生成这件东西的那张原图，装盒页和纸条旁都用它 */
   sourceImage?: string;
+  /** 首页展品：门口那件先被拆的东西 */
+  featured?: boolean;
 };
 
 const ITEMS_DIR = path.join(process.cwd(), 'public', 'items');

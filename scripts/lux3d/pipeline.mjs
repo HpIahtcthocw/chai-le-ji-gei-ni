@@ -127,6 +127,20 @@ console.log(`[2/3] model.glb 已落盘 ${(splitSize / 1024 / 1024).toFixed(2)} M
 // 默认用「生成产物」而非拆分产物：玩家下载的是拼好的整件物体，拆分 GLB 只是游戏用的中间态。
 // 产物顺序固定为 zip/glb/usdz/objZip/fbxZip/stl/3mf，未请求的返回 NOT_REQUESTED，所以按后缀匹配。
 const exportFrom = getArg('export-from') || 'source';
+// 只做游戏用的示例件时，STL 导出那一次任务是纯浪费：给个开关跳过它
+const skipExport = args.includes('--skip-export');
+
+if (skipExport) {
+  console.log('[3/3] 跳过 STL 导出（--skip-export）');
+  console.log(
+    JSON.stringify(
+      { generate: state.generate, split: state.split, splitUrl: state.splitUrl },
+      null,
+      2,
+    ),
+  );
+  process.exit(0);
+}
 
 if (state.exportFailed) {
   // 上次失败过，清掉任务号重试，避免断点续跑时死循环

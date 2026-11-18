@@ -1,0 +1,17 @@
+{
+  "id": "radio",
+  "name": "收音机",
+  "riddle": "它只有中波，夜深了才清楚。",
+  "story": "寄件人留言：这台是我爸年轻时自己装的，晚上只有中波。我听着它睡着过很多次，现在它只响电流声了。",
+  "partCount": 7,
+  "note": "Lux3D 文生体 + 拆分产物。零件名按包围盒位置定：机身、正面板、后盖、骨架，右侧三枚旋钮。",
+  "parts": [
+    { "partId": "part-0", "label": "机身", "options": [], "answerIndex": 0 },
+    { "partId": "part-1", "label": "面板", "options": [], "answerIndex": 0 },
+    { "partId": "part-3", "label": "骨架", "options": [], "answerIndex": 0 },
+    { "partId": "part-5", "label": "后盖", "options": [], "answerIndex": 0 },
+    { "partId": "part-2", "label": "旋钮", "options": [], "answerIndex": 0 },
+    { "partId": "part-4", "label": "旋钮", "options": [], "answerIndex": 0 },
+    { "partId": "part-6", "label": "旋钮", "options": [], "answerIndex": 0 }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "fan",
+  "name": "台扇",
+  "riddle": "每年六月，它比电费单先到。",
+  "story": "寄件人留言：每年六月它就开始响，一档最吵，三档最凉。我妈说听见这声音，夏天才算来了。",
+  "partCount": 5,
+  "note": "Lux3D 文生体 + 拆分产物。零件名按包围盒位置定：网罩、扇叶、机座、立柱、底座。",
+  "parts": [
+    { "partId": "part-2", "label": "网罩", "options": [], "answerIndex": 0 },
+    { "partId": "part-1", "label": "扇叶", "options": [], "answerIndex": 0 },
+    { "partId": "part-3", "label": "机座", "options": [], "answerIndex": 0 },
+    { "partId": "part-0", "label": "立柱", "options": [], "answerIndex": 0 },
+    { "partId": "part-4", "label": "底座", "options": [], "answerIndex": 0 }
+  ]
+}

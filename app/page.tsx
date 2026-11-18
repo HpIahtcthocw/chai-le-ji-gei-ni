@@ -14,8 +14,11 @@ export default async function Home() {
     (item): item is NonNullable<typeof item> => Boolean(item),
   );
 
-  // 优先挑一件零件带名字的，拆开时标签才是“灯罩/底座”，不是一个字“零件”
-  const demo = items.find((it) => it.parts?.some((p) => p.label)) ?? items[0];
+  // 展品优先取 featured；没有就挑一件零件带名字的（拆开时标签才是“灯罩/底座”）
+  const demo =
+    items.find((it) => it.featured) ??
+    items.find((it) => it.parts?.some((p) => p.label)) ??
+    items[0];
 
   const labels: Record<number, string> = {};
   if (demo) {
@@ -34,6 +37,9 @@ export default async function Home() {
     );
   }
 
+  // 门口还放着别的包裹：都能拆，说明这套流程不是只对一件东西成立
+  const others = items.filter((it) => it.id !== demo.id && it.parts?.some((p) => p.label));
+
   return (
     <>
       <LockProto
@@ -51,6 +57,16 @@ export default async function Home() {
           </Link>
           <span className="home-jump-note">拍一张照，它会被拆成零件寄出去。</span>
         </div>
+        {others.length > 0 && (
+          <div className="home-shelf">
+            <span>门口还放着：</span>
+            {others.map((it) => (
+              <Link key={it.id} href={`/p/${it.id}`} className="home-shelf-item">
+                {it.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
