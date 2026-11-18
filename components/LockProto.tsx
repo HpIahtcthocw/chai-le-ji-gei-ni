@@ -95,6 +95,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [finish, setFinish] = useState<Finish>('ink');
   const [spreadDone, setSpreadDone] = useState(false);
   const [coreLabel, setCoreLabel] = useState('最里面');
+  // 拆完给一句账：拆了几块、硬拽几次、用了多久，收件人自己会拿去对比
+  const [elapsed, setElapsed] = useState<number | null>(null);
+  const startRef = useRef(0);
   const ctrlRef = useRef<{
     spread: () => void;
     fold: () => void;
@@ -494,6 +497,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
 
         setCoreLabel(labels[coreIndex] ?? `第 ${coreIndex + 1} 块`);
         setTotal(parts.length);
+        startRef.current = Date.now();
         setPhase('playing');
       },
       (e) => {
@@ -685,6 +689,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       setOldest(part.label ?? '最后拆下来的那件');
       if (part.index === coreIndex) {
         finished = true;
+        setElapsed(Math.max(1, Math.round((Date.now() - startRef.current) / 1000)));
         part.rim.uniforms.uColor.value.copy(RIM_CORE);
         part.rimTarget = 1;
         setHint(null);
@@ -1103,6 +1108,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
               {sender}
               {photo ? ' · 照片和这句话一起封进去的' : ''}
             </div>
+            {elapsed !== null && (
+              <p className="lp-note-stat">
+                拆了 {total} 块 · 硬拽 {damage} 次 · 用了 {elapsed} 秒
+              </p>
+            )}
             <div className="lp-note-actions">
               <button type="button" className="lp-cta" onClick={() => ctrlRef.current.spread()}>
                 全部摊开
@@ -1120,9 +1130,22 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       {phase === 'spread' && (
         <div className="lp-rule lp-rule-bottom">
           <span>{spreadDone ? `${itemName}，共 ${total} 件` : '滚轮能来回拨'}</span>
-          <button type="button" className="lp-cta lp-cta-line" onClick={() => ctrlRef.current.fold()}>
-            {spreadDone ? '装回去' : '摊开'}
-          </button>
+          <span className="lp-spread-actions">
+            <button type="button" className="lp-cta lp-cta-line" onClick={() => setPhase('note')}>
+              再看纸条
+            </button>
+            {replyCode && (
+              <a className="lp-cta lp-cta-line" href={`/r/${encodeURIComponent(replyCode)}`}>
+                回他一句
+              </a>
+            )}
+            <button type="button" className="lp-cta lp-cta-line" onClick={() => ctrlRef.current.fold()}>
+              {spreadDone ? '装回去' : '摊开'}
+            </button>
+            <a className="lp-door" href="/">
+              门口
+            </a>
+          </span>
         </div>
       )}
     </main>
