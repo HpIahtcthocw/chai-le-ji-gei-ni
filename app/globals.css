@@ -1492,24 +1492,22 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 /* ---------------- 首页 = 一个可拆的包裹 ---------------- */
 .home-jump {
   position: fixed;
-  right: 26px;
-  bottom: 22px;
+  left: 28px;
+  right: auto;
+  bottom: 62px;
   z-index: 8;
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
   pointer-events: none;
 }
-.home-jump-mark {
-  font-family: "Source Han Serif SC", "Songti SC", "SimSun", serif;
-  font-size: 19px;
-  letter-spacing: 0.26em;
-  color: rgba(24, 26, 31, 0.5);
-}
+.home-jump-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .home-jump-link {
   pointer-events: auto;
-  font-size: 12.5px;
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: 0.1em;
   color: #14161b;
   text-decoration: none;
@@ -1520,6 +1518,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   align-items: center;
 }
 .home-jump-link:hover { color: #8a2f22; border-color: #8a2f22; }
+.home-jump-note { font-size: 12.5px; line-height: 1.6; letter-spacing: 0.04em; color: #4c505a; max-width: 300px; }
 
 .home-empty {
   min-height: 100vh;

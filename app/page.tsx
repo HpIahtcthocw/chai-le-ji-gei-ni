@@ -45,10 +45,12 @@ export default async function Home() {
       />
 
       <div className="home-jump">
-        <span className="home-jump-mark">无名件</span>
-        <Link href="/send" className="home-jump-link">
-          寄一件你自己的
-        </Link>
+        <div className="home-jump-row">
+          <Link href="/send" className="home-jump-link">
+            寄一件你自己的
+          </Link>
+          <span className="home-jump-note">拍一张照，它会被拆成零件寄出去。</span>
+        </div>
       </div>
     </>
   );
