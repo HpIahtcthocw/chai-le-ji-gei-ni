@@ -97,6 +97,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [coreLabel, setCoreLabel] = useState('最里面');
   // 拆完给一句账：拆了几块、硬拽几次、用了多久，收件人自己会拿去对比
   const [elapsed, setElapsed] = useState<number | null>(null);
+  // 上一次拆同一件的成绩，存在本机：拆得快一点、少拽一次，都值得被记着
+  const [record, setRecord] = useState<string | null>(null);
+  const damageRef = useRef(0);
   const startRef = useRef(0);
   const ctrlRef = useRef<{
     spread: () => void;
@@ -485,6 +488,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           return true;
         };
         (window as any).__PROTO_HURT__ = (n = 2) => {
+          damageRef.current = n;
           setDamage(n);
           return n;
         };
@@ -632,7 +636,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
               ? `先拆${names[0]}`
               : `先拆${names.slice(0, 2).join('、')}`;
       setHint(text);
-      setDamage((d) => d + 1);
+      damageRef.current += 1;
+      setDamage(damageRef.current);
       setTimeout(() => {
         blockers.forEach((b) => (b.rimTarget = 0));
         setHint(null);
@@ -689,7 +694,33 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       setOldest(part.label ?? '最后拆下来的那件');
       if (part.index === coreIndex) {
         finished = true;
-        setElapsed(Math.max(1, Math.round((Date.now() - startRef.current) / 1000)));
+        const sec = Math.max(1, Math.round((Date.now() - startRef.current) / 1000));
+        setElapsed(sec);
+        const hurtNow = damageRef.current;
+        const key = `wuming:best:${src}`;
+        let line = '';
+        try {
+          const raw = window.localStorage.getItem(key);
+          const prev = raw ? (JSON.parse(raw) as { sec?: number; damage?: number }) : null;
+          if (prev && typeof prev.sec === 'number') {
+            if (sec < prev.sec) line = `比上次快 ${prev.sec - sec} 秒`;
+            else if (typeof prev.damage === 'number' && hurtNow < prev.damage) {
+              line = `比上次少硬拽 ${prev.damage - hurtNow} 次`;
+            } else line = `上次 ${prev.sec} 秒`;
+            if (hurtNow === 0 && prev.damage === 0) line += ' · 两次纸边都没缺';
+          } else {
+            line = '第一次拆完';
+          }
+          const better =
+            !prev ||
+            typeof prev.sec !== 'number' ||
+            sec <= prev.sec ||
+            (typeof prev.damage === 'number' && hurtNow < prev.damage);
+          if (better) window.localStorage.setItem(key, JSON.stringify({ sec, damage: hurtNow }));
+        } catch {
+          line = '';
+        }
+        setRecord(line || null);
         part.rim.uniforms.uColor.value.copy(RIM_CORE);
         part.rimTarget = 1;
         setHint(null);
@@ -759,7 +790,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           thud();
           jiggle = { part: drag.part, t0: performance.now() };
           setHint('顺着箭头的方向拔');
-          setDamage((d) => d + 1);
+          damageRef.current += 1;
+      setDamage(damageRef.current);
           setTimeout(() => setHint(null), 900);
           drag = null;
           return;
@@ -1111,6 +1143,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             {elapsed !== null && (
               <p className="lp-note-stat">
                 拆了 {total} 块 · 硬拽 {damage} 次 · 用了 {elapsed} 秒
+                {record ? ` · ${record}` : ''}
               </p>
             )}
             <div className="lp-note-actions">
