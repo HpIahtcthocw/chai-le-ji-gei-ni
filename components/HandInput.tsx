@@ -160,7 +160,7 @@ export default function HandInput({ getControls, onClose }: Props) {
         const tip = toScreen({ x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2, z: 0, visibility: 1 });
         const el2 = meterRef.current;
         if (el2 && i === 0) {
-          el2.textContent = `掌宽 ${Math.round(size * 100)} · 捏合 ${pinchRatio.toFixed(2)} · 阈值 ${PINCH_ON}`;
+          el2.textContent = `捏合 ${pinchRatio.toFixed(2)} · 触发 ${PINCH_ON}`;
         }
         const prev = hands[i];
         const h: HandState = prev ?? { pinching: false, grabbed: false, x: tip.x, y: tip.y, palmX: null, seen: now };
