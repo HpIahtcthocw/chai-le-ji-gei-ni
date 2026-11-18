@@ -1010,11 +1010,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         u.value = THREE.MathUtils.damp(u.value, p.rimTarget, 12, dt);
       }
       if (spreadArmed) {
-        spread = THREE.MathUtils.damp(spread, spreadTarget, 3.2, dt);
+        spread = THREE.MathUtils.damp(spread, spreadTarget, 6.4, dt);
         applySpread(spread);
-        const show = clamp01((spread - 0.75) / 0.18);
+        const show = clamp01((spread - 0.62) / 0.16);
         parts.forEach((p, i) => {
-          const el = tagEls[i];
+          const el = tagsHost.children[i] as HTMLElement | undefined;
           if (!el) return;
           const anchor = p.center.clone().add(p.mesh.position);
           anchor.y -= p.boxSize.y / 2 + 0.035;
@@ -1065,7 +1065,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   }, [phase]);
 
   return (
-    <main className="lp" data-note={phase === 'note' ? '1' : '0'}>
+    <main className="lp" data-phase={phase} data-note={phase === 'note' ? '1' : '0'}>
       <div ref={hostRef} className="lp-stage" />
       <div ref={dirsRef} className="lp-dirs" aria-hidden="true" />
       <div className="lp-dots" aria-hidden="true" />
