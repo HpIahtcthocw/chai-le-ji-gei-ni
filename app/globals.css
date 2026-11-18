@@ -1691,3 +1691,34 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 }
 .lp-note-body-wrap { position: relative; z-index: 1; }
 .lp[data-note="1"] .lp-note { top: 84px; max-height: calc(100% - 106px); }
+
+/* 能脱开的方向：像拆解图纸那样画一支箭，看得见才谈得上判断 */
+.lp-dirs { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.lp-dir {
+  position: absolute;
+  height: 3px;
+  background: #fbfaf7;
+  box-shadow: 0 0 0 1px rgba(15, 16, 18, 0.55);
+  opacity: 0;
+  transform-origin: 0 1.5px;
+  transition: opacity 0.16s ease;
+  will-change: transform, width;
+}
+.lp-dir::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  background: inherit;
+  box-shadow: inherit;
+  transform: rotate(45deg);
+}
+.lp-note-answer {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3c3a33;
+}
+.lp-note-answer b { font-weight: 600; border-bottom: 1px solid rgba(60, 52, 38, 0.4); }

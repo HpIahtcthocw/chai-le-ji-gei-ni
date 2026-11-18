@@ -61,6 +61,7 @@ type Part = {
   radial: THREE.Vector3;
   cell: THREE.Vector3;
   label?: string;
+  bestDir?: THREE.Vector3;
 };
 
 type Phase = 'loading' | 'playing' | 'note' | 'spread';
@@ -104,6 +105,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [handsOn, setHandsOn] = useState(false);
   /** 硬拉被压住的件、朝错方向拽，都会在件上留下撬痕；纸条能否读全看这个 */
   const [damage, setDamage] = useState(0);
+  const [oldest, setOldest] = useState<string | null>(null);
+  const dirsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -506,9 +509,10 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         const el = document.createElement('div');
         el.className = 'lp-tag';
         const isCore = p.index === coreIndex;
+        const isOld = p.index === oldestIdx;
         el.innerHTML = `<i></i><span class="lp-tag-no">${String(i + 1).padStart(2, '0')}</span><span class="lp-tag-name">${
           p.label ?? `第 ${p.index + 1} 块`
-        }${isCore ? '<em>纸条在这里</em>' : ''}</span>`;
+        }${isCore ? '<em>纸条在这里</em>' : ''}${isOld ? '<em>最旧的一块</em>' : ''}</span>`;
         tagsHost.appendChild(el);
         tagEls.push(el);
       });
@@ -530,12 +534,49 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       pxPerUnit: number;
     } | null = null;
     let hovered: Part | null = null;
+    // 悬停时画出这件能脱开的方向：让玩家用眼睛判断，而不是靠六向乱试
+    const dirEls: HTMLDivElement[] = [];
+    for (let i = 0; i < 3; i++) {
+      const el = document.createElement('div');
+      el.className = 'lp-dir';
+      el.style.opacity = '0';
+      dirsRef.current?.appendChild(el);
+      dirEls.push(el);
+    }
+    const hideDirs = () => dirEls.forEach((el) => (el.style.opacity = '0'));
+    const showDirs = (part: Part) => {
+      const axes = part.free.length > 0 ? part.free.slice(0, 3) : part.bestDir ? [part.bestDir] : [];
+      const base = part.center.clone().add(part.mesh.position);
+      const c = project(base);
+      axes.forEach((axis, i) => {
+        const el = dirEls[i];
+        if (!el) return;
+        const tip = project(base.clone().addScaledVector(axis, 0.22));
+        const dx = tip.x - c.x;
+        const dy = tip.y - c.y;
+        const len = Math.hypot(dx, dy);
+        if (len < 6) {
+          el.style.opacity = '0';
+          return;
+        }
+        const reach = Math.min(64, Math.max(38, len * 1.6));
+        const ux = dx / len;
+        const uy = dy / len;
+        el.style.left = `${c.x + ux * 14}px`;
+        el.style.top = `${c.y + uy * 14}px`;
+        el.style.width = `${reach}px`;
+        el.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+        el.style.opacity = '1';
+      });
+      for (let i = axes.length; i < dirEls.length; i++) dirEls[i].style.opacity = '0';
+    };
     let jiggle: { part: Part; t0: number } | null = null;
     let removedCount = 0;
     let finished = false;
     let trayX = -0.62;
     let trayRow = 0;
     let hintCleared = false;
+    let oldestIdx = -1;
 
     const ndcFrom = (x: number, y: number) => {
       const r = renderer.domElement.getBoundingClientRect();
@@ -565,6 +606,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       return best;
     };
 
+    const tries = new Map<number, number>();
     const flashBlockers = (part: Part) => {
       thud();
       jiggle = { part, t0: performance.now() };
@@ -574,12 +616,17 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         b.rimTarget = 1;
       });
       const names = blockers.map((b) => (b.label ? b.label : `第 ${b.index + 1} 块`));
+      const n = (tries.get(part.index) ?? 0) + 1;
+      tries.set(part.index, n);
+      // 头两次只给看得见的线索，第三次才告诉你是谁压着：难度靠理顺序，不靠记答案
       const text =
         names.length === 0
           ? '卡住了'
-          : names.length === 1
-            ? `先拆${names[0]}`
-            : `被 ${names.length} 块压着`;
+          : n < 3
+            ? '被旁边的件卡着'
+            : names.length === 1
+              ? `先拆${names[0]}`
+              : `先拆${names.slice(0, 2).join('、')}`;
       setHint(text);
       setDamage((d) => d + 1);
       setTimeout(() => {
@@ -634,6 +681,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       });
       computeFreedom();
       setTimeout(reframe, 380);
+      oldestIdx = part.index;
+      setOldest(part.label ?? '最后拆下来的那件');
       if (part.index === coreIndex) {
         finished = true;
         part.rim.uniforms.uColor.value.copy(RIM_CORE);
@@ -704,7 +753,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           // 被拉的方向挡着，但它在别的方向是松的：只抖不报挡路的零件
           thud();
           jiggle = { part: drag.part, t0: performance.now() };
-          setHint('换个方向，别硬拽');
+          setHint('顺着箭头的方向拔');
           setDamage((d) => d + 1);
           setTimeout(() => setHint(null), 900);
           drag = null;
@@ -809,6 +858,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     };
     ctrlRef.current.spread = () => {
       setPhase('spread');
+      buildTags();
       parts.forEach((p) => (p.rimTarget = 0));
       controls.enabled = false;
       // 先把托盘里的零件按装配顺序装回原位，再炸开
@@ -906,6 +956,10 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           jiggle.part.mesh.position.set(Math.sin(t * 74) * amp, 0, Math.cos(t * 58) * amp * 0.5);
         }
       }
+      const focus = drag?.part ?? hovered;
+      if (focus && !focus.removed && phase !== 'note') showDirs(focus);
+      else hideDirs();
+
       // 一进来不知道该干嘛：让唯一能拆的那块轻轻呼吸，手指就知道往哪放
       if (removedCount === 0 && !drag && !hovered) {
         const cue = parts.find((part) => !part.removed && part.free.length > 0);
@@ -976,6 +1030,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   return (
     <main className="lp" data-note={phase === 'note' ? '1' : '0'}>
       <div ref={hostRef} className="lp-stage" />
+      <div ref={dirsRef} className="lp-dirs" aria-hidden="true" />
       <div className="lp-dots" aria-hidden="true" />
       <div ref={tagsRef} className="lp-tags" aria-hidden="true" />
       <div className="lp-mark">Aholo Viewer 渲染 · Lux3D 生成</div>
@@ -1037,6 +1092,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
                 <button type="button" onClick={() => window.location.reload()}>
                   重新拆一次
                 </button>
+              </p>
+            )}
+            {oldest && (
+              <p className="lp-note-answer">
+                最旧的一块：<b>{oldest}</b>
               </p>
             )}
             <div className="lp-note-sign">
