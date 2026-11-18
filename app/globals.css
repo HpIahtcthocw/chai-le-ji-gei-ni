@@ -1762,3 +1762,553 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   .home-jump-link { font-size: 12.5px; }
   .home-jump-note { font-size: 11.5px; max-width: none; }
 }
+
+/* ---------------- 寄件台（/live） ---------------- */
+/* 冷灰台面上放一张单据：照片贴在左边，话写在右边，邮戳盖在右下 */
+.lv-page {
+  min-height: 100vh;
+  padding: 40px 20px 72px;
+  background:
+    radial-gradient(1200px 520px at 50% -10%, #fdfdff 0%, rgba(253, 253, 255, 0) 60%),
+    linear-gradient(180deg, #f1f3f5 0%, #e7eaed 62%, #dfe3e6 100%);
+  color: #111214;
+}
+.lv-desk {
+  width: 100%;
+  max-width: 1010px;
+  margin: 0 auto;
+  padding: clamp(26px, 4vw, 46px) clamp(22px, 4vw, 52px) clamp(30px, 4vw, 46px);
+  background: #ffffff;
+  border: 1px solid rgba(17, 18, 20, 0.12);
+  border-radius: 3px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 18px 46px rgba(17, 18, 20, 0.09),
+    0 2px 4px rgba(17, 18, 20, 0.05);
+}
+.lv-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(17, 18, 20, 0.12);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #6b7078;
+}
+.lv-back {
+  color: #3f434a;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+.lv-back:hover {
+  color: #9c3b23;
+}
+.lv-mark {
+  letter-spacing: 0.26em;
+  color: #9c3b23;
+}
+
+.lv-head {
+  margin-top: 22px;
+}
+.lv-title {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.22;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.lv-sub {
+  margin: 14px 0 0;
+  max-width: 640px;
+  font-size: 15px;
+  line-height: 1.95;
+  color: #4a4d52;
+}
+.lv-fact {
+  margin: 10px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: #9c3b23;
+}
+
+.lv-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: clamp(20px, 3vw, 40px);
+  margin-top: 26px;
+  align-items: start;
+}
+
+/* 贴照片的位置 */
+.lv-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 300px;
+  padding: 0;
+  background:
+    linear-gradient(0deg, rgba(17, 18, 20, 0.02), rgba(17, 18, 20, 0.02)),
+    #fbfbfa;
+  border: 1px dashed rgba(17, 18, 20, 0.22);
+  border-radius: 2px;
+  color: #6b7078;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.lv-slot::before,
+.lv-slot::after,
+.lv-slot .corner-b::before,
+.lv-slot .corner-b::after {
+  content: '';
+}
+/* 四角相角 */
+.lv-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(17, 18, 20, 0.24);
+  pointer-events: none;
+}
+.lv-corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.lv-corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+.lv-corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+.lv-corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+.lv-slot:hover {
+  border-color: rgba(156, 59, 35, 0.55);
+}
+.lv-slot.is-busy {
+  cursor: progress;
+}
+.lv-slot.has-photo {
+  border-style: solid;
+  border-color: rgba(17, 18, 20, 0.1);
+  background: #f2f2f0;
+  padding: 12px;
+}
+.lv-slot-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 24px;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: #4a4d52;
+}
+.lv-slot-hint em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #8a9099;
+}
+.lv-photo {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(17, 18, 20, 0.12);
+}
+/* 两条胶带，像真的贴在单据上 */
+.lv-tape {
+  position: absolute;
+  top: -8px;
+  width: 74px;
+  height: 22px;
+  background: rgba(214, 199, 160, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 2px rgba(17, 18, 20, 0.08);
+}
+.lv-tape-l {
+  left: 22px;
+  transform: rotate(-3.2deg);
+}
+.lv-tape-r {
+  right: 22px;
+  transform: rotate(2.6deg);
+}
+.lv-swap {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 7px 14px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  background: rgba(17, 18, 20, 0.86);
+  border-radius: 2px;
+}
+.lv-slot-meta {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  color: #8a9099;
+}
+
+/* 已有的三件 */
+.lv-shelf {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(17, 18, 20, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+}
+.lv-shelf-cap {
+  width: 100%;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #6b7078;
+}
+.lv-shelf-link {
+  font-size: 14px;
+  color: #111214;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(17, 18, 20, 0.28);
+  padding-bottom: 2px;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.lv-shelf-link em {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 12px;
+  color: #8a9099;
+}
+.lv-shelf-link:hover {
+  color: #9c3b23;
+  border-color: rgba(156, 59, 35, 0.6);
+}
+
+/* 写字的几栏 */
+.lv-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.lv-field {
+  display: block;
+}
+.lv-field-label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #6b7078;
+}
+.lv-field input,
+.lv-field textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 10px 2px;
+  border: none;
+  border-bottom: 1px solid rgba(17, 18, 20, 0.24);
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #111214;
+}
+.lv-field textarea {
+  padding: 10px 12px;
+  border: 1px solid rgba(17, 18, 20, 0.16);
+  background: #fbfbfa;
+  min-height: 104px;
+  resize: vertical;
+}
+.lv-field input::placeholder,
+.lv-field textarea::placeholder {
+  color: #a8adb4;
+}
+.lv-field input:focus,
+.lv-field textarea:focus {
+  outline: none;
+  border-color: #111214;
+}
+.lv-field em {
+  display: block;
+  margin-top: 8px;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #8a9099;
+}
+
+.lv-action {
+  margin-top: 4px;
+}
+.lv-go {
+  width: 100%;
+  min-height: 54px;
+  padding: 15px 20px;
+  border: 1px solid #111214;
+  border-radius: 2px;
+  background: #111214;
+  color: #f7f4ec;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+.lv-go:not(:disabled):hover {
+  background: #23262b;
+  transform: translateY(-1px);
+}
+.lv-go:disabled {
+  background: #e6e7e6;
+  border-color: rgba(17, 18, 20, 0.14);
+  color: #9aa0a6;
+  cursor: not-allowed;
+}
+.lv-go-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #8a9099;
+}
+.lv-error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #9c3b23;
+}
+
+/* 进度：一条墨线，配真实状态 */
+.lv-track {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(17, 18, 20, 0.12);
+}
+.lv-bar {
+  height: 3px;
+  background: rgba(17, 18, 20, 0.1);
+  overflow: hidden;
+}
+.lv-bar i {
+  display: block;
+  height: 100%;
+  background: #111214;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lv-bar i.is-waiting {
+  background: #111214;
+  animation: lv-breathe 2.4s ease-in-out infinite;
+}
+@keyframes lv-breathe {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+.lv-track-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #3f434a;
+}
+.lv-track-line b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #9c3b23;
+}
+.lv-track-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.lv-track-steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: #9aa0a6;
+}
+.lv-track-steps li span {
+  letter-spacing: 0.04em;
+}
+.lv-track-steps li em {
+  font-style: normal;
+  font-size: 12px;
+  color: inherit;
+}
+.lv-track-steps li.is-now {
+  color: #111214;
+}
+.lv-track-steps li.is-now span {
+  position: relative;
+}
+.lv-track-steps li.is-now span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: #9c3b23;
+}
+.lv-track-steps li.is-past {
+  color: #4a4d52;
+}
+
+/* 装好了：一张贴纸似的标签 */
+.lv-label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  margin-top: 26px;
+  padding: 20px 22px;
+  background: #f7f4ec;
+  border: 1px solid rgba(17, 18, 20, 0.16);
+  border-radius: 2px;
+  box-shadow: 0 10px 26px rgba(17, 18, 20, 0.08);
+}
+.lv-label-main {
+  min-width: 0;
+}
+.lv-label-cap {
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: #9c3b23;
+}
+.lv-label-url {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #3f434a;
+  text-decoration: none;
+  word-break: break-all;
+  border-bottom: 1px solid rgba(17, 18, 20, 0.2);
+  padding-bottom: 4px;
+}
+.lv-label-url:hover {
+  color: #9c3b23;
+}
+.lv-label-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+.lv-open {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
+  background: #111214;
+  color: #f7f4ec;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 2px;
+}
+.lv-copy {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(17, 18, 20, 0.28);
+  background: transparent;
+  color: #111214;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.lv-copy:hover {
+  border-color: #111214;
+}
+.lv-label-qr {
+  width: 116px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(17, 18, 20, 0.12);
+}
+.lv-label-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .lv-page {
+    padding: 20px 12px 40px;
+  }
+  .lv-desk {
+    padding: 22px 18px 26px;
+  }
+  .lv-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .lv-slot {
+    min-height: 230px;
+  }
+  .lv-label {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lv-label-qr {
+    width: 96px;
+  }
+  .lv-title {
+    font-size: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-bar i.is-waiting {
+    animation: none;
+  }
+}
+
+/* 顶栏的印章 */
+.lv-seal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 7px 4px;
+  border: 1px solid rgba(156, 59, 35, 0.72);
+  border-radius: 1px;
+  transform: rotate(-3.6deg);
+  font-size: 11px;
+  line-height: 1.15;
+  letter-spacing: 0.18em;
+  color: #9c3b23;
+  opacity: 0.9;
+}
+.lv-seal b { font-weight: 500; }
+
+/* 到了那边会怎样 */
+.lv-after {
+  margin-top: 4px;
+  padding: 14px 0 0 14px;
+  border-top: 1px solid rgba(17, 18, 20, 0.1);
+  border-left: 1px solid rgba(17, 18, 20, 0.1);
+}
+.lv-after p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.85;
+  color: #4a4d52;
+}
+.lv-after p:last-child { margin-bottom: 0; }
+.lv-after b { font-weight: 500; color: #111214; }
+
+@media (max-width: 760px) {
+  .lv-after { padding-left: 12px; }
+}

@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     image?: string;
     line?: string;
     u?: string;
+    qrInk?: boolean;
   };
 
   // 线上生成的件没有本地资产，用官方 CDN 的模型地址，只认白名单域
@@ -41,11 +42,13 @@ export async function POST(req: NextRequest) {
   const code = encodeParcel(parcel);
   const origin = originOf(req);
   const url = `${origin}/p/${code}`;
+  // 收件页的纸是米色，二维码用浅色；寄件台的面板是白纸黑字，要墨色
+  const dark = body.qrInk ? '#111214' : '#f4ede2';
   const qrSvg = await QRCode.toString(url, {
     type: 'svg',
     margin: 1,
     errorCorrectionLevel: 'M',
-    color: { dark: '#f4ede2', light: '#00000000' },
+    color: { dark, light: '#00000000' },
   });
 
   return NextResponse.json({ code, url, qrSvg });
