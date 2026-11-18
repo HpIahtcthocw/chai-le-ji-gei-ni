@@ -1388,7 +1388,8 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 .lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: 0.24em; color: #232830; pointer-events: none; animation: lp-fade 0.3s ease both; }
 
 /* 纸条：手写体，白边加细墨线，像夹在零件里抽出来的 */
-.lp-note { position: absolute; right: 7vw; top: 50%; width: min(360px, calc(100% - 40px)); padding: 26px 28px 22px; background: #fbfaf6; box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgba(17, 18, 20, 0.55), 0 22px 40px -18px rgba(30, 28, 22, 0.35); transform-origin: 20% 0; animation: lp-slip 0.7s cubic-bezier(0.24, 1.28, 0.4, 1) both; }
+.lp-note { position: absolute; left: 50%; bottom: 4vh; translate: -50% 0; width: min(720px, calc(100% - 48px)); padding: 18px 22px 16px; background: #fbfaf6; border: 1px solid rgba(60, 52, 38, 0.14);
+  box-shadow: 0 22px 44px -26px rgba(30, 28, 22, 0.34), 0 1px 0 rgba(255, 255, 255, 0.9) inset; display: flex; gap: 22px; align-items: flex-start; transform-origin: 50% 100%; animation: lp-slip 0.55s cubic-bezier(0.24, 1.28, 0.4, 1) both; }
 .lp-note-head { font-size: 12px; letter-spacing: 0.24em; color: #6f6d66; }
 .lp-note-body { margin: 16px 0 12px; font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; font-size: 22px; line-height: 1.85; color: #1b1c1f; }
 .lp-note-sign { font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; font-size: 18px; text-align: right; color: #3c3d40; }
@@ -1540,22 +1541,23 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 
 /* 拆到核心那块，原图跟着纸条一起浮出来 */
 .lp-note-photo {
-  position: absolute;
-  left: -206px;
-  top: -30px;
-  width: 188px;
+  position: static;
+  flex: 0 0 132px;
+  width: 132px;
+  margin: 4px 0 0;
+  padding: 6px 6px 18px;
   margin: 0;
   padding: 8px 8px 24px;
   background: #fff;
   box-shadow: 0 0 0 1px rgba(17, 18, 20, 0.12), 0 16px 30px -14px rgba(20, 18, 12, 0.5);
-  transform: rotate(-5deg);
+  transform: rotate(-3deg);
   animation: lp-photo-up 0.72s cubic-bezier(0.22, 1, 0.3, 1) both 0.12s;
 }
 .lp-note-photo img { width: 100%; display: block; filter: grayscale(1) contrast(1.45) brightness(0.95); }
 .lp-note-photo figcaption { margin-top: 7px; font-size: 10px; letter-spacing: 0.14em; color: #6f6d66; text-align: center; }
 @keyframes lp-photo-up {
   from { opacity: 0; transform: translateY(30px) rotate(-9deg); }
-  to { opacity: 1; transform: translateY(0) rotate(-5deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-3deg); }
 }
 .lp-note-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 16px; }
 .lp-note-actions .lp-cta-line { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
@@ -1648,3 +1650,44 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 .lp-worn { font-size: 11px; letter-spacing: 0.1em; color: #8a2f22; }
 
 .lp-note-sign { margin-top: 12px; }
+/* 纸条是掉在台面前方的一张纸，不是浮在画面上的卡片 */
+.lp[data-note="1"] .lp-dots { opacity: 0; }
+
+/* 纸条和物件并排：物件在左，纸条在右，谁也不压谁 */
+.lp[data-note="1"] .lp-stage { right: 40%; }
+.lp[data-note="1"] .lp-note {
+  right: 22px;
+  left: auto;
+  top: 22px;
+  bottom: auto;
+  translate: none;
+  transform: none;
+  animation: lp-fade 0.4s ease both;
+  width: min(440px, 36vw);
+  box-sizing: border-box;
+  max-height: calc(100% - 44px);
+  overflow-y: auto;
+  padding: 24px 24px 20px;
+  display: block;
+}
+.lp[data-note="1"] .lp-note-photo { width: 104px; margin: 0 0 14px; }
+
+.lp-note-body-wrap { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 760px) {
+  .lp[data-note="1"] .lp-stage { right: 0; bottom: 46%; }
+  .lp[data-note="1"] .lp-note { left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; max-height: 42vh; }
+  .lp-note { flex-direction: column; gap: 12px; padding: 16px 16px 14px; }
+  .lp-note-photo { width: 96px; flex-basis: 96px; }
+}
+
+.lp-note-ghost {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  filter: grayscale(1) contrast(1.3);
+  pointer-events: none;
+}
+.lp-note-body-wrap { position: relative; z-index: 1; }
+.lp[data-note="1"] .lp-note { top: 84px; max-height: calc(100% - 106px); }

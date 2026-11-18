@@ -98,8 +98,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     spread: () => void;
     fold: () => void;
     finish: (f: Finish) => void;
+    resize: () => void;
     hand?: HandControls;
-  }>({ spread: () => {}, fold: () => {}, finish: () => {} });
+  }>({ spread: () => {}, fold: () => {}, finish: () => {}, resize: () => {} });
   const [handsOn, setHandsOn] = useState(false);
   /** 硬拉被压住的件、朝错方向拽，都会在件上留下撬痕；纸条能否读全看这个 */
   const [damage, setDamage] = useState(0);
@@ -871,6 +872,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         }),
     };
 
+
     const onResize = () => {
       camera.aspect = host.clientWidth / host.clientHeight;
       camera.updateProjectionMatrix();
@@ -964,8 +966,15 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const kept = Math.max(6, Math.round(message.length * (1 - cutRatio)));
   const torn = `${message.slice(0, kept)}…（下半张被撕掉了）`;
 
+  // 纸条一出现，就把 3D 舞台收高 36%：主体在上面，纸条躺在前景，谁也不压谁
+  useEffect(() => {
+    if (phase !== 'note') return;
+    const t = window.setTimeout(() => ctrlRef.current.resize(), 80);
+    return () => window.clearTimeout(t);
+  }, [phase]);
+
   return (
-    <main className="lp">
+    <main className="lp" data-note={phase === 'note' ? '1' : '0'}>
       <div ref={hostRef} className="lp-stage" />
       <div className="lp-dots" aria-hidden="true" />
       <div ref={tagsRef} className="lp-tags" aria-hidden="true" />
@@ -1016,10 +1025,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       {phase === 'note' && (
         <div className="lp-note">
           {photo && (
-            <figure className="lp-note-photo">
-              <img src={photo} alt={`${sender}拍下的那一张`} />
-              <figcaption>拍下的那一张</figcaption>
-            </figure>
+            // 原图不做成卡片（白底物件会变成一块白板），压在纸下面当纸的底纹
+            <div className="lp-note-ghost" style={{ backgroundImage: `url(${photo})` }} aria-hidden />
           )}
           <div className="lp-note-body-wrap">
             <div className="lp-note-head">{coreLabel}里夹着一张纸条</div>
