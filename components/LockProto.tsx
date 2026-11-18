@@ -75,8 +75,6 @@ type Props = {
   photo?: string;
   /** 有包裹码时才给“回一句”的入口 */
   replyCode?: string;
-  /** 每块零件的三选一：拆出来先猜它是从什么东西上拆下来的 */
-  quiz?: Record<number, { options: string[]; answerIndex: number; label?: string }>;
 };
 
 const clamp01 = (k: number) => Math.min(1, Math.max(0, k));
@@ -85,7 +83,7 @@ const easeOutExpo = (k: number) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
 const easeOutBack = (k: number) => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
 const easeOutCubic = (k: number) => 1 - Math.pow(1 - k, 3);
 
-export default function LockProto({ src, sender, itemName, message, labels, photo, replyCode, quiz }: Props) {
+export default function LockProto({ src, sender, itemName, message, labels, photo, replyCode }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>('loading');
@@ -100,12 +98,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     spread: () => void;
     fold: () => void;
     finish: (f: Finish) => void;
-    answer: (choice: number) => void;
     hand?: HandControls;
-  }>({ spread: () => {}, fold: () => {}, finish: () => {}, answer: () => {} });
+  }>({ spread: () => {}, fold: () => {}, finish: () => {} });
   const [handsOn, setHandsOn] = useState(false);
-  const [guess, setGuess] = useState<{ options: string[]; answerIndex: number; label?: string } | null>(null);
-  const [misses, setMisses] = useState(0);
+  /** 硬拉被压住的件、朝错方向拽，都会在件上留下撬痕；纸条能否读全看这个 */
+  const [damage, setDamage] = useState(0);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -472,34 +469,17 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         shelf = shelfLayout(camera.aspect);
         buildTags();
         (window as any).__PROTO__ = { parts: parts.length, coreIndex, initialFree, depth };
-        // 截图与验收用：直接跳到“纸条”那一屏，不靠手拖
-        (window as any).__PROTO_ASK__ = (index?: number) => {
-          const i = typeof index === 'number' ? index : Number(Object.keys(quiz ?? {})[0]);
-          const q = quiz?.[i];
-          if (!q || !Number.isFinite(i)) return false;
-          setHint(null);
-          setGuess({ ...q, label: q.label ?? labels[i] });
-          return true;
-        };
-        // 验收用：把一块真的拉到手上的位置，再开问，走的是同一条代码路
+        // 验收用：把某一块按它的松脱方向真的拉到台面上
         (window as any).__PROTO_PULL__ = (index?: number) => {
           const i = typeof index === 'number' ? index : coreIndex;
           const part = parts[i];
           if (!part) return false;
-          const axis = part.free[0] ?? new THREE.Vector3(0, 1, 0);
-          tween(320, (k) => part.mesh.position.copy(axis).multiplyScalar(0.12 * easeOutCubic(k)));
-          pendingPart = part;
-          pendingAxis = axis;
-          const q = quiz?.[part.index];
-          if (q) {
-            pendingQuiz = { ...q, label: q.label ?? labels[part.index] };
-            setHint(null);
-            setGuess({ ...q, label: q.label ?? labels[part.index] });
-          } else {
-            pendingQuiz = null;
-            removePart(part, axis);
-          }
+          removePart(part, part.free[0] ?? new THREE.Vector3(0, 1, 0));
           return true;
+        };
+        (window as any).__PROTO_HURT__ = (n = 2) => {
+          setDamage(n);
+          return n;
         };
         (window as any).__PROTO_NOTE__ = () => {
           parts.forEach((p) => (p.removed = true));
@@ -600,6 +580,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             ? `先拆${names[0]}`
             : `被 ${names.length} 块压着`;
       setHint(text);
+      setDamage((d) => d + 1);
       setTimeout(() => {
         blockers.forEach((b) => (b.rimTarget = 0));
         setHint(null);
@@ -633,33 +614,6 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       const target = box.getCenter(new THREE.Vector3());
       target.y = Math.min(target.y, 0.46);
       camGoal = { target, dist: Math.max(controls.minDistance, dist) };
-    };
-
-    // 悬在手上的那一块，等一个答案
-    let pendingPart: Part | null = null;
-    let pendingAxis: THREE.Vector3 | null = null;
-    let pendingQuiz: { options: string[]; answerIndex: number; label?: string } | null = null;
-
-    ctrlRef.current.answer = (choice: number) => {
-      const part = pendingPart;
-      const axis = pendingAxis;
-      const q = pendingQuiz;
-      if (!part || !axis || !q) return;
-      pendingPart = null;
-      pendingAxis = null;
-      pendingQuiz = null;
-      setGuess(null);
-      if (choice === q.answerIndex) {
-        removePart(part, axis);
-        return;
-      }
-      // 猜错：滑回原位，得再拉一次
-      const from = part.mesh.position.clone();
-      tween(420, (k) => part.mesh.position.copy(from).multiplyScalar(1 - easeOutCubic(k)));
-      thud();
-      setMisses((m) => m + 1);
-      setHint('不是这块，再拉一次');
-      setTimeout(() => setHint(null), 1200);
     };
 
     const removePart = (part: Part, axis: THREE.Vector3) => {
@@ -749,7 +703,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           // 被拉的方向挡着，但它在别的方向是松的：只抖不报挡路的零件
           thud();
           jiggle = { part: drag.part, t0: performance.now() };
-          setHint('换个方向');
+          setHint('换个方向，别硬拽');
+          setDamage((d) => d + 1);
           setTimeout(() => setHint(null), 900);
           drag = null;
           return;
@@ -767,16 +722,6 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       if (along * drag.pxPerUnit > 150 || along > drag.part.size * 0.9 + 0.06) {
         const { part, axis } = drag;
         drag = null;
-        const q = quiz?.[part.index];
-        if (q) {
-          // 先别落台面：这块到底是什么东西上的零件？
-          pendingPart = part;
-          pendingAxis = axis!;
-          pendingQuiz = { ...q, label: q.label ?? labels[part.index] };
-          setHint(null);
-          setGuess({ ...q, label: q.label ?? labels[part.index] });
-          return;
-        }
         removePart(part, axis!);
       }
     };
@@ -1012,7 +957,12 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       host.removeChild(renderer.domElement);
       tagsHost.innerHTML = '';
     };
-  }, [src, labels, quiz]);
+  }, [src, labels]);
+
+  // 撬得越狠，纸条缺得越多：最多只剩前半句
+  const cutRatio = Math.min(0.5, damage * 0.09);
+  const kept = Math.max(6, Math.round(message.length * (1 - cutRatio)));
+  const torn = `${message.slice(0, kept)}…（下半张被撕掉了）`;
 
   return (
     <main className="lp">
@@ -1029,6 +979,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           {total > 0 && (
             <span className="lp-count">
               已拆 {removed} / {total}
+            </span>
+          )}
+          {damage > 0 && (
+            <span className="lp-worn" title="硬拽留下的撬痕，会撕坏里面的纸条">
+              撬痕 {damage}
             </span>
           )}
           <button type="button" className={handsOn ? 'lp-hands is-on' : 'lp-hands'} onClick={() => setHandsOn((v) => !v)}>
@@ -1057,22 +1012,6 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       {phase === 'loading' && <div className="lp-loading">拆包中 {progress ? `${progress}%` : ''}</div>}
       {phase === 'playing' && hint && <div className="lp-hint">{hint}</div>}
 
-      {guess && (
-        <div className="lp-guess">
-          <div className="lp-guess-head">这块是从什么东西上拆下来的？</div>
-          <div className="lp-guess-opts">
-            {guess.options.map((option, i) => (
-              <button key={option} type="button" onClick={() => ctrlRef.current.answer(i)}>
-                {option}
-              </button>
-            ))}
-          </div>
-          <div className="lp-guess-foot">
-            已拆 {removed} / {total}
-            {misses > 0 ? ` · 猜错 ${misses} 次` : ''}
-          </div>
-        </div>
-      )}
 
       {phase === 'note' && (
         <div className="lp-note">
@@ -1084,7 +1023,15 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           )}
           <div className="lp-note-body-wrap">
             <div className="lp-note-head">{coreLabel}里夹着一张纸条</div>
-            <p className="lp-note-body">{message}</p>
+            <p className="lp-note-body">{damage > 0 ? torn : message}</p>
+            {damage > 0 && (
+              <p className="lp-note-worn">
+                撬坏 {damage} 处，纸边连字一起掉了。
+                <button type="button" onClick={() => window.location.reload()}>
+                  重新拆一次
+                </button>
+              </p>
+            )}
             <div className="lp-note-sign">
               {sender}
               {photo ? ' · 照片和这句话一起封进去的' : ''}

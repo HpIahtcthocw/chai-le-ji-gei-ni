@@ -25,14 +25,6 @@ export default async function Home() {
     }
   }
 
-  const quiz: Record<number, { options: string[]; answerIndex: number; label?: string }> = {};
-  for (const part of demo.parts ?? []) {
-    if (!part.options?.length) continue;
-    const index = Number(part.partId.replace(/^part-/, ''));
-    if (!Number.isFinite(index)) continue;
-    quiz[index] = { options: part.options, answerIndex: part.answerIndex, label: part.label };
-  }
-
   if (!demo) {
     return (
       <main className="home-empty">
@@ -50,7 +42,6 @@ export default async function Home() {
         itemName={demo.name}
         message={demo.story.replace(/^寄件人留言：/, '')}
         labels={labels}
-        quiz={quiz}
       />
 
       <div className="home-jump">
