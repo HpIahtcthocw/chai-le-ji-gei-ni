@@ -28,6 +28,9 @@ type HandState = {
 
 // 识别偶尔掉一帧，不能让"少一帧"等于"松手"：连丢 260ms 才算手真的离开
 const LOST_GRACE = 260;
+// 抓着零件时，捏合值的自然抖动不该把零件掉在半路：真正放手要 300ms 的明确张开
+const DROP_GRACE = 300;
+const DROP_RATIO = 0.62;
 
 const PINCH_ON = 0.4;
 const PINCH_OFF = 0.56;
@@ -186,11 +189,16 @@ export default function HandInput({ getControls, onClose }: Props) {
         if (h.pinching && ordered.length === 1 && !h.grabbed) {
           h.grabbed = controls?.grab(h.x, h.y, 110) ?? false;
         }
-        if (!h.pinching && h.grabbed) {
-          if (!h.offSince) h.offSince = now;
-          else if (now - h.offSince > 140) {
-            controls?.release();
-            h.grabbed = false;
+        if (h.grabbed) {
+          const opening = pinchRatio > DROP_RATIO || isOpenPalm(lm);
+          if (opening) {
+            if (!h.offSince) h.offSince = now;
+            else if (now - h.offSince > DROP_GRACE) {
+              controls?.release();
+              h.grabbed = false;
+              h.offSince = 0;
+            }
+          } else {
             h.offSince = 0;
           }
         } else {
