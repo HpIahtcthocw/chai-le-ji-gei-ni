@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
+import HeroStage from '@/components/HeroStage';
 
 /**
- * 寄件台：一件东西从照片变成可拆的包裹。
+ * 拆件台：一个 95 年那种模样的窗口应用。
+ * 一打开就是工作台——左边说明和现成的包，中间真台灯，右边寄件单，不用先猜要干什么。
  * 无状态链路——提交拿任务号，浏览器每 3 秒查一次，模型地址编进包裹链接。
  */
 const MAX_EDGE = 1600;
@@ -15,10 +17,10 @@ type Phase = 'pending' | 'running' | 'done' | 'failed';
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const PHASE_TEXT: Record<Phase, string> = {
-  pending: '排着队',
-  running: '正在做',
-  done: '好了',
-  failed: '没做成',
+  pending: '排队中',
+  running: '进行中',
+  done: '完成',
+  failed: '失败',
 };
 
 async function toDataUrl(file: File): Promise<{ dataUrl: string; width: number; height: number; kb: number }> {
@@ -44,9 +46,9 @@ async function toDataUrl(file: File): Promise<{ dataUrl: string; width: number; 
 }
 
 const SHELF = [
-  { href: '/p/lamp', name: '台灯', parts: 7 },
-  { href: '/p/radio', name: '收音机', parts: 7 },
-  { href: '/p/fan', name: '台扇', parts: 5 },
+  { href: '/p/lamp', name: '台灯', parts: 7, note: '最早寄出的那件' },
+  { href: '/p/radio', name: '收音机', parts: 7, note: '按轮廓拆的' },
+  { href: '/p/fan', name: '台扇', parts: 5, note: '件数少的' },
 ];
 
 export default function LivePage() {
@@ -63,7 +65,16 @@ export default function LivePage() {
   const [copied, setCopied] = useState(false);
 
   const busy = stage === 'gen' || stage === 'split';
-  const progress = stage === 'done' ? 100 : stage === 'split' ? 68 : stage === 'gen' ? 30 : 0;
+  const progress = stage === 'done' ? 100 : stage === 'split' ? 68 : stage === 'gen' ? 28 : 0;
+  const goLabel = busy
+    ? '正在做，别关窗口'
+    : stage === 'done'
+      ? '再寄一件'
+      : !img
+        ? '先放一张照片'
+        : !line.trim()
+          ? '还得写那句话'
+          : '开始拆件 ▶';
 
   const pick = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -81,6 +92,17 @@ export default function LivePage() {
       setStage('error');
     }
   }, []);
+
+  const useSample = useCallback(async () => {
+    try {
+      const res = await fetch('/example/camera.jpg');
+      const blob = await res.blob();
+      await pick(new File([blob], 'camera.jpg', { type: 'image/jpeg' }));
+    } catch {
+      setError('示例照片取不到');
+      setStage('error');
+    }
+  }, [pick]);
 
   const run = useCallback(async () => {
     if (!img || busy) return;
@@ -163,192 +185,235 @@ export default function LivePage() {
     }
   }, [img, busy, sender, line]);
 
-  const statusLine = stage === 'gen'
-    ? genPhase === 'pending' ? '照片排在队里，等着开始长' : '正在把照片变成一个形状'
+  const clock = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+  const status = stage === 'gen'
+    ? genPhase === 'pending' ? '等队列' : '建模中'
     : stage === 'split'
-      ? splitPhase === 'pending' ? '形状有了，排着队等拆零件' : '正在按结构拆成零件'
+      ? splitPhase === 'pending' ? '等队列' : '拆件中'
       : stage === 'done'
-        ? '装进盒子里了'
-        : '';
+        ? '已完成'
+        : stage === 'error'
+          ? '出错了'
+          : '就绪';
 
   return (
-    <main className="lv-page">
-      <div className="lv-desk">
-        <div className="lv-top">
-          <Link href="/" className="lv-back">← 回到门口</Link>
-          <span className="lv-seal" aria-hidden="true"><b>无名</b><b>件</b></span>
-        </div>
+    <main className="rt-page">
+      <div className="rt-desktop">
+        <nav className="rt-icons">
+          <Link href="/" className="rt-icon">
+            <span className="rt-icon-glyph" aria-hidden="true">⌂</span>
+            <span>门口</span>
+          </Link>
+          <span className="rt-icon is-active">
+            <span className="rt-icon-glyph" aria-hidden="true">▤</span>
+            <span>拆件台</span>
+          </span>
+          <a href="#how" className="rt-icon">
+            <span className="rt-icon-glyph" aria-hidden="true">?</span>
+            <span>怎么用</span>
+          </a>
+        </nav>
 
-        <header className="lv-head">
-          <h1 className="lv-title">拍一件东西<br />它会以拆散的样子到达</h1>
-          <p className="lv-sub">
-            照片先长成一个粗模，再被拆成一块块能拉出来的零件；你写的那句话压在最里面那块底下，收件人得拆到那儿才看得到。
-          </p>
-          <p className="lv-fact">一件要几分钟。链接出来之后，才需要人。</p>
-        </header>
+        <div className="rt-win">
+          <header className="rt-titlebar">
+            <span className="rt-titlebar-icon" aria-hidden="true">▣</span>
+            <span className="rt-titlebar-text">无名件 — 拆件台 · C:\无名件\台灯.glb</span>
+            <span className="rt-titlebar-btns" aria-hidden="true"><b>_</b><b>□</b><b>×</b></span>
+          </header>
 
-        <div className="lv-body">
-          <div className="lv-left">
-            <button
-              type="button"
-              className={`lv-slot${img ? ' has-photo' : ''}${busy ? ' is-busy' : ''}`}
-              onClick={() => inputRef.current?.click()}
-              disabled={busy}
-            >
-              {img ? (
-                <>
-                  <i className="lv-corner tl" aria-hidden="true" />
-                  <i className="lv-corner tr" aria-hidden="true" />
-                  <i className="lv-corner bl" aria-hidden="true" />
-                  <i className="lv-corner br" aria-hidden="true" />
-                  <img src={img.dataUrl} alt="要寄出去的那件东西" className="lv-photo" />
-                  <span className="lv-tape lv-tape-l" aria-hidden="true" />
-                  <span className="lv-tape lv-tape-r" aria-hidden="true" />
-                  {!busy && <span className="lv-swap">换一张</span>}
-                </>
-              ) : (
-                <span className="lv-slot-hint">
-                  <i className="lv-corner tl" aria-hidden="true" />
-                  <i className="lv-corner tr" aria-hidden="true" />
-                  <i className="lv-corner bl" aria-hidden="true" />
-                  <i className="lv-corner br" aria-hidden="true" />
-                  把照片贴在这里
-                  <em>点一下选照片，或用手机现拍一张</em>
-                </span>
-              )}
-            </button>
-
-            <p className="lv-slot-meta">
-              {img ? `${img.width}×${img.height} · 压成 JPEG ${img.kb} KB · 会按轮廓找零件` : '白底或浅底、东西占满画面最好认'}
-            </p>
-
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              capture="environment"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void pick(file);
-                e.target.value = '';
-              }}
-            />
-
-            <div className="lv-shelf">
-              <span className="lv-shelf-cap">已经寄出的，可以直接拆：</span>
-              {SHELF.map((it) => (
-                <a key={it.name} href={it.href} className="lv-shelf-link">
-                  {it.name}<em>{it.parts} 块</em>
-                </a>
-              ))}
-            </div>
+          <div className="rt-menubar">
+            <span>文件</span>
+            <span>编辑</span>
+            <span>视图</span>
+            <span>帮助</span>
+            <span className="rt-menubar-gap" />
+            <span className="rt-menubar-note">在线生成：开 · 一件 = 1 次建模 + 1 次拆件</span>
           </div>
 
-          <div className="lv-right">
-            <label className="lv-field">
-              <span className="lv-field-label">署名</span>
-              <input
-                value={sender}
-                onChange={(e) => setSender(e.target.value)}
-                placeholder="不写也行"
-                maxLength={12}
-                disabled={busy}
-              />
-              <em>不写就署名“一个没留名的人”</em>
-            </label>
+          <div className="rt-body">
+            <section className="rt-col rt-col-a">
+              <div className="rt-group">
+                <div className="rt-group-title">怎么用</div>
+                <ol className="rt-steps" id="how">
+                  <li><b>放一张照片</b><span>白底或浅底，一件东西占满画面最好认</span></li>
+                  <li><b>写一句话</b><span>它会压在最里面那块底下，拆到那儿才翻出来</span></li>
+                  <li><b>按「开始拆件」</b><span>等五到十分钟，出来直接是一条链接</span></li>
+                </ol>
+              </div>
 
-            <label className="lv-field is-line">
-              <span className="lv-field-label">那句话</span>
-              <textarea
-                value={line}
-                onChange={(e) => setLine(e.target.value)}
-                placeholder="他拆到最里面那块，才会看到这句。"
-                maxLength={80}
-                rows={3}
-                disabled={busy}
-              />
-              <em>{line.length}/80 · 必须写，它只出现在最里面那块里</em>
-            </label>
-
-            <div className="lv-action">
-              <button
-                type="button"
-                className="lv-go"
-                disabled={!img || busy || !line.trim()}
-                onClick={() => {
-                  if (stage === 'done') {
-                    setStage('idle');
-                    setImg(null);
-                    setParcel(null);
-                    setGenPhase(null);
-                    setSplitPhase(null);
-                    setSeconds(0);
-                    return;
-                  }
-                  void run();
-                }}
-              >
-                {busy ? '在做，别关页面' : stage === 'done' ? '换一件东西再寄' : '封进去，让它长出来'}
-              </button>
-              <p className="lv-go-note">生成中可以离开，回来刷新还在这页。一件 = 一次生成 + 一次拆件。</p>
-              {error && <p className="lv-error">{error}</p>}
-            </div>
-
-            <div className="lv-after">
-              <p><b>拆开的时候</b>，那边看到的是它被拆成几块的样子，不是一张照片。</p>
-              <p><b>得自己动手</b>：按住一块往外拉，被压着的拉不动；顺序错了，纸上会留撬痕。</p>
-              <p><b>最里面那块底下</b>压着你写的那句话，拆到那儿才会翻出来。</p>
-            </div>
-          </div>
-        </div>
-
-        {(busy || stage === 'done') && (
-          <section className="lv-track">
-            <div className="lv-bar">
-              <i className={busy ? 'is-waiting' : ''} style={{ width: `${progress}%` }} />
-            </div>
-            <p className="lv-track-line">
-              {statusLine}
-              <b>{String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</b>
-            </p>
-            <ol className="lv-track-steps">
-              <li className={stage !== 'gen' ? 'is-past' : 'is-now'}>
-                <span>建模</span><em>{genPhase ? PHASE_TEXT[genPhase] : '没开始'}</em>
-              </li>
-              <li className={stage === 'done' ? 'is-past' : stage === 'split' ? 'is-now' : ''}>
-                <span>拆成零件</span><em>{splitPhase ? PHASE_TEXT[splitPhase] : '等建模'}</em>
-              </li>
-              <li className={stage === 'done' ? 'is-past' : ''}>
-                <span>装盒出链接</span><em>{parcel ? '好了' : stage === 'done' ? '好了' : '等前两步'}</em>
-              </li>
-            </ol>
-          </section>
-        )}
-
-        {stage === 'done' && parcel && (
-          <section className="lv-label">
-            <div className="lv-label-main">
-              <span className="lv-label-cap">装好了 · 这条链接就是盒子</span>
-              <a className="lv-label-url" href={parcel.url} target="_blank" rel="noreferrer">{parcel.url}</a>
-              <div className="lv-label-actions">
-                <a className="lv-open" href={parcel.url}>拆开它</a>
-                <button
-                  type="button"
-                  className="lv-copy"
-                  onClick={() => {
-                    void navigator.clipboard?.writeText(parcel.url);
-                    setCopied(true);
-                    window.setTimeout(() => setCopied(false), 1800);
-                  }}
-                >
-                  {copied ? '已复制' : '复制链接'}
+              <div className="rt-group">
+                <div className="rt-group-title">示例照片</div>
+                <button type="button" className="rt-sample" onClick={() => void useSample()} disabled={busy}>
+                  <img src="/example/camera.jpg" alt="示例：一台旧胶片相机" />
+                  <span className="rt-sample-note">
+                    旧相机 · 点一下拿来试
+                    <em>真跑过一次，拆成 9 件</em>
+                  </span>
                 </button>
               </div>
-            </div>
-            {parcel.qrSvg && <div className="lv-label-qr" dangerouslySetInnerHTML={{ __html: parcel.qrSvg }} />}
-          </section>
-        )}
+
+              <div className="rt-group">
+                <div className="rt-group-title">现成的包</div>
+                <ul className="rt-list">
+                  {SHELF.map((it) => (
+                    <li key={it.name}>
+                      <span className="rt-list-glyph" aria-hidden="true">▮</span>
+                      <span className="rt-list-name">{it.name}<em>{it.note}</em></span>
+                      <span className="rt-list-count">{it.parts} 件</span>
+                      <a className="rt-list-open" href={it.href}>打开</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+
+            <section className="rt-col rt-col-b">
+              <div className="rt-pane">
+                <div className="rt-pane-title">拆解台 — 台灯（7 件）</div>
+                <div className="rt-stage">
+                  <HeroStage src="/items/lamp/model.glb" />
+                  <span className="rt-stage-hint">拖住转 · 单击整件拆开</span>
+                </div>
+                <div className="rt-toolbar">
+                  <span className="rt-toolbtn">拖拽旋转</span>
+                  <span className="rt-toolbtn">单击拆开</span>
+                  <span className="rt-toolbar-gap" />
+                  <span className="rt-readout">原来挂着的那件 · 真拆过</span>
+                </div>
+              </div>
+            </section>
+
+            <section className="rt-col rt-col-c">
+              <div className="rt-group">
+                <div className="rt-group-title">寄件单</div>
+
+                <button
+                  type="button"
+                  className={`rt-slot${img ? ' has-photo' : ''}`}
+                  onClick={() => inputRef.current?.click()}
+                  disabled={busy}
+                >
+                  {img ? (
+                    <img src={img.dataUrl} alt="要寄出去的这件" />
+                  ) : (
+                    <span className="rt-slot-empty">
+                      <b>照片</b>
+                      点这里选一张，或手机现拍
+                      <i>JPG / PNG · 原图不会上传</i>
+                    </span>
+                  )}
+                </button>
+                <p className="rt-slot-meta">
+                  {img ? `${img.width}×${img.height} · 压成 ${img.kb} KB · 原图不上传` : '还没放照片；也可以先点左边那张示例'}
+                </p>
+
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  capture="environment"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void pick(file);
+                    e.target.value = '';
+                  }}
+                />
+
+                <label className="rt-field">
+                  <span>署名</span>
+                  <input
+                    value={sender}
+                    onChange={(e) => setSender(e.target.value)}
+                    placeholder="不写也行"
+                    maxLength={12}
+                    disabled={busy}
+                  />
+                </label>
+
+                <label className="rt-field">
+                  <span>那句话（必写）</span>
+                  <textarea
+                    value={line}
+                    onChange={(e) => setLine(e.target.value)}
+                    placeholder="他拆到最里面那块，才会看到这句。"
+                    maxLength={80}
+                    rows={3}
+                    disabled={busy}
+                  />
+                  <em>{line.length}/80</em>
+                </label>
+
+                <button
+                  type="button"
+                  className="rt-go"
+                  disabled={!img || busy || !line.trim()}
+                  onClick={() => {
+                    if (stage === 'done') {
+                      setStage('idle');
+                      setImg(null);
+                      setParcel(null);
+                      setGenPhase(null);
+                      setSplitPhase(null);
+                      setSeconds(0);
+                      return;
+                    }
+                    void run();
+                  }}
+                >
+                  {goLabel}
+                </button>
+
+                {(busy || stage === 'done') && (
+                  <div className="rt-progress">
+                    <div className="rt-progress-bar">
+                      <i style={{ width: `${progress}%` }} />
+                    </div>
+                    <div className="rt-progress-line">
+                      <span>{status}</span>
+                      <b>{clock}</b>
+                    </div>
+                    <ul className="rt-log">
+                      <li>建模：{genPhase ? PHASE_TEXT[genPhase] : '未开始'}</li>
+                      <li>拆件：{splitPhase ? PHASE_TEXT[splitPhase] : '未开始'}</li>
+                      <li>装盒：{stage === 'done' ? '完成' : '等前两步'}</li>
+                    </ul>
+                  </div>
+                )}
+
+                {error && <p className="rt-error">{error}</p>}
+
+                {stage === 'done' && parcel && (
+                  <div className="rt-result">
+                    <span className="rt-result-cap">链接就是盒子</span>
+                    <a className="rt-result-url" href={parcel.url} target="_blank" rel="noreferrer">{parcel.url}</a>
+                    <div className="rt-result-actions">
+                      <a className="rt-result-open" href={parcel.url}>拆开</a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void navigator.clipboard?.writeText(parcel.url);
+                          setCopied(true);
+                          window.setTimeout(() => setCopied(false), 1800);
+                        }}
+                      >
+                        {copied ? '已复制' : '复制'}
+                      </button>
+                    </div>
+                    {parcel.qrSvg && <div className="rt-result-qr" dangerouslySetInnerHTML={{ __html: parcel.qrSvg }} />}
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+
+          <footer className="rt-statusbar">
+            <span className="rt-status-cell">{status}</span>
+            <span className="rt-status-cell">{img ? '照片已就位' : '没有照片'}</span>
+            <span className="rt-status-cell">{line.trim() ? '那句话已写' : '还没写那句话'}</span>
+            <span className="rt-status-cell rt-status-right">收到时是拆散的，得自己一块块拉开来</span>
+          </footer>
+        </div>
       </div>
     </main>
   );
