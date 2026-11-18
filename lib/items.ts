@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import manifest from './items-manifest.json';
 
 export type ItemPart = {
   partId: string;
@@ -27,6 +28,9 @@ const ITEMS_DIR = path.join(process.cwd(), 'public', 'items');
 const isValidId = (id: string) => /^[a-z0-9_-]+$/i.test(id);
 
 export async function listItemIds(): Promise<string[]> {
+  // 构建时生成的清单（线上 serverless 读不到 public/items 目录）
+  const baked = Object.keys(manifest as Record<string, ItemMeta>);
+  if (baked.length) return baked.sort();
   try {
     const entries = await readdir(ITEMS_DIR, { withFileTypes: true });
     const ids: string[] = [];
@@ -47,6 +51,8 @@ export async function listItemIds(): Promise<string[]> {
 
 export async function getItem(id: string): Promise<ItemMeta | null> {
   if (!isValidId(id)) return null;
+  const bakedItem = (manifest as Record<string, ItemMeta>)[id];
+  if (bakedItem) return bakedItem;
   try {
     const raw = await readFile(path.join(ITEMS_DIR, id, 'meta.json'), 'utf8');
     return JSON.parse(raw) as ItemMeta;

@@ -11,6 +11,9 @@ const MAX_BYTES = 5 * 1024 * 1024;
  * 凭证与上传任务必须在同一次请求内完成，换 token 去查旧任务会报“Token未绑定任务”。
  */
 export async function POST(req: Request) {
+  if (process.env.NEXT_PUBLIC_DEMO === '1' || process.env.VERCEL === '1') {
+    return NextResponse.json({ error: '线上版不接生成；寄一件要在本机跑' }, { status: 503 });
+  }
   const key = process.env.AHOLO_API_KEY;
   if (!key) {
     return NextResponse.json({ error: '服务端没有配置 AHOLO_API_KEY' }, { status: 500 });

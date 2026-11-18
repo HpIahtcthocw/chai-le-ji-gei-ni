@@ -4,6 +4,7 @@ import { getItem } from '@/lib/items';
 import { parseParcel } from '@/lib/parcels';
 
 /** 收件人视角：打开链接就是盒子里的那件东西，按住一块往外拉 */
+
 export default async function ReceivePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const parcel = parseParcel(decodeURIComponent(code));

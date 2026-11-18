@@ -9,6 +9,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (process.env.NEXT_PUBLIC_DEMO === '1' || process.env.VERCEL === '1') {
+    return NextResponse.json({ error: '线上版不接生成；寄一件要在本机跑' }, { status: 503 });
+  }
   const body = (await req.json().catch(() => null)) as
     | { image?: string; sentence?: string; sender?: string; name?: string }
     | null;

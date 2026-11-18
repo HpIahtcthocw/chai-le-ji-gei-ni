@@ -1523,6 +1523,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 .lp[data-phase="spread"] ~ .home-jump,
 .lp[data-phase="note"] ~ .home-jump { opacity: 0; pointer-events: none; }
 .home-jump { transition: opacity 0.3s ease; }
+.home-jump-lead { font-size: 15px; color: #55595f; }
 .home-shelf { display: inline-flex; align-items: baseline; gap: 12px; font-size: 12px; letter-spacing: 0.08em; color: #676c76; }
 .home-shelf-item { color: #14161b; text-decoration: none; border-bottom: 1px solid rgba(20, 22, 27, 0.35); padding-bottom: 2px; min-height: 28px; display: inline-flex; align-items: center; }
 .home-shelf-item:hover { color: #8a2f22; border-color: #8a2f22; }

@@ -26,6 +26,8 @@ async function normalize(file: File): Promise<{ blob: Blob; width: number; heigh
   return { blob, width, height };
 }
 
+const DEMO_BUILD = process.env.NEXT_PUBLIC_DEMO === '1';
+
 export default function SendPage() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,6 +88,27 @@ export default function SendPage() {
       setMessage(err instanceof Error ? err.message : '出错了');
     }
   }, [preview]);
+
+  if (DEMO_BUILD) {
+    return (
+      <main className="send-page">
+        <div className="send-inner">
+          <div className="send-top">
+            <Link href="/" className="send-back">← 回到门口</Link>
+          </div>
+          <h1 className="send-title">这一件<br />还在本机</h1>
+          <p className="send-lead">
+            从照片长出一件东西，要跑分钟级的生成任务，还要把零件落到本地。<br />
+            线上这版只放已经寄到的三件：台灯、收音机、台扇，都能拆到底。
+          </p>
+          <div className="send-foot">
+            <div className="send-note">想寄自己的那件，要在本机跑生成：npm start -- -p 3100。</div>
+            <Link className="send-next" href="/">回门口拆一件</Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="send-page">

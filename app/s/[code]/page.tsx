@@ -16,9 +16,9 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
   const meta = await getItem(parcel.a);
   if (!meta) notFound();
 
-  const h = await headers();
-  const host = h.get('host') || 'localhost:3100';
-  const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+  const h = process.env.NEXT_STATIC_EXPORT === '1' ? null : await headers();
+  const host = h?.get('host') || 'localhost:3100';
+  const proto = h?.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
   const url = `${proto}://${host}/p/${encodeURIComponent(code)}`;
 
   // 生成件常常没有零件名（拆件接口只给几何，不给名字），清单就按件数排，
