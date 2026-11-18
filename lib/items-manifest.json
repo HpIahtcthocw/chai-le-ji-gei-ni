@@ -37,7 +37,9 @@
         "options": [],
         "answerIndex": 0
       }
-    ]
+    ],
+    "oldest": "底座",
+    "oldestWhy": "搬来搬去，底座上的漆掉得最厉害。"
   },
   "genmwkpt3mu8o6hb": {
     "id": "genmwkpt3mu8o6hb",
@@ -45,8 +47,39 @@
     "riddle": "它每天最后一个关掉自己。",
     "story": "寄件人留言：这盏灯陪我熬过整个毕业季，拆开你就知道它哪块最旧。",
     "partCount": 7,
-    "parts": [],
-    "sourceImage": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg"
+    "parts": [
+      {
+        "partId": "part-5",
+        "label": "底座"
+      },
+      {
+        "partId": "part-6",
+        "label": "电源线"
+      },
+      {
+        "partId": "part-4",
+        "label": "灯杆"
+      },
+      {
+        "partId": "part-1",
+        "label": "灯臂"
+      },
+      {
+        "partId": "part-3",
+        "label": "灯头接头"
+      },
+      {
+        "partId": "part-2",
+        "label": "灯罩"
+      },
+      {
+        "partId": "part-0",
+        "label": "灯泡"
+      }
+    ],
+    "sourceImage": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg",
+    "oldest": "灯泡",
+    "oldestWhy": "换了两次灯罩，灯泡一直没换。"
   },
   "lamp": {
     "id": "lamp",
@@ -179,6 +212,8 @@
         "options": [],
         "answerIndex": 0
       }
-    ]
+    ],
+    "oldest": "旋钮",
+    "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。"
   }
 }

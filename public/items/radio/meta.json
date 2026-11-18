@@ -6,12 +6,49 @@
   "partCount": 7,
   "note": "Lux3D 文生体 + 拆分产物。零件名按包围盒位置定：机身、正面板、后盖、骨架，右侧三枚旋钮。",
   "parts": [
-    { "partId": "part-0", "label": "机身", "options": [], "answerIndex": 0 },
-    { "partId": "part-1", "label": "面板", "options": [], "answerIndex": 0 },
-    { "partId": "part-3", "label": "骨架", "options": [], "answerIndex": 0 },
-    { "partId": "part-5", "label": "后盖", "options": [], "answerIndex": 0 },
-    { "partId": "part-2", "label": "旋钮", "options": [], "answerIndex": 0 },
-    { "partId": "part-4", "label": "旋钮", "options": [], "answerIndex": 0 },
-    { "partId": "part-6", "label": "旋钮", "options": [], "answerIndex": 0 }
-  ]
+    {
+      "partId": "part-0",
+      "label": "机身",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-1",
+      "label": "面板",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-3",
+      "label": "骨架",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-5",
+      "label": "后盖",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-2",
+      "label": "旋钮",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-4",
+      "label": "旋钮",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-6",
+      "label": "旋钮",
+      "options": [],
+      "answerIndex": 0
+    }
+  ],
+  "oldest": "旋钮",
+  "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。"
 }

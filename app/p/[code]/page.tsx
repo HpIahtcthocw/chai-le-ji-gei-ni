@@ -31,6 +31,7 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
       labels={labels}
       photo={parcel.i || meta.sourceImage}
       replyCode={code}
+      oldest={meta.oldest ? { label: meta.oldest, why: meta.oldestWhy } : undefined}
     />
   );
 }

@@ -76,6 +76,8 @@ type Props = {
   photo?: string;
   /** 有包裹码时才给“回一句”的入口 */
   replyCode?: string;
+  /** 寄件人说的"最旧的一块"：具体是哪件、为什么 */
+  oldest?: { label: string; why?: string };
 };
 
 const clamp01 = (k: number) => Math.min(1, Math.max(0, k));
@@ -84,7 +86,7 @@ const easeOutExpo = (k: number) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
 const easeOutBack = (k: number) => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
 const easeOutCubic = (k: number) => 1 - Math.pow(1 - k, 3);
 
-export default function LockProto({ src, sender, itemName, message, labels, photo, replyCode }: Props) {
+export default function LockProto({ src, sender, itemName, message, labels, photo, replyCode, oldest: oldestAnswer }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>('loading');
@@ -111,7 +113,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [handsOn, setHandsOn] = useState(false);
   /** 硬拉被压住的件、朝错方向拽，都会在件上留下撬痕；纸条能否读全看这个 */
   const [damage, setDamage] = useState(0);
-  const [oldest, setOldest] = useState<string | null>(null);
+  const [oldest, setOldest] = useState<string | null>(oldestAnswer?.label ?? null);
   const dirsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -517,8 +519,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         const el = document.createElement('div');
         el.className = 'lp-tag';
         const isCore = p.index === coreIndex;
-        const isOld = p.index === oldestIdx;
-        el.innerHTML = `<i></i><span class="lp-tag-no">${String(i + 1).padStart(2, '0')}</span><span class="lp-tag-name">${
+        const isOld = !!oldestAnswer && !!p.label && p.label.startsWith(oldestAnswer.label);
+        el.innerHTML = `${p.label ? `<span class="lp-tag-no">${String(i + 1).padStart(2, '0')}</span>` : ''}<i></i><span class="lp-tag-name">${
           p.label ?? `第 ${p.index + 1} 块`
         }${isCore ? '<em>纸条在这里</em>' : ''}${isOld ? '<em>最旧的一块</em>' : ''}</span>`;
         tagsHost.appendChild(el);
@@ -584,7 +586,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     let trayX = -0.62;
     let trayRow = 0;
     let hintCleared = false;
-    let oldestIdx = -1;
+    const oldestIdx = -1;
 
     const ndcFrom = (x: number, y: number) => {
       const r = renderer.domElement.getBoundingClientRect();
@@ -690,8 +692,6 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       });
       computeFreedom();
       setTimeout(reframe, 380);
-      oldestIdx = part.index;
-      setOldest(part.label ?? '最后拆下来的那件');
       if (part.index === coreIndex) {
         finished = true;
         const sec = Math.max(1, Math.round((Date.now() - startRef.current) / 1000));
@@ -1075,6 +1075,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       <div className="lp-rule lp-rule-top">
         <span>
           {sender} 寄来一件东西
+          <em className="lp-rule-sub">拆完，里面夹着一句话</em>
         </span>
         <span className="lp-rule-right">
           {total > 0 && (
@@ -1134,6 +1135,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             {oldest && (
               <p className="lp-note-answer">
                 最旧的一块：<b>{oldest}</b>
+                {oldestAnswer?.why && <span className="lp-note-why">{oldestAnswer.why}</span>}
               </p>
             )}
             <div className="lp-note-sign">

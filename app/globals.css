@@ -1379,6 +1379,8 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 .lp-rule-bottom { bottom: 0; padding-left: 46px; border-top: 1px solid rgba(17, 18, 20, 0.16); animation: lp-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }.lp-spread-actions { display: inline-flex; align-items: center; gap: 14px; }
 .lp-door { font-size: 12px; letter-spacing: 0.12em; color: #5b6069; text-decoration: none; border-bottom: 1px solid rgba(17, 18, 20, 0.28); padding-bottom: 2px; margin-left: 4px; }
 .lp-rule-right { display: flex; align-items: center; gap: 22px; }
+.lp-rule-sub { display: block; margin-top: 4px; font-style: normal; font-size: 11.5px; letter-spacing: 0.06em; color: #64686f; }
+.lp-note-why { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; color: #6f6d66; }
 .lp-count { font-family: "Consolas", "SF Mono", monospace; font-size: 12px; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
 .lp-finish { display: flex; gap: 14px; }
 .lp-finish button { all: unset; cursor: pointer; font-size: 12px; letter-spacing: 0.14em; color: #6b7078; padding: 4px 11px; border: 1px solid rgba(17, 18, 20, 0.14); border-radius: 999px; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
@@ -1386,7 +1388,7 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 .lp-finish button:hover { color: #2f6bf6; border-color: #2f6bf6; }
 
 .lp-loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Consolas", monospace; font-size: 12px; color: #6f6d66; letter-spacing: 0.3em; pointer-events: none; }
-.lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: 0.24em; color: #232830; pointer-events: none; animation: lp-fade 0.3s ease both; }
+.lp-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; font-weight: 500; letter-spacing: 0.18em; color: #111214; pointer-events: none; animation: lp-fade 0.3s ease both; }
 
 /* 纸条：手写体，白边加细墨线，像夹在零件里抽出来的 */
 .lp-note { position: absolute; left: 50%; bottom: 4vh; translate: -50% 0; width: min(720px, calc(100% - 48px)); padding: 18px 22px 16px; background: #fbfaf6; border: 1px solid rgba(60, 52, 38, 0.14);
@@ -1405,7 +1407,7 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 .lp-tag i { position: relative; width: 5px; height: 5px; border-radius: 50%; background: #111214; }
 .lp-tag i::before { content: ""; position: absolute; left: 2px; bottom: 5px; width: 1px; height: 13px; background: linear-gradient(rgba(17, 18, 20, 0.5), rgba(17, 18, 20, 0.12)); }
 .lp-tag-no { font-family: "Consolas", "SF Mono", monospace; font-size: 11px; letter-spacing: 0.12em; color: #71767e; }
-.lp-mark { position: absolute; left: 28px; top: 46px; font-size: 10px; letter-spacing: 0.14em; color: #7d828a; pointer-events: none; }
+.lp-mark { position: absolute; left: 28px; top: 62px; font-size: 10px; letter-spacing: 0.14em; color: #7d828a; pointer-events: none; }
 
 .lp-tag-name { letter-spacing: 0.1em; }
 .lp-tag-name em { font-style: normal; margin-left: 8px; padding-bottom: 1px; font-size: 11px; color: #2f6bf6; border-bottom: 1px solid currentColor; }

@@ -6,10 +6,37 @@
   "partCount": 5,
   "note": "Lux3D 文生体 + 拆分产物。零件名按包围盒位置定：网罩、扇叶、机座、立柱、底座。",
   "parts": [
-    { "partId": "part-2", "label": "网罩", "options": [], "answerIndex": 0 },
-    { "partId": "part-1", "label": "扇叶", "options": [], "answerIndex": 0 },
-    { "partId": "part-3", "label": "机座", "options": [], "answerIndex": 0 },
-    { "partId": "part-0", "label": "立柱", "options": [], "answerIndex": 0 },
-    { "partId": "part-4", "label": "底座", "options": [], "answerIndex": 0 }
-  ]
+    {
+      "partId": "part-2",
+      "label": "网罩",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-1",
+      "label": "扇叶",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-3",
+      "label": "机座",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-0",
+      "label": "立柱",
+      "options": [],
+      "answerIndex": 0
+    },
+    {
+      "partId": "part-4",
+      "label": "底座",
+      "options": [],
+      "answerIndex": 0
+    }
+  ],
+  "oldest": "底座",
+  "oldestWhy": "搬来搬去，底座上的漆掉得最厉害。"
 }

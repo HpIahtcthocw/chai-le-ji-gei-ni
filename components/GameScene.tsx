@@ -438,8 +438,8 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           // 吸合半径按零件自身大小放宽一些，大件更好放，小件不至于太苛刻
           snapRadius: Math.max(maxSize * 0.05, partMax * 0.45),
           quiz: {
-            options: metaPart.options,
-            answerIndex: metaPart.answerIndex,
+            options: metaPart.options ?? [],
+            answerIndex: metaPart.answerIndex ?? 0,
             label: metaPart.label || metaPart.partId,
           },
         });

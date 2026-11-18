@@ -5,8 +5,9 @@ import manifest from './items-manifest.json';
 export type ItemPart = {
   partId: string;
   label?: string;
-  options: string[];
-  answerIndex: number;
+  /** 旧版三选一题留下的字段：现在页面只认 partId / label */
+  options?: string[];
+  answerIndex?: number;
 };
 
 export type ItemMeta = {
@@ -14,6 +15,10 @@ export type ItemMeta = {
   name: string;
   riddle: string;
   story: string;
+  /** 寄件人说"最旧的一块"是哪件：答案是物件自己的事，不靠拆到最后一块暗示 */
+  oldest?: string;
+  /** 为什么最旧，一句话，跟着答案一起给人看 */
+  oldestWhy?: string;
   partCount: number;
   parts: ItemPart[];
   /** 生成这件东西的那张原图，装盒页和纸条旁都用它 */
