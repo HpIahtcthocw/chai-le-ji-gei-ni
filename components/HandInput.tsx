@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { HandLandmarker as HandLandmarkerType, NormalizedLandmark } from '@mediapipe/tasks-vision';
 
 export type HandControls = {
-  grab: (x: number, y: number) => boolean;
+  grab: (x: number, y: number, pad?: number) => boolean;
   move: (x: number, y: number) => void;
   release: () => void;
   orbit: (dx: number) => void;
@@ -23,13 +23,14 @@ type HandState = {
   y: number;
   palmX: number | null;
   seen: number;
+  offSince: number;
 };
 
 // 识别偶尔掉一帧，不能让"少一帧"等于"松手"：连丢 260ms 才算手真的离开
 const LOST_GRACE = 260;
 
-const PINCH_ON = 0.32;
-const PINCH_OFF = 0.46;
+const PINCH_ON = 0.4;
+const PINCH_OFF = 0.56;
 // 只用画面中间 70% 映射到整块屏幕，手不用伸到摄像头边缘
 const REACH = 0.15;
 
@@ -163,7 +164,15 @@ export default function HandInput({ getControls, onClose }: Props) {
           el2.textContent = `捏合 ${pinchRatio.toFixed(2)} · 触发 ${PINCH_ON}`;
         }
         const prev = hands[i];
-        const h: HandState = prev ?? { pinching: false, grabbed: false, x: tip.x, y: tip.y, palmX: null, seen: now };
+        const h: HandState = prev ?? {
+          pinching: false,
+          grabbed: false,
+          x: tip.x,
+          y: tip.y,
+          palmX: null,
+          seen: now,
+          offSince: 0,
+        };
         h.seen = now;
         // 速度越快平滑越少：慢移稳、快移跟手
         const speed = Math.hypot(tip.x - h.x, tip.y - h.y);
@@ -173,15 +182,24 @@ export default function HandInput({ getControls, onClose }: Props) {
 
         const wasPinching = h.pinching;
         h.pinching = wasPinching ? pinchRatio < PINCH_OFF : pinchRatio < PINCH_ON;
-        if (h.pinching && !wasPinching && ordered.length === 1) h.grabbed = controls?.grab(h.x, h.y) ?? false;
-        if (!h.pinching && wasPinching && h.grabbed) {
-          controls?.release();
-          h.grabbed = false;
+        // 捏住之后每帧都试着抓：手先捏、再挪到零件上，也能抓住
+        if (h.pinching && ordered.length === 1 && !h.grabbed) {
+          h.grabbed = controls?.grab(h.x, h.y, 110) ?? false;
+        }
+        if (!h.pinching && h.grabbed) {
+          if (!h.offSince) h.offSince = now;
+          else if (now - h.offSince > 140) {
+            controls?.release();
+            h.grabbed = false;
+            h.offSince = 0;
+          }
+        } else {
+          h.offSince = 0;
         }
         if (ordered.length === 1) controls?.move(h.x, h.y);
 
         const palm = toScreen(lm[9]).x;
-        if (ordered.length === 1 && !h.pinching && isOpenPalm(lm)) {
+        if (ordered.length === 1 && !h.pinching && !h.grabbed && isOpenPalm(lm)) {
           if (h.palmX !== null) controls?.orbit(palm - h.palmX);
           h.palmX = palm;
         } else {

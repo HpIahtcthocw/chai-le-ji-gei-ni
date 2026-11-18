@@ -582,7 +582,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       const r = renderer.domElement.getBoundingClientRect();
       pointer.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
     };
-    const pickAt = (x: number, y: number) => {
+    const pickAt = (x: number, y: number, pad = 44) => {
       ndcFrom(x, y);
       raycaster.setFromCamera(pointer, camera);
       raycaster.far = Infinity;
@@ -593,7 +593,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       const px = x - r.left;
       const py = y - r.top;
       let best: Part | null = null;
-      let bestD = 44;
+      let bestD = pad;
       for (const part of parts) {
         if (part.removed) continue;
         const c = project(part.center.clone().add(part.mesh.position));
@@ -695,9 +695,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       }
     };
 
-    const grabAt = (x: number, y: number) => {
+    const grabAt = (x: number, y: number, pad = 44) => {
       if (finished) return false;
-      const part = pickAt(x, y);
+      const part = pickAt(x, y, pad);
       if (!part) return false;
       controls.enabled = false;
       drag = { part, startX: x, startY: y, axis: null, screenDir: new THREE.Vector2(), pxPerUnit: 1 };
@@ -728,7 +728,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       const dx = x - drag.startX;
       const dy = y - drag.startY;
       if (!drag.axis) {
-        if (Math.hypot(dx, dy) < 6) return;
+        if (Math.hypot(dx, dy) < 12) return;
         if (drag.part.free.length === 0) {
           flashBlockers(drag.part);
           drag = null;
@@ -749,7 +749,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             drag.pxPerUnit = len / 0.2;
           }
         }
-        if (!drag.axis || best < 0.35) {
+        if (!drag.axis || best < 0.28) {
           // 被拉的方向挡着，但它在别的方向是松的：只抖不报挡路的零件
           thud();
           jiggle = { part: drag.part, t0: performance.now() };
