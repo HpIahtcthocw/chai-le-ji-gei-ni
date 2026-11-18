@@ -18,8 +18,8 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
     if (Number.isFinite(index) && part.label) labels[index] = part.label;
   }
 
-  // 演示件的纸条内容先用 meta 里的故事；真实任务接上以后换成寄件人写的那句
-  const message = meta.story.replace(/^寄件人留言：/, '');
+  // 纸条优先用包裹码里带的那句话（回信时会换人）；没有才回落到 meta 的故事
+  const message = (parcel.m || meta.story).replace(/^寄件人留言：/, '');
 
   return (
     <LockProto
@@ -28,6 +28,8 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
       itemName={meta.name}
       message={message}
       labels={labels}
+      photo={parcel.i || meta.sourceImage}
+      replyCode={code}
     />
   );
 }

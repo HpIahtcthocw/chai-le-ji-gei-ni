@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>无名件 · 方向二 冷白仪器</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    margin: 0; background: #f2f4f6; color: #111417;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .shell { max-width: 1440px; width: 100%; margin: 0 auto; padding: 30px 56px 28px; flex: 1; display: flex; flex-direction: column; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; letter-spacing: 0.08em; color: #6d727a;
+    border-bottom: 1px solid rgba(17, 20, 23, 0.12); padding-bottom: 13px;
+  }
+  header b { font-weight: 600; color: #111417; letter-spacing: 0.16em; }
+
+  .hero {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    padding: 26px 0 20px;
+    min-height: 0;
+  }
+
+  .copy { width: 47%; flex: none; }
+  h1 {
+    margin: 0;
+    font-size: 68px;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+  }
+  h1 .light { color: #939aa2; }
+
+  .note {
+    margin: 30px 0 0;
+    font-size: 14px; line-height: 1.95; color: #454b53;
+    max-width: 27em;
+  }
+
+  .figure {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: -40px;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid rgba(17, 20, 23, 0.1);
+    padding: 16px 16px 0;
+    box-shadow: 0 24px 60px rgba(17, 20, 23, 0.1);
+  }
+  .card img { display: block; height: 46vh; width: auto; }
+  .cardcap {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11px; letter-spacing: 0.1em; color: #6d727a;
+    padding: 12px 2px 13px;
+    border-top: 1px solid rgba(17, 20, 23, 0.1);
+    margin-top: 12px;
+  }
+
+  .strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(17, 20, 23, 0.14);
+    border-bottom: 1px solid rgba(17, 20, 23, 0.14);
+  }
+  .strip div { padding: 12px 0 13px; border-right: 1px solid rgba(17, 20, 23, 0.1); }
+  .strip div:last-child { border-right: 0; }
+  .strip dt { font-size: 11px; letter-spacing: 0.16em; color: #6d727a; margin: 0 0 6px; }
+  .strip dd { margin: 0; font-size: 24px; letter-spacing: -0.02em; font-weight: 600; }
+
+  footer { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; }
+  footer span { font-size: 12px; letter-spacing: 0.1em; color: #6d727a; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 13px 26px; background: #111417; color: #f2f4f6;
+    text-decoration: none; font-size: 14px; letter-spacing: 0.06em; border-radius: 999px;
+  }
+  .cta i { display: block; width: 6px; height: 6px; border-radius: 50%; background: #2f6bf6; }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <b>无名件</b>
+      <div>寄来的东西，拆开才看得清</div>
+    </header>
+
+    <section class="hero">
+      <div class="copy">
+        <h1>拆开<br><span class="light">才看得清</span><br>它有多旧。</h1>
+        <p class="note">拍一张照片，写一句只有他懂的话。它会在几分钟里长出形状，按结构拆成零件，装进盒子寄出去。收件人拿到链接，一块块拉出来，最后一块里夹着你的话。</p>
+      </div>
+
+      <div class="figure">
+        <div class="card">
+          <img src="../.tmp/lamp-cut.png" alt="台灯白模">
+          <div class="cardcap"><span>示例 · 一盏用了十年的台灯</span><span>生成后按结构拆件</span></div>
+        </div>
+      </div>
+    </section>
+
+    <dl class="strip">
+      <div><dt>形状从哪来</dt><dd>一张照片</dd></div>
+      <div><dt>拆成几件</dt><dd>按结构拆</dd></div>
+      <div><dt>怎么拆</dt><dd>按方向拉</dd></div>
+      <div><dt>话藏在哪</dt><dd>最后一件</dd></div>
+    </dl>
+
+    <footer>
+      <span>按结构拆件 · 可导出 STL · 手势可拆</span>
+      <a class="cta" href="#"><i></i>寄一件</a>
+    </footer>
+  </div>
+</body>
+</html>

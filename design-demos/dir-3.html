@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>无名件 · 方向三 夜里的展台</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #0b0b0c; color: #f1eee7;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden; position: relative;
+  }
+
+  .beam {
+    position: absolute; inset: -10% 0 0 0;
+    background: radial-gradient(54% 58% at 66% 40%, rgba(214, 205, 186, 0.2) 0%, rgba(214, 205, 186, 0.06) 44%, rgba(11, 11, 12, 0) 74%);
+    pointer-events: none;
+  }
+
+  .shell { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; padding: 32px 56px 30px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; }
+  .brand { font-size: 13px; letter-spacing: 0.3em; color: #b9b2a4; }
+  .status { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: 0.12em; color: #8c8577; }
+  .status i { width: 7px; height: 7px; border-radius: 50%; background: #c9a063; box-shadow: 0 0 12px rgba(201, 160, 99, 0.7); }
+
+  .stage { flex: 1; position: relative; min-height: 0; }
+
+  .object {
+    position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+    width: 840px;
+  }
+  .object img {
+    width: 100%; display: block;
+    opacity: 0.94;
+    filter: invert(1) brightness(0.92) contrast(1.02);
+  }
+
+  .words { position: absolute; left: 0; bottom: 96px; max-width: 540px; }
+  h1 { margin: 0 0 20px; font-size: 42px; line-height: 1.44; font-weight: 400; letter-spacing: 0.03em; }
+  h1 span { color: #c9a063; }
+  p { margin: 0; font-size: 14px; line-height: 2.05; color: #9a9386; max-width: 26em; }
+
+  footer { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 16px; }
+  .meta { font-size: 11px; letter-spacing: 0.18em; color: #6f695e; line-height: 2.1; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 16px;
+    padding: 14px 28px; border: 1px solid rgba(201, 160, 99, 0.55);
+    color: #e8dfcd; text-decoration: none; font-size: 14px; letter-spacing: 0.14em;
+    border-radius: 999px; background: rgba(201, 160, 99, 0.06);
+  }
+  .cta::after { content: ""; width: 20px; height: 1px; background: rgba(201, 160, 99, 0.8); }
+</style>
+</head>
+<body>
+  <div class="beam"></div>
+
+  <div class="shell">
+    <header>
+      <div class="brand">无名件</div>
+      <div class="status"><i></i><span>示例 · 一盏用了十年的台灯</span></div>
+    </header>
+
+    <div class="stage">
+      <div class="object"><img src="../.tmp/lamp-cut.png" alt="台灯白模"></div>
+
+      <div class="words">
+        <h1>凑近了，<br>才看得见它<span>旧的地方</span>。</h1>
+        <p>拍一张照片，写一句没人听过的话。它会从照片里长出来，按结构拆成几件，装进盒子寄给一个人。他一块块拆到最里面，才读到那句。</p>
+      </div>
+    </div>
+
+    <footer>
+      <div class="meta">可导出 STL<br>手势可以拆</div>
+      <a class="cta" href="#">寄一件</a>
+    </footer>
+  </div>
+</body>
+</html>

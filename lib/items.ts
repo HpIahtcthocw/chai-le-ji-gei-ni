@@ -15,6 +15,8 @@ export type ItemMeta = {
   story: string;
   partCount: number;
   parts: ItemPart[];
+  /** 生成这件东西的那张原图，装盒页和纸条旁都用它 */
+  sourceImage?: string;
 };
 
 const ITEMS_DIR = path.join(process.cwd(), 'public', 'items');

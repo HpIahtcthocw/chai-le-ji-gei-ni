@@ -21,6 +21,14 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
   const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
   const url = `${proto}://${host}/p/${encodeURIComponent(code)}`;
 
+  // 生成件常常没有零件名（拆件接口只给几何，不给名字），清单就按件数排，
+  // 有名字的才写名字，绝不编一个假名字上去
+  const count = meta.partCount || meta.parts.length;
+  const manifest = Array.from({ length: count }, (_, i) => ({
+    no: String(i + 1).padStart(2, '0'),
+    label: meta.parts.find((part) => part.partId === `part-${i}`)?.label || '',
+  }));
+
   const qrSvg = await QRCode.toString(url, {
     type: 'svg',
     margin: 0,
@@ -40,7 +48,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
 
         <h1 className="share-title">
           已经装好了
-          <span>七块</span>
+          <span>{meta.partCount} 件</span>
         </h1>
         <p className="share-lede">
           把码给对方。他打开就是一件被拆散的东西，一块一块往外拉，
@@ -53,16 +61,17 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
             <span className="share-box-code">{meta.name}</span>
           </div>
           <ul className="share-manifest">
-            {meta.parts.map((part, index) => (
-              <li key={part.partId}>
-                <span className="share-manifest-num">{String(index + 1).padStart(2, '0')}</span>
+            {manifest.map((row) => (
+              <li key={row.no}>
+                <span className="share-manifest-num">{row.no}</span>
+                {row.label && <span className="share-manifest-name">{row.label}</span>}
                 <span className="share-manifest-line" />
                 <span className="share-manifest-mark">✓</span>
               </li>
             ))}
           </ul>
           <div className="share-box-foot">
-            <span>{meta.parts.length} / {meta.parts.length} 件</span>
+            <span>{count} / {count} 件</span>
             <span>{parcel.s?.trim() || '未署名'}</span>
           </div>
         </div>
@@ -84,14 +93,15 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
         </div>
 
         <p className="share-note">
-          这一版先用预置的台灯把拆包走一遍；你拍的那张照片已经存下来了，就贴在右边。
+          箱子里的零件是照片拆出来的，件数就这么多。你拍的原图跟着包裹一起走，
+          收件人拆到最里面那块时才会看到它。
         </p>
       </div>
 
-      {parcel.i && (
+      {(parcel.i || meta.sourceImage) && (
         <figure className="share-photo">
           {/* 寄件人自己拍的那张，原样放出来：它是这个包裹唯一的"实物证据" */}
-          <img src={parcel.i} alt="寄件人拍下的照片" />
+          <img src={parcel.i || meta.sourceImage} alt="寄件人拍下的照片" />
           <figcaption>
             <span>寄件人拍下的那一张</span>
             <span>{new Date(parcel.t || Date.now()).toLocaleDateString('zh-CN')}</span>

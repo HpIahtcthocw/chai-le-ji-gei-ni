@@ -1020,10 +1020,8 @@ body {
 }
 .home-stage { position: absolute; inset: 0; }
 .home-stage .hero-canvas { position: absolute; inset: 0; }
-/* 深色渲染反相成"黑物体+白纸"，跟参考一样用印刷语言 */
-.home-stage canvas {
-  filter: invert(1) grayscale(1) contrast(0.92) brightness(1.02);
-}
+/* 首屏直接给 Lux3D 生成的材料，不做反相：评委第一眼要看的就是 3D 本体 */
+.home-stage canvas { filter: saturate(1.03) contrast(1.02); }
 .home-dots {
   position: absolute;
   inset: 0;
@@ -1099,6 +1097,16 @@ body {
   padding-bottom: 3px;
 }
 .home-alt:hover { color: #6b3a2a; border-color: #6b3a2a; }
+
+/* 技术栈那一行：说清这张 3D 是怎么来的 */
+.home-stack {
+  margin: 18px 0 0;
+  font-family: "Consolas", "SF Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #6f6d66;
+}
+button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 
 @media (max-width: 760px) {
   .home-copy { left: 20px; right: 20px; bottom: 62px; max-width: none; }
@@ -1456,3 +1464,121 @@ body {
 .job-error { margin-top: 16px; font-size: 13px; line-height: 1.7; color: #8a3a24; }
 @keyframes jobpulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(47, 107, 246, 0.12); } 50% { box-shadow: 0 0 0 8px rgba(47, 107, 246, 0.04); } }
 @media (max-width: 680px) { .job-title { font-size: 26px; } .job-page { padding: 22px 18px 72px; } }
+
+/* ---------------- 首页按夜场收口：3D 是暗底 + 亮字，别让黑字压在黑场上 ---------------- */
+.home-fix { background: radial-gradient(120% 90% at 50% 40%, #12151b 0%, #070809 72%); color: #f2efe7; }
+.home-rule { color: #8b8578; }
+.home-rule-top { border-bottom-color: rgba(242, 239, 231, 0.16); }
+.home-rule-bottom { border-top-color: rgba(242, 239, 231, 0.16); color: #8b8578; }
+.home-title { color: #f5f2ea; }
+.home-lede { color: #c9c2b3; }
+.home-alt { color: #e7dfd1; border-bottom-color: rgba(231, 223, 209, 0.5); }
+.home-alt:hover { color: #c9a063; border-color: #c9a063; }
+.home-cta { background: #f3efe7; color: #14131a; }
+.home-cta:hover { background: #fffaf0; }
+.home-stack { color: #857f72; }
+.home-hint { color: #857f72; }
+.home-hint i { background: linear-gradient(#f2efe7, rgba(242, 239, 231, 0)); }
+.home-manifest i { color: #857f72; }
+.home-manifest span { color: #ddd6c7; }
+.home-manifest li::after { border-bottom-color: rgba(242, 239, 231, 0.26); }
+.home-shadow { background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0)); }
+
+/* 拆开的时候把说明让开，别压在零件上 */
+html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
+.home-copy { transition: opacity 0.55s ease; }
+
+/* ---------------- 首页 = 一个可拆的包裹 ---------------- */
+.home-jump {
+  position: fixed;
+  right: 26px;
+  bottom: 22px;
+  z-index: 8;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  pointer-events: none;
+}
+.home-jump-mark {
+  font-family: "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  font-size: 19px;
+  letter-spacing: 0.26em;
+  color: rgba(24, 26, 31, 0.5);
+}
+.home-jump-link {
+  pointer-events: auto;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: #14161b;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 3px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+.home-jump-link:hover { color: #8a2f22; border-color: #8a2f22; }
+
+.home-empty {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #f2f4f6;
+  color: #14161b;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.home-empty a { color: #14161b; }
+
+@media (max-width: 760px) {
+  .home-jump { right: 16px; bottom: 14px; gap: 10px; }
+  .home-jump-mark { font-size: 16px; }
+}
+
+/* 拆到核心那块，原图跟着纸条一起浮出来 */
+.lp-note-photo {
+  position: absolute;
+  left: -206px;
+  top: -30px;
+  width: 188px;
+  margin: 0;
+  padding: 8px 8px 24px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(17, 18, 20, 0.12), 0 16px 30px -14px rgba(20, 18, 12, 0.5);
+  transform: rotate(-5deg);
+  animation: lp-photo-up 0.72s cubic-bezier(0.22, 1, 0.3, 1) both 0.12s;
+}
+.lp-note-photo img { width: 100%; display: block; filter: grayscale(1) contrast(1.45) brightness(0.95); }
+.lp-note-photo figcaption { margin-top: 7px; font-size: 10px; letter-spacing: 0.14em; color: #6f6d66; text-align: center; }
+@keyframes lp-photo-up {
+  from { opacity: 0; transform: translateY(30px) rotate(-9deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-5deg); }
+}
+.lp-note-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 16px; }
+.lp-note-actions .lp-cta-line { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+
+@media (max-width: 760px) {
+  .lp-note-photo { position: static; width: 118px; margin: 0 0 14px; transform: rotate(-3deg); }
+  .lp-note-actions { justify-content: flex-start; }
+}
+
+/* 进度页：两次真实调用 */
+.job-pipe { margin: 26px 0 0; border-top: 1px solid rgba(20, 22, 26, 0.12); }
+.job-pipe-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px solid rgba(20, 22, 26, 0.08); }
+.job-pipe-row dt { font-size: 12px; letter-spacing: 0.1em; color: #4b4c50; }
+.job-pipe-row dd { margin: 0; display: flex; gap: 14px; font-size: 11.5px; letter-spacing: 0.04em; color: #7c7a73; font-variant-numeric: tabular-nums; }
+
+/* 回信页：先让他看见自己读到的那句 */
+.reply-heard { margin: 6px 0 26px; padding: 18px 20px; background: #fbfaf6; box-shadow: 0 0 0 1px rgba(20, 22, 26, 0.1); }
+.reply-heard-label { font-size: 11px; letter-spacing: 0.18em; color: #6f6d66; }
+.reply-heard p { margin: 10px 0 0; font-family: "Kaiti SC", "STKaiti", "KaiTi", serif; font-size: 19px; line-height: 1.8; color: #1b1c1f; }
+
+@media (max-width: 760px) {
+  .job-pipe-row { flex-wrap: wrap; }
+  .job-pipe-row dd { gap: 10px; }
+}
+
+.share-manifest-name { font-size: 11.5px; letter-spacing: 0.08em; color: #d8d0c2; margin-left: 8px; margin-right: 8px; }

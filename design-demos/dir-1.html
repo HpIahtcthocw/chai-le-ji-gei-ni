@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>无名件 · 方向一 物证</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #f3f1ea;
+    color: #141310;
+    font-family: "Songti SC", "SimSun", "STSong", serif;
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .rail {
+    border-right: 1px solid rgba(20, 19, 16, 0.18);
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 0;
+  }
+  .rail span {
+    writing-mode: vertical-rl;
+    font-size: 13px; letter-spacing: 0.34em; color: #5c574c;
+  }
+
+  main { position: relative; padding: 40px 56px 34px 64px; display: flex; flex-direction: column; min-height: 100vh; }
+
+  .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.2em; color: #6f695c; }
+  .mark { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 15px; letter-spacing: 0.24em; color: #141310; }
+
+  .stage { flex: 1; display: grid; grid-template-columns: 560px 1fr; align-items: center; gap: 40px; }
+
+  h1 {
+    margin: 0;
+    font-size: 62px;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    font-weight: 400;
+  }
+  h1 em { font-style: normal; border-bottom: 2px solid #8a2f22; padding-bottom: 3px; }
+  .sub {
+    margin-top: 24px;
+    font-size: 14px;
+    line-height: 2.1;
+    color: #575144;
+    max-width: 27em;
+  }
+
+  .object { position: relative; justify-self: end; width: 100%; max-width: 660px; margin-right: -40px; }
+  .object img {
+    display: block; width: 100%;
+    filter: drop-shadow(0 24px 44px rgba(20, 19, 16, 0.2));
+  }
+  .caption {
+    margin-top: 12px;
+    display: flex; justify-content: space-between;
+    font-size: 12px; letter-spacing: 0.14em; color: #6f695c;
+    border-top: 1px solid rgba(20, 19, 16, 0.18);
+    padding-top: 9px;
+  }
+
+  footer {
+    display: flex; align-items: center; gap: 26px;
+    border-top: 1px solid rgba(20, 19, 16, 0.18);
+    padding-top: 16px; margin-top: 12px;
+  }
+  .seal {
+    width: 44px; height: 44px; flex: none;
+    border: 1.5px solid #8a2f22; color: #8a2f22;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 12px; line-height: 1.1;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    transform: rotate(-6deg);
+    letter-spacing: 0.04em;
+  }
+  .foot-note { flex: 1; font-size: 12px; letter-spacing: 0.16em; color: #6f695c; }
+  .cta {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 15px 28px; background: #141310; color: #f3f1ea;
+    text-decoration: none; font-size: 15px; letter-spacing: 0.12em; border-radius: 1px;
+  }
+  .cta::after { content: ""; width: 24px; height: 1px; background: #f3f1ea; }
+</style>
+</head>
+<body>
+  <aside class="rail"><span>寄一件你愿意拆开的东西</span></aside>
+
+  <main>
+    <div class="top">
+      <div class="mark">无名件</div>
+      <div>拆开，才算寄到</div>
+    </div>
+
+    <div class="stage">
+      <div class="lede">
+        <h1>拆开它的人，<br>才知道它<br><em>哪儿最旧</em>。</h1>
+        <p class="sub">拍一张照片，写下你舍不得扔它的原因。它会变成能拆开的零件，装进盒子，寄给一个人。他一件件拆出来，读到你以为没人会发现的痕迹。</p>
+      </div>
+
+      <div class="object">
+        <img src="../.tmp/lamp-cut.png" alt="台灯的白模">
+        <div class="caption"><span>示例 · 一盏用了十年的台灯</span><span>生成后按结构拆件</span></div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="seal">拆过<br>才算</div>
+      <div class="foot-note">按结构拆件 · 可导出 STL · 手势可拆</div>
+      <a class="cta" href="#">寄一件</a>
+    </footer>
+  </main>
+</body>
+</html>

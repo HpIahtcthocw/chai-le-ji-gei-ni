@@ -16,6 +16,11 @@ export type Job = {
   itemId?: string;
   code?: string;
   partCount?: number;
+  /** 两次真实调用：拿得出任务号和耗时才敢写到这里 */
+  pipeline?: {
+    generate: { taskId: string; seconds: number };
+    split: { taskId: string; seconds: number };
+  };
   error?: string;
   createdAt: number;
   updatedAt: number;

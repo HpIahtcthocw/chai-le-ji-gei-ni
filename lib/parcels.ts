@@ -11,6 +11,8 @@ export type Parcel = {
   i?: string;
   /** 创建时间戳 */
   t: number;
+  /** 夹在核心零件里那句话；没有就回落到 meta.story */
+  m?: string;
 };
 
 const ID_RE = /^[a-z0-9_-]+$/i;

@@ -71,6 +71,10 @@ type Props = {
   itemName: string;
   message: string;
   labels: Record<number, string>;
+  /** 寄件人原图：核心零件被拉出时浮出来，和 3D 件并排 */
+  photo?: string;
+  /** 有包裹码时才给“回一句”的入口 */
+  replyCode?: string;
 };
 
 const clamp01 = (k: number) => Math.min(1, Math.max(0, k));
@@ -79,7 +83,7 @@ const easeOutExpo = (k: number) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
 const easeOutBack = (k: number) => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
 const easeOutCubic = (k: number) => 1 - Math.pow(1 - k, 3);
 
-export default function LockProto({ src, sender, itemName, message, labels }: Props) {
+export default function LockProto({ src, sender, itemName, message, labels, photo, replyCode }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const tagsRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>('loading');
@@ -463,8 +467,15 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
         shelf = shelfLayout(camera.aspect);
         buildTags();
         (window as any).__PROTO__ = { parts: parts.length, coreIndex, initialFree, depth };
+        // 截图与验收用：直接跳到“纸条”那一屏，不靠手拖
+        (window as any).__PROTO_NOTE__ = () => {
+          parts.forEach((p) => (p.removed = true));
+          setRemoved(parts.length);
+          setHint(null);
+          setPhase('note');
+        };
 
-        setCoreLabel(labels[coreIndex] ?? '最里面那块');
+        setCoreLabel(labels[coreIndex] ?? `第 ${coreIndex + 1} 块`);
         setTotal(parts.length);
         setPhase('playing');
       },
@@ -482,7 +493,7 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
         el.className = 'lp-tag';
         const isCore = p.index === coreIndex;
         el.innerHTML = `<i></i><span class="lp-tag-no">${String(i + 1).padStart(2, '0')}</span><span class="lp-tag-name">${
-          p.label ?? '零件'
+          p.label ?? `第 ${p.index + 1} 块`
         }${isCore ? '<em>纸条在这里</em>' : ''}</span>`;
         tagsHost.appendChild(el);
         tagEls.push(el);
@@ -971,12 +982,30 @@ export default function LockProto({ src, sender, itemName, message, labels }: Pr
 
       {phase === 'note' && (
         <div className="lp-note">
-          <div className="lp-note-head">{coreLabel}里夹着一张纸条</div>
-          <p className="lp-note-body">{message}</p>
-          <div className="lp-note-sign">{sender}</div>
-          <button type="button" className="lp-cta" onClick={() => ctrlRef.current.spread()}>
-            全部摊开
-          </button>
+          {photo && (
+            <figure className="lp-note-photo">
+              <img src={photo} alt={`${sender}拍下的那一张`} />
+              <figcaption>拍下的那一张</figcaption>
+            </figure>
+          )}
+          <div className="lp-note-body-wrap">
+            <div className="lp-note-head">{coreLabel}里夹着一张纸条</div>
+            <p className="lp-note-body">{message}</p>
+            <div className="lp-note-sign">
+              {sender}
+              {photo ? ' · 照片和这句话一起封进去的' : ''}
+            </div>
+            <div className="lp-note-actions">
+              <button type="button" className="lp-cta" onClick={() => ctrlRef.current.spread()}>
+                全部摊开
+              </button>
+              {replyCode && (
+                <a className="lp-cta lp-cta-line" href={`/r/${encodeURIComponent(replyCode)}`}>
+                  回他一句
+                </a>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

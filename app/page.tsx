@@ -1,67 +1,55 @@
 import Link from 'next/link';
-import HeroScene from '@/components/HeroScene';
+import LockProto from '@/components/LockProto';
 import { getItem, listItemIds } from '@/lib/items';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * 首页 = 一个已经寄到的包裹。
+ * 不做介绍页：进来就能按住零件往外拉，拆到底会翻出夹在里面的纸条。
+ */
 export default async function Home() {
   const ids = await listItemIds();
   const items = (await Promise.all(ids.map((id) => getItem(id)))).filter(
     (item): item is NonNullable<typeof item> => Boolean(item),
   );
-  const demo = items[0];
+
+  // 优先挑一件零件带名字的，拆开时标签才是“灯罩/底座”，不是一个字“零件”
+  const demo = items.find((it) => it.parts?.some((p) => p.label)) ?? items[0];
+
+  const labels: Record<number, string> = {};
+  if (demo) {
+    for (const part of demo.parts ?? []) {
+      const index = Number(part.partId.replace(/^part-/, ''));
+      if (Number.isFinite(index) && part.label) labels[index] = part.label;
+    }
+  }
+
+  if (!demo) {
+    return (
+      <main className="home-empty">
+        <p>还没有可拆的包裹。先去寄一件。</p>
+        <Link href="/send">寄一件</Link>
+      </main>
+    );
+  }
 
   return (
-    <main className="home-scroll">
-      <div className="home-fix">
-        <div className="home-stage">
-          {demo && <HeroScene src={`/items/${demo.id}/model.glb`} />}
-          <div className="home-dots" aria-hidden="true" />
-          <div className="home-shadow" aria-hidden="true" />
-        </div>
+    <>
+      <LockProto
+        src={`/items/${demo.id}/model.glb`}
+        sender="一个陌生人"
+        itemName={demo.name}
+        message={demo.story.replace(/^寄件人留言：/, '')}
+        labels={labels}
+      />
 
-        <div className="home-rule home-rule-top">
-          <span>AHOLO 3D AI HACKATHON</span>
-          <span>七件 · 未署名</span>
-        </div>
-
-        <div className="home-copy">
-          <h1 className="home-title">无名件</h1>
-          <p className="home-lede">
-            一件东西拆成几块，一句想说的话藏在最里面那块。<br />
-            收件人一块一块拆开，才知道寄来的是什么，才知道你说了什么。
-          </p>
-          <div className="home-actions">
-            <Link href="/send" className="home-cta">
-              寄一件
-            </Link>
-            {demo && (
-              <Link href={`/p/${demo.id}`} className="home-alt">
-                我收到一个包裹
-              </Link>
-            )}
-          </div>
-        </div>
-
-        <div className="home-rule home-rule-bottom">
-          <span>七件 · 可导出 STL</span>
-          <span>{demo ? demo.riddle : ''}</span>
-        </div>
-
-        <ol className="home-manifest" aria-hidden="true">
-          <li><i>01</i><span>罩住光的</span></li>
-          <li><i>02</i><span>会发烫的</span></li>
-          <li><i>03</i><span>伸出去的那截</span></li>
-          <li><i>04</i><span>让它转身的</span></li>
-          <li><i>05</i><span>撑起它的</span></li>
-          <li><i>06</i><span>托住它的</span></li>
-          <li><i>07</i><span>连着的</span></li>
-        </ol>
-        <div className="home-hint" aria-hidden="true">
-          <span>往下滚，看它怎么拆</span>
-          <i />
-        </div>
+      <div className="home-jump">
+        <span className="home-jump-mark">无名件</span>
+        <Link href="/send" className="home-jump-link">
+          寄一件你自己的
+        </Link>
       </div>
-
-      <div className="home-track" aria-hidden="true" />
-    </main>
+    </>
   );
 }

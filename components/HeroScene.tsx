@@ -113,7 +113,19 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
 
       const meshes: any[] = [];
       model.traverse((o: any) => {
-        if (o.isMesh || o.isSkinnedMesh) meshes.push(o);
+        if (o.isMesh || o.isSkinnedMesh) {
+          meshes.push(o);
+          // Lux3D 出的白模（PBR 很弱）在暗场上像石膏；统一压成墨色，结构线才立得住
+          const mats = Array.isArray(o.material) ? o.material : [o.material];
+          mats.forEach((m: any) => {
+            if (!m) return;
+            m.color?.set?.(0x14161b);
+            if ('roughness' in m) m.roughness = 0.52;
+            if ('metalness' in m) m.metalness = 0.22;
+            if (m.map) m.map = null;
+            m.needsUpdate = true;
+          });
+        }
       });
 
       const box = new A.Box3().setFromObject(model);
@@ -184,11 +196,20 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
       const easeIn = (k: number) => k * k * k;
       const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
+      // 可以绕过滚动：点按钮直接把进度推到“拆开”
+      let auto: number | null = null;
       const onScroll = () => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
         const raw = max > 0 ? window.scrollY / max : 0;
-        progress = clamp(raw);
+        if (auto === null) progress = clamp(raw);
         (window as any).__HERO_PROGRESS__ = progress;
+      };
+      (window as any).__HERO_OPEN__ = () => {
+        auto = 0.58;
+      };
+      (window as any).__HERO_RESET__ = () => {
+        auto = null;
+        onScroll();
       };
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
@@ -201,15 +222,15 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
       const frame = () => {
         if (disposed) return;
         const t = (performance.now() - t0) / 1000;
-        smooth += (progress - smooth) * 0.085;
+        smooth += ((auto ?? progress) - smooth) * 0.085;
         const p = smooth;
 
-        // 平光 → 立体：光在 0.04→0.30 之间渐次上来
+        // 第一帧就要看得见东西：一开始就有主光和轮廓，越拆越亮
         const lit = easeInOut(clamp((p - 0.05) / 0.2));
-        ambient.intensity = 1.05 - 0.83 * lit;
-        key.intensity = 2.0 * lit;
-        fill.intensity = 0.55 * lit;
-        rim.intensity = 1.7 * lit;
+        ambient.intensity = 0.3 - 0.09 * lit;
+        key.intensity = 1.3 + 0.7 * lit;
+        fill.intensity = 0.36 + 0.2 * lit;
+        rim.intensity = 1.05 + 0.65 * lit;
 
         let openSum = 0;
         let openPeak = 0;
@@ -228,7 +249,7 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
           openPeak = Math.max(openPeak, o);
 
           // 沿自身方位飞出，越在外面的走得越远；带一点重力下坠和自转
-          const spread = maxSize * 0.36 * o;
+          const spread = maxSize * 0.24 * o;
           const breathe = Math.sin(t * 0.9 + piece.seed * 6.28) * maxSize * 0.012 * Math.max(0, Math.min(1, (o - 0.6) / 0.4));
           piece.mesh.position.set(
             piece.dir.x * spread * 1.2,
@@ -246,7 +267,7 @@ export default function HeroScene({ src = '/items/lamp/model.glb' }: { src?: str
 
         // 第三拍只属于镜头：散完之后再慢慢退，退的过程里零件是静的
         const pullBack = easeInOut(clamp((p - 0.46) / 0.32));
-        const zoom = 1.02 * (1 + openPeak * 0.72 + pullBack * 0.26);
+        const zoom = 1.02 * (1 + openPeak * 0.5 + pullBack * 0.24);
         const a = 0.22 + p * 0.42 + mouseRef.current * 0.34;
         camera.position.set(
           lookAt.x + Math.sin(a) * dist * zoom,

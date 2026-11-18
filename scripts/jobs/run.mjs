@@ -75,6 +75,7 @@ try {
   mark('intake', 'done', '照片收到了');
   mark('understand', 'run');
 
+  const genStart = Date.now();
   const taskId = await lux3d.imgTo3d.create({
     img: job.image,
     version: 'G1',
@@ -87,13 +88,16 @@ try {
   mark('shape', 'run');
 
   const result = await lux3d.tasks.waitFor(taskId, WAIT);
+  const genSeconds = Math.round((Date.now() - genStart) / 1000);
   const glbUrl = glbUrlOf(result.outputs);
   if (!glbUrl) throw new Error(`生成任务没有 GLB 输出: ${JSON.stringify(result.outputs).slice(0, 200)}`);
   mark('shape', 'done', '形状有了');
   mark('split', 'run');
 
+  const splitStart = Date.now();
   const splitId = await lux3d.partSplit.create({ glbUrl });
   const splitResult = await lux3d.tasks.waitFor(splitId, WAIT);
+  const splitSeconds = Math.round((Date.now() - splitStart) / 1000);
   const splitUrl = glbUrlOf(splitResult.outputs);
   if (!splitUrl) throw new Error(`拆分任务没有 GLB 输出: ${JSON.stringify(splitResult.outputs).slice(0, 200)}`);
 
@@ -120,6 +124,7 @@ try {
     story: `寄件人留言：${job.sentence}`,
     partCount,
     parts: [],
+    sourceImage: job.image,
   };
   writeFileSync(resolve(itemDir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf8');
   writeFileSync(
@@ -129,6 +134,10 @@ try {
   );
 
   job.itemId = itemId;
+  job.pipeline = {
+    generate: { taskId, seconds: genSeconds },
+    split: { taskId: splitId, seconds: splitSeconds },
+  };
   job.code = codeOf(itemId, job.sender);
   job.partCount = partCount;
   mark('pack', 'done', `装好了，${partCount} 件`);

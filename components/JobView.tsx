@@ -6,6 +6,8 @@ import type { Job } from '@/lib/jobs';
 
 const STATE_TEXT: Record<string, string> = { wait: '等着', run: '在做', done: '', fail: '卡住了' };
 
+const clock = (sec: number) => (sec >= 60 ? `${Math.floor(sec / 60)} 分 ${sec % 60} 秒` : `${sec} 秒`);
+
 export default function JobView({ id }: { id: string }) {
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState('');
@@ -68,6 +70,25 @@ export default function JobView({ id }: { id: string }) {
             </li>
           ))}
         </ol>
+
+        {job?.pipeline && (
+          <dl className="job-pipe">
+            <div className="job-pipe-row">
+              <dt>Aholo Lux3D · imgTo3D</dt>
+              <dd>
+                <span>任务 {job.pipeline.generate.taskId}</span>
+                <span>{clock(job.pipeline.generate.seconds)}</span>
+              </dd>
+            </div>
+            <div className="job-pipe-row">
+              <dt>Aholo Lux3D · partSplit</dt>
+              <dd>
+                <span>任务 {job.pipeline.split.taskId}</span>
+                <span>{clock(job.pipeline.split.seconds)}</span>
+              </dd>
+            </div>
+          </dl>
+        )}
 
         {error && <p className="job-error">{error}</p>}
         {failed && job?.error && <p className="job-error">原因：{job.error}</p>}
