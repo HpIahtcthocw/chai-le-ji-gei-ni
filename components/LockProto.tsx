@@ -93,7 +93,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [progress, setProgress] = useState(0);
   const [removed, setRemoved] = useState(0);
   const [total, setTotal] = useState(0);
-  const [hint, setHint] = useState<string | null>('按住一块往外拉 · 被压着的拆不动');
+  const [hint, setHint] = useState<string | null>('按住一块往外拉；被别的块压着的，拉不动');
   const [finish, setFinish] = useState<Finish>('ink');
   const [spreadDone, setSpreadDone] = useState(false);
   const [coreLabel, setCoreLabel] = useState('最里面');
@@ -707,7 +707,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             else if (typeof prev.damage === 'number' && hurtNow < prev.damage) {
               line = `比上次少硬拽 ${prev.damage - hurtNow} 次`;
             } else line = `上次 ${prev.sec} 秒`;
-            if (hurtNow === 0 && prev.damage === 0) line += ' · 两次纸边都没缺';
+            if (hurtNow === 0 && prev.damage === 0) line += '，两次纸边都没缺';
           } else {
             line = '第一次拆完';
           }
@@ -838,6 +838,12 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       orbit: orbitBy,
       spreadBy: (d: number) => {
         if (spreadArmed) spreadTarget = clamp01(spreadTarget + d);
+      },
+      blow: () => {
+        if (spreadArmed) spreadTarget = 1;
+      },
+      fold: () => {
+        if (spreadArmed) spreadTarget = 0;
       },
     };
 
@@ -1070,7 +1076,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       <div ref={dirsRef} className="lp-dirs" aria-hidden="true" />
       <div className="lp-dots" aria-hidden="true" />
       <div ref={tagsRef} className="lp-tags" aria-hidden="true" />
-      <div className="lp-mark">Aholo Viewer 渲染 · Lux3D 生成</div>
+      <div className="lp-mark">模型 Lux3D 生成，Aholo Viewer 看</div>
 
       <div className="lp-rule lp-rule-top">
         <span>
@@ -1140,11 +1146,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             )}
             <div className="lp-note-sign">
               {sender}
-              {photo ? ' · 照片和这句话一起封进去的' : ''}
+              {photo ? '，照片和这句话一起封进去的' : ''}
             </div>
             {elapsed !== null && (
               <p className="lp-note-stat">
-                拆了 {total} 块 · 硬拽 {damage} 次 · 用了 {elapsed} 秒
+                拆了 {total} 块，硬拽 {damage} 次，用了 {elapsed} 秒
                 {record ? ` · ${record}` : ''}
               </p>
             )}

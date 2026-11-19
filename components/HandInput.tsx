@@ -9,6 +9,8 @@ export type HandControls = {
   release: () => void;
   orbit: (dx: number) => void;
   spreadBy: (d: number) => void;
+  blow?: () => void;
+  fold?: () => void;
 };
 
 type Props = {
@@ -24,6 +26,10 @@ type HandState = {
   palmX: number | null;
   seen: number;
   offSince: number;
+  openHold: number;
+  fistHold: number;
+  blown: boolean;
+  folded: boolean;
 };
 
 // 识别偶尔掉一帧，不能让"少一帧"等于"松手"：连丢 260ms 才算手真的离开
@@ -49,6 +55,20 @@ const isOpenPalm = (lm: NormalizedLandmark[]) =>
     [16, 14],
     [20, 18],
   ].every(([tip, pip]) => dist(lm[tip], lm[0]) > dist(lm[pip], lm[0]) * 1.12);
+
+// 握拳：指尖缩回掌心，比指节更靠近手腕
+const isFist = (lm: NormalizedLandmark[]) =>
+  [
+    [8, 6],
+    [12, 10],
+    [16, 14],
+    [20, 18],
+  ].every(([tip, pip]) => dist(lm[tip], lm[0]) < dist(lm[pip], lm[0]) * 0.92);
+
+// 张着手停住 = 拆开；握起来停住 = 拼回。停住的时间门槛，防手抖误触
+const OPEN_HOLD = 780;
+const FIST_HOLD = 620;
+const STILL_SPEED = 3.2;
 
 export default function HandInput({ getControls, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -164,7 +184,7 @@ export default function HandInput({ getControls, onClose }: Props) {
         const tip = toScreen({ x: (lm[4].x + lm[8].x) / 2, y: (lm[4].y + lm[8].y) / 2, z: 0, visibility: 1 });
         const el2 = meterRef.current;
         if (el2 && i === 0) {
-          el2.textContent = `捏合 ${pinchRatio.toFixed(2)} · 触发 ${PINCH_ON}`;
+          el2.textContent = `捏合 ${pinchRatio.toFixed(2)}（小于 ${PINCH_ON} 算捏住）`;
         }
         const prev = hands[i];
         const h: HandState = prev ?? {
@@ -175,6 +195,10 @@ export default function HandInput({ getControls, onClose }: Props) {
           palmX: null,
           seen: now,
           offSince: 0,
+          openHold: 0,
+          fistHold: 0,
+          blown: false,
+          folded: false,
         };
         h.seen = now;
         // 速度越快平滑越少：慢移稳、快移跟手
@@ -185,6 +209,10 @@ export default function HandInput({ getControls, onClose }: Props) {
 
         const wasPinching = h.pinching;
         h.pinching = wasPinching ? pinchRatio < PINCH_OFF : pinchRatio < PINCH_ON;
+        // 握拳时指尖本来就贴着拇指，别让它被当成捏合去抓零件
+        const openNow = isOpenPalm(lm);
+        const fistNow = !openNow && isFist(lm);
+        if (fistNow) h.pinching = false;
         // 捏住之后每帧都试着抓：手先捏、再挪到零件上，也能抓住
         if (h.pinching && ordered.length === 1 && !h.grabbed) {
           h.grabbed = controls?.grab(h.x, h.y, 110) ?? false;
@@ -206,9 +234,41 @@ export default function HandInput({ getControls, onClose }: Props) {
         }
         if (ordered.length === 1) controls?.move(h.x, h.y);
 
+        const open = openNow;
+        const fist = fistNow;
+        const still = speed < STILL_SPEED;
+
+        if (h.pinching || h.grabbed) {
+          // 捏着、拉着的时候别去拆合，免得跟拖零件打架
+          h.openHold = 0;
+          h.fistHold = 0;
+        } else {
+          if (open && still && ordered.length === 1) {
+            if (!h.openHold) h.openHold = now;
+            if (now - h.openHold > OPEN_HOLD && !h.blown) {
+              controls?.blow?.();
+              h.blown = true;
+            }
+          } else {
+            h.openHold = 0;
+            if (!open) h.blown = false;
+          }
+          if (fist && ordered.length === 1) {
+            if (!h.fistHold) h.fistHold = now;
+            if (now - h.fistHold > FIST_HOLD && !h.folded) {
+              controls?.fold?.();
+              h.folded = true;
+            }
+          } else {
+            h.fistHold = 0;
+            if (!fist) h.folded = false;
+          }
+        }
+
         const palm = toScreen(lm[9]).x;
-        if (ordered.length === 1 && !h.pinching && !h.grabbed && isOpenPalm(lm)) {
-          if (h.palmX !== null) controls?.orbit(palm - h.palmX);
+        if (ordered.length === 1 && !h.pinching && !h.grabbed && open) {
+          // 只有真在挥的时候才转视角，停住的那只手交给「拆开」
+          if (!still && h.palmX !== null) controls?.orbit(palm - h.palmX);
           h.palmX = palm;
         } else {
           h.palmX = null;
@@ -236,11 +296,15 @@ export default function HandInput({ getControls, onClose }: Props) {
       const openCount = ordered.filter((lm) => isOpenPalm(lm)).length;
       const anyGrab = hands.some((h) => h?.grabbed);
       const anyPinch = hands.some((h) => h?.pinching);
+      const holding = hands.some((h) => h && h.openHold > 0);
+      const closing = hands.some((h) => h && h.fistHold > 0);
       if (!found.length) say('把手举到摄像头前');
       else if (anyGrab) say('抓住了，往外拉');
       else if (anyPinch) say('捏住了，别松手');
+      else if (closing) say('别动，正在拼回去');
+      else if (holding) say('别动，正在拆开');
       else if (openCount === 2) say('两只手拉开，就摊开了');
-      else if (openCount === 1) say('左右挥手，转着看');
+      else if (openCount === 1) say('张开手掌停一下能拆，挥手是转着看');
       else say('捏住食指和拇指');
     };
     (window as any).__HAND_FEED__ = process;
@@ -305,8 +369,9 @@ export default function HandInput({ getControls, onClose }: Props) {
       </div>
       <ul className="hi-legend">
         <li>捏住一件，往外拉</li>
-        <li>张手左右挥，转着看</li>
-        <li>双手拉开，就摊开</li>
+        <li>张开手掌停一下，整件散开</li>
+        <li>握起拳头停一下，拼回去</li>
+        <li>挥手是转着看，别停着挥</li>
       </ul>
     </>
   );

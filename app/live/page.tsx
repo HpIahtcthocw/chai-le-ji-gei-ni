@@ -223,7 +223,7 @@ export default function LivePage() {
         <div className="rt-win">
           <header className="rt-titlebar">
             <span className="rt-titlebar-icon" aria-hidden="true">▣</span>
-            <span className="rt-titlebar-text">无名件 — 拆件台 · C:\无名件\台灯.glb</span>
+            <span className="rt-titlebar-text">无名件 拆件台 — 台灯.glb（16 MB，七件）</span>
             <span className="rt-titlebar-btns" aria-hidden="true"><b>_</b><b>□</b><b>×</b></span>
           </header>
 
@@ -233,7 +233,7 @@ export default function LivePage() {
             <span>视图</span>
             <span>帮助</span>
             <span className="rt-menubar-gap" />
-            <span className="rt-menubar-note">在线生成：开 · 一件 = 1 次建模 + 1 次拆件</span>
+            <span className="rt-menubar-note">这台机器连得上，一件要等五到十分钟</span>
           </div>
 
           <div className="rt-body">
@@ -241,9 +241,9 @@ export default function LivePage() {
               <div className="rt-group">
                 <div className="rt-group-title">怎么用</div>
                 <ol className="rt-steps" id="how">
-                  <li><b>放一张照片</b><span>白底或浅底，一件东西占满画面最好认</span></li>
-                  <li><b>写一句话</b><span>它会压在最里面那块底下，拆到那儿才翻出来</span></li>
-                  <li><b>按「开始拆件」</b><span>等五到十分钟，出来直接是一条链接</span></li>
+                  <li><b>放进一张照片</b><span>白底或浅底最认得出，别裁太紧</span></li>
+                  <li><b>写一句话</b><span>它会压在最里面那块底下，拆到那儿才看得到</span></li>
+                  <li><b>按「开始拆件」</b><span>五到十分钟，出来就是一条链接</span></li>
                 </ol>
               </div>
 
@@ -252,8 +252,8 @@ export default function LivePage() {
                 <button type="button" className="rt-sample" onClick={() => void useSample()} disabled={busy}>
                   <img src="/example/camera.jpg" alt="示例：一台旧胶片相机" />
                   <span className="rt-sample-note">
-                    旧相机 · 点一下拿来试
-                    <em>真跑过一次，拆成 9 件</em>
+                    旧相机，点一下就用
+                    <em>这一件真跑过，散成九块</em>
                   </span>
                 </button>
               </div>
@@ -282,7 +282,7 @@ export default function LivePage() {
                     mode={hold}
                     onUserToggle={(open) => setHold(open ? 'open' : 'closed')}
                   />
-                  <span className="rt-stage-hint">拖住转 · 双指或滚轮缩放 · 单击拆开</span>
+                  <span className="rt-stage-hint">拖住转，两指缩放，点一下散开</span>
                   {packing && (
                     <div className="rt-pack">
                       <div className="rt-pack-bar">
@@ -292,7 +292,7 @@ export default function LivePage() {
                       <div className="rt-pack-body">
                         <div className="rt-pack-file" aria-hidden="true">▤</div>
                         <p>
-                          把台上这 <b>{FALLBACK_PARTS}</b> 件装回盒子里……
+                          把台上这 <b>{FALLBACK_PARTS}</b> 件装回盒子……
                           <em>盖上去，就成一条链接</em>
                         </p>
                       </div>
@@ -352,8 +352,8 @@ export default function LivePage() {
                   ) : (
                     <span className="rt-slot-empty">
                       <b>照片</b>
-                      点这里选一张，或手机现拍
-                      <i>JPG / PNG · 原图不会上传</i>
+                      点这里从相册里挑，或者现在就拍
+                      <i>先压到 1600 宽，原图不上传</i>
                     </span>
                   )}
                 </button>
@@ -460,11 +460,11 @@ export default function LivePage() {
               </div>
 
               <div className="rt-group">
-                <div className="rt-group-title">这一件是怎么长出来的</div>
+                <div className="rt-group-title">这一件要花多少功夫</div>
                 <ul className="rt-cost">
-                  <li><b>建模 1 次</b><span>照片 → 12 万面模型，约 5 分钟</span></li>
-                  <li><b>拆件 1 次</b><span>按轮廓切成零件，约 2 分钟</span></li>
-                  <li><b>人工审核 0 次</b><span>出来就是链接，收件的人自己拉开来</span></li>
+                  <li><b>建模一次</b><span>照片变成十二万面的模型，五分钟上下</span></li>
+                  <li><b>拆件一次</b><span>按轮廓切成零件，两分钟</span></li>
+                  <li><b>不用人看</b><span>出来就是链接，摊开等你自己拆</span></li>
                 </ul>
               </div>
             </section>
@@ -474,7 +474,7 @@ export default function LivePage() {
             <span className="rt-status-cell">{status}</span>
             <span className="rt-status-cell">{img ? '照片已就位' : '没有照片'}</span>
             <span className="rt-status-cell">{line.trim() ? '那句话已写' : '还没写那句话'}</span>
-            <span className="rt-status-cell rt-status-right">收到时是拆散的，得自己一块块拉开来</span>
+            <span className="rt-status-cell rt-status-right">收件那头螺丝是松的，得自己一块块拉开来</span>
           </footer>
         </div>
       </div>
