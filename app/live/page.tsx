@@ -404,6 +404,15 @@ export default function LivePage() {
                   </div>
                 )}
               </div>
+
+              <div className="rt-group">
+                <div className="rt-group-title">这一件是怎么长出来的</div>
+                <ul className="rt-cost">
+                  <li><b>建模 1 次</b><span>照片 → 12 万面模型，约 5 分钟</span></li>
+                  <li><b>拆件 1 次</b><span>按轮廓切成零件，约 2 分钟</span></li>
+                  <li><b>人工审核 0 次</b><span>出来就是链接，收件的人自己拉开来</span></li>
+                </ul>
+              </div>
             </section>
           </div>
 

@@ -3326,3 +3326,31 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
     min-height: 250px;
   }
 }
+
+.rt-cost {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rt-cost li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px dotted #9a9a9a;
+}
+.rt-cost li:last-child {
+  border-bottom: none;
+}
+.rt-cost b {
+  flex: 0 0 84px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.rt-cost span {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #262626;
+}
