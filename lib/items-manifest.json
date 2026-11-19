@@ -39,7 +39,8 @@
       }
     ],
     "oldest": "底座",
-    "oldestWhy": "搬来搬去，底座上的漆掉得最厉害。"
+    "oldestWhy": "搬来搬去，底座上的漆掉得最厉害。",
+    "glb": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6Y2FQKTKYSYAABAAAAABQ8.glb"
   },
   "genmwkpt3mu8o6hb": {
     "id": "genmwkpt3mu8o6hb",
@@ -79,7 +80,8 @@
     ],
     "sourceImage": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg",
     "oldest": "灯泡",
-    "oldestWhy": "换了两次灯罩，灯泡一直没换。"
+    "oldestWhy": "换了两次灯罩，灯泡一直没换。",
+    "glb": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6FKVQKTKJFSAABAAAAAAQ8.glb"
   },
   "lamp": {
     "id": "lamp",
@@ -160,7 +162,8 @@
         ],
         "answerIndex": 1
       }
-    ]
+    ],
+    "glb": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL3JEMAKTJJSAAABAAAAADI8.glb"
   },
   "radio": {
     "id": "radio",
@@ -214,6 +217,7 @@
       }
     ],
     "oldest": "旋钮",
-    "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。"
+    "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。",
+    "glb": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL6YYWYKTKULKAABAAAAAAQ8.glb"
   }
 }

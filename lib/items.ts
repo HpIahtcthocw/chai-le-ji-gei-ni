@@ -25,6 +25,8 @@ export type ItemMeta = {
   sourceImage?: string;
   /** 首页展品：门口那件先被拆的东西 */
   featured?: boolean;
+  /** 官方 CDN 上的拆分 GLB；容器带宽有限时用它代替仓库里的 model.glb */
+  glb?: string;
 };
 
 const ITEMS_DIR = path.join(process.cwd(), 'public', 'items');

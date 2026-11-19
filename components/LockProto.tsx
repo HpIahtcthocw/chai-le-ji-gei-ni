@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -413,6 +415,11 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     let shelf = { width: 1, height: 1 };
 
     const loader = new GLTFLoader();
+    // 官方 CDN 的拆分产物是 meshopt / draco 压过的，不装解码器只能拿到一堆空 mesh
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    const draco = new DRACOLoader();
+    draco.setDecoderPath('/draco/');
+    loader.setDRACOLoader(draco);
     loader.load(
       src,
       (gltf) => {

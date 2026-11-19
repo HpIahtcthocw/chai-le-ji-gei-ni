@@ -36,7 +36,7 @@ export default async function ReceivePage({ params }: { params: Promise<{ code: 
 
   return (
     <LockProto
-      src={remote ?? `/items/${parcel.a}/model.glb`}
+      src={remote ?? meta?.glb ?? `/items/${parcel.a}/model.glb`}
       sender={parcel.s?.trim() || '一个没留名的人'}
       itemName={meta?.name ?? '一件刚长出来的东西'}
       message={message}
