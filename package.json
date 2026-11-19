@@ -20,6 +20,8 @@
   },
   "devDependencies": {
     "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
     "@manycore/aholo-sdk-lux3d": "^1.9.0",
     "@types/node": "22.19.4",
     "@types/qrcode": "^1.5.6",

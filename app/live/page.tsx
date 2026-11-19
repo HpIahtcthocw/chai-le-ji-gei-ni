@@ -223,7 +223,7 @@ export default function LivePage() {
         <div className="rt-win">
           <header className="rt-titlebar">
             <span className="rt-titlebar-icon" aria-hidden="true">▣</span>
-            <span className="rt-titlebar-text">无名件 拆件台 — 台灯.glb（16 MB，七件）</span>
+            <span className="rt-titlebar-text">无名件 拆件台 — 台灯.glb（七件）</span>
             <span className="rt-titlebar-btns" aria-hidden="true"><b>_</b><b>□</b><b>×</b></span>
           </header>
 
@@ -278,7 +278,7 @@ export default function LivePage() {
                 <div className="rt-pane-title">拆解台 — 台灯（7 件）</div>
                 <div className="rt-stage">
                   <HeroStage
-                    src="https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL3JEMAKTJJSAAABAAAAADI8.glb"
+                    src="/items/lamp/model-slim.glb"
                     mode={hold}
                     onUserToggle={(open) => setHold(open ? 'open' : 'closed')}
                   />

@@ -47,7 +47,7 @@ export default async function Home() {
   return (
     <>
       <LockProto
-        src={demo.glb ?? `/items/${demo.id}/model.glb`}
+        src={demo.glb ?? `/items/${demo.id}/model-slim.glb`}
         sender="一个陌生人"
         itemName={demo.name}
         message={demo.story.replace(/^寄件人留言：/, '')}
