@@ -45,6 +45,8 @@ async function toDataUrl(file: File): Promise<{ dataUrl: string; width: number; 
   throw new Error('这张图压不下去，换一张小一点的照片');
 }
 
+const FALLBACK_PARTS = 7;
+
 const SHELF = [
   { href: '/p/lamp', name: '台灯', parts: 7, note: '最早寄出的那件' },
   { href: '/p/radio', name: '收音机', parts: 7, note: '按轮廓拆的' },
@@ -63,6 +65,8 @@ export default function LivePage() {
   const [error, setError] = useState('');
   const [parcel, setParcel] = useState<{ url: string; qrSvg: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [hold, setHold] = useState<'auto' | 'open' | 'closed'>('auto');
+  const [packing, setPacking] = useState(false);
 
   const busy = stage === 'gen' || stage === 'split';
   const progress = stage === 'done' ? 100 : stage === 'split' ? 68 : stage === 'gen' ? 28 : 0;
@@ -176,6 +180,8 @@ export default function LivePage() {
       if (!parcelRes.ok || !parcelJson.url) throw new Error(parcelJson.error || '打包失败');
 
       setParcel({ url: parcelJson.url, qrSvg: parcelJson.qrSvg ?? '' });
+      setPacking(true);
+      window.setTimeout(() => setPacking(false), 1900);
       setStage('done');
     } catch (err) {
       setError(err instanceof Error ? err.message : '出错了');
@@ -271,12 +277,60 @@ export default function LivePage() {
               <div className="rt-pane">
                 <div className="rt-pane-title">拆解台 — 台灯（7 件）</div>
                 <div className="rt-stage">
-                  <HeroStage src="/items/lamp/model.glb" />
-                  <span className="rt-stage-hint">拖住转 · 单击整件拆开</span>
+                  <HeroStage
+                    src="/items/lamp/model.glb"
+                    mode={hold}
+                    onUserToggle={(open) => setHold(open ? 'open' : 'closed')}
+                  />
+                  <span className="rt-stage-hint">拖住转 · 双指或滚轮缩放 · 单击拆开</span>
+                  {packing && (
+                    <div className="rt-pack">
+                      <div className="rt-pack-bar">
+                        <span>装箱</span>
+                        <span className="rt-pack-x">×</span>
+                      </div>
+                      <div className="rt-pack-body">
+                        <div className="rt-pack-file" aria-hidden="true">▤</div>
+                        <p>
+                          把台上这 <b>{FALLBACK_PARTS}</b> 件装回盒子里……
+                          <em>盖上去，就成一条链接</em>
+                        </p>
+                      </div>
+                      <div className="rt-pack-track">
+                        <i />
+                      </div>
+                    </div>
+                  )}
+                  {hold === 'open' && (
+                    <div className="rt-slip">
+                      <b>最里面那块底下</b>
+                      <span>{line.trim() ? `「${line.trim()}」` : '「你还没写——写完就压在这一块底下」'}</span>
+                      <em>收件的人拆到这一块，才看得到</em>
+                    </div>
+                  )}
                 </div>
                 <div className="rt-toolbar">
-                  <span className="rt-toolbtn">拖拽旋转</span>
-                  <span className="rt-toolbtn">单击拆开</span>
+                  <button
+                    type="button"
+                    className={`rt-toolbtn${hold === 'closed' ? ' is-on' : ''}`}
+                    onClick={() => setHold('closed')}
+                  >
+                    合上
+                  </button>
+                  <button
+                    type="button"
+                    className={`rt-toolbtn${hold === 'open' ? ' is-on' : ''}`}
+                    onClick={() => setHold('open')}
+                  >
+                    拆开
+                  </button>
+                  <button
+                    type="button"
+                    className={`rt-toolbtn${hold === 'auto' ? ' is-on' : ''}`}
+                    onClick={() => setHold('auto')}
+                  >
+                    自动循环
+                  </button>
                   <span className="rt-toolbar-gap" />
                   <span className="rt-readout">原来挂着的那件 · 真拆过</span>
                 </div>

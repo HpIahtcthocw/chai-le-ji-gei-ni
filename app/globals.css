@@ -3354,3 +3354,186 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   line-height: 1.5;
   color: #262626;
 }
+
+/* 工具栏：真按钮，按下去有凹陷 */
+.rt-toolbtn {
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 10px;
+  color: #000000;
+  background: #c0c0c0;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  cursor: pointer;
+}
+.rt-toolbtn.is-on {
+  border-color: #808080 #ffffff #ffffff #808080;
+  background: #b4b4b4;
+  font-weight: 700;
+}
+
+/* 台上那张纸：拆开时才浮出来，就是你写的那句话 */
+.rt-slip {
+  position: absolute;
+  right: 10px;
+  bottom: 34px;
+  width: 186px;
+  padding: 7px 9px 6px;
+  background: #fffdf2;
+  border: 1px solid #b9ab92;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  transform: rotate(-1.6deg);
+  font-size: 11px;
+  line-height: 1.55;
+  color: #2a2620;
+  animation: rt-slip-in 0.22s ease-out both;
+}
+.rt-slip b {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: #7a5a3c;
+  margin-bottom: 3px;
+}
+.rt-slip span {
+  display: block;
+  font-size: 12px;
+  word-break: break-word;
+}
+.rt-slip em {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 10px;
+  color: #7a7367;
+}
+@keyframes rt-slip-in {
+  from {
+    opacity: 0;
+    transform: rotate(-1.6deg) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-1.6deg) translateY(0);
+  }
+}
+
+/* 窗口开起来像被点开，不是硬出现 */
+.rt-win {
+  animation: rt-win-in 0.36s ease-out both;
+}
+@keyframes rt-win-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 860px) {
+  .rt-slip {
+    width: 148px;
+    right: 8px;
+    bottom: 30px;
+    font-size: 10px;
+  }
+  .rt-toolbtn {
+    padding: 3px 9px;
+  }
+}
+
+/* 装箱：台上弹一个 95 对话框，把拆开的这些装回去 */
+.rt-pack {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 246px;
+  transform: translate(-50%, -50%);
+  background: #c0c0c0;
+  border: 1px solid #000000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  animation: rt-pack-in 0.16s ease-out both;
+}
+.rt-pack-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+.rt-pack-x {
+  margin-left: auto;
+  width: 16px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  color: #000000;
+  background: #c0c0c0;
+  border: 1px solid #ffffff;
+}
+.rt-pack-body {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.rt-pack-file {
+  width: 34px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: #000080;
+  background: #ffffff;
+  border: 1px solid #808080;
+}
+.rt-pack-body p {
+  margin: 0;
+}
+.rt-pack-body em {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  color: #404040;
+}
+.rt-pack-track {
+  height: 14px;
+  margin: 0 10px 10px;
+  padding: 2px;
+  background: #ffffff;
+  border: 1px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  overflow: hidden;
+}
+.rt-pack-track i {
+  display: block;
+  height: 100%;
+  background-image: repeating-linear-gradient(90deg, #000080 0 9px, #1084d0 9px 11px);
+  animation: rt-pack-fill 1.85s linear both;
+}
+@keyframes rt-pack-fill {
+  from {
+    width: 4%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes rt-pack-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

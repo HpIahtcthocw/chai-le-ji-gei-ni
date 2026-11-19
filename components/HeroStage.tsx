@@ -13,11 +13,23 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 export default function HeroStage({
   src = '/items/lamp/model.glb',
   partsLabel,
+  mode = 'auto',
+  onUserToggle,
 }: {
   src?: string;
   partsLabel?: string;
+  mode?: 'auto' | 'open' | 'closed';
+  onUserToggle?: (open: boolean) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const modeRef = useRef(mode);
+  const toggleRef = useRef(onUserToggle);
+
+  // 外部按钮能改台上这一件，台上的点击也能反过来改按钮
+  useEffect(() => {
+    modeRef.current = mode;
+    toggleRef.current = onUserToggle;
+  }, [mode, onUserToggle]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -115,6 +127,7 @@ export default function HeroStage({
     let spinTarget = 0.06;
     let dragVel = 0;
     let explodeHold = 0;
+    let zoom = 1;
 
     const pointer = new THREE.Vector2(-9, -9);
     const raycaster = new THREE.Raycaster();
@@ -212,7 +225,7 @@ export default function HeroStage({
     const view = { dist: 3, camX: 0, camY: 0, lookX: 0, lookY: 0.3 };
     const applyCamera = (t: number) => {
       // 拆开的时候镜头自己退一点，像电影里让开位置
-      camera.position.set(view.camX, view.camY + t * height * 0.06, view.dist * (1 + 0.34 * t));
+      camera.position.set(view.camX, view.camY + t * height * 0.06, view.dist * zoom * (1 + 0.34 * t));
       camera.lookAt(view.lookX, view.lookY + t * height * 0.05, 0);
     };
 
@@ -235,26 +248,67 @@ export default function HeroStage({
     const resize = new ResizeObserver(() => fitView());
     resize.observe(host);
 
+    const active = new Map<number, { x: number; y: number }>();
+    let pinchStart = 0;
+    let zoomStart = 1;
+    const spread = () => {
+      const pts = Array.from(active.values());
+      if (pts.length < 2) return 0;
+      return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    };
+
     const onPointerDown = (e: PointerEvent) => {
-      dragging = true;
-      lastX = e.clientX;
-      dragVel = 0;
+      active.set(e.pointerId, { x: e.clientX, y: e.clientY });
       host.setPointerCapture(e.pointerId);
       clickedAt = performance.now();
+      dragVel = 0;
+      if (active.size === 1) {
+        dragging = true;
+        lastX = e.clientX;
+      } else {
+        // 两指按下去就不转了，改成捏合缩放
+        dragging = false;
+        pinchStart = spread();
+        zoomStart = zoom;
+      }
     };
     const onPointerUp = (e: PointerEvent) => {
+      active.delete(e.pointerId);
+      if (pinchStart) {
+        pinchStart = 0;
+        dragVel = 0;
+        clickedAt = performance.now();
+        return;
+      }
+      if (active.size === 1) {
+        // 松掉一根手指，剩下一根接着拖
+        const rest = Array.from(active.values())[0];
+        dragging = true;
+        lastX = rest.x;
+        clickedAt = performance.now();
+        return;
+      }
       dragging = false;
       host.releasePointerCapture?.(e.pointerId);
       const moved = Math.abs(dragVel) > 0.02 || performance.now() - clickedAt > 260;
       if (!moved) {
-        explodeHold = explodeHold > 0.5 ? 0 : 1;
+        const next = explodeHold > 0.5 ? 0 : 1;
+        explodeHold = next;
         auto = false;
         clickedAt = performance.now();
+        toggleRef.current?.(next === 1);
       }
     };
     const onPointerMove = (e: PointerEvent) => {
       const rect = host.getBoundingClientRect();
       pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+      if (!active.has(e.pointerId)) return;
+      active.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (active.size >= 2 && pinchStart > 4) {
+        zoom = Math.min(1.9, Math.max(0.62, zoomStart * (spread() / pinchStart)));
+        return;
+      }
       if (dragging) {
         const dx = e.clientX - lastX;
         lastX = e.clientX;
@@ -268,11 +322,19 @@ export default function HeroStage({
     const onPointerLeave = () => {
       pointer.set(-9, -9);
       dragging = false;
+      active.clear();
+      pinchStart = 0;
+    };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      zoom = Math.min(1.9, Math.max(0.62, zoom * (1 + e.deltaY * 0.0008)));
     };
     host.addEventListener('pointerdown', onPointerDown);
     host.addEventListener('pointerup', onPointerUp);
+    host.addEventListener('pointercancel', onPointerUp);
     host.addEventListener('pointermove', onPointerMove);
     host.addEventListener('pointerleave', onPointerLeave);
+    host.addEventListener('wheel', onWheel, { passive: false });
 
     let raf = 0;
     const clock = new THREE.Clock();
@@ -286,7 +348,12 @@ export default function HeroStage({
       const dt = Math.min(0.05, clock.getDelta());
       const now = performance.now();
 
-      if (!auto && now - clickedAt > 6000 && !dragging) {
+      const want = modeRef.current;
+      if (want !== 'auto') {
+        auto = false;
+        const target = want === 'open' ? 1 : 0;
+        explodeHold += (target - explodeHold) * 0.07;
+      } else if (!auto && now - clickedAt > 6000 && !dragging) {
         auto = true;
         explodeHold = 0;
       }
@@ -352,7 +419,9 @@ export default function HeroStage({
       host.removeEventListener('pointerdown', onPointerDown);
       host.removeEventListener('pointerup', onPointerUp);
       host.removeEventListener('pointermove', onPointerMove);
+      host.removeEventListener('pointercancel', onPointerUp);
       host.removeEventListener('pointerleave', onPointerLeave);
+      host.removeEventListener('wheel', onWheel);
       renderer.dispose();
       pmrem.dispose();
       if (renderer.domElement.parentElement === host) host.removeChild(renderer.domElement);
