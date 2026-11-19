@@ -874,7 +874,7 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
       >
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: narrow ? 14 : 15, letterSpacing: 2, color: '#e8eaf0', whiteSpace: 'nowrap' }}>
-            无名件
+            拆了寄给你
           </div>
           <div style={{ fontSize: 11, color: '#6d7688', marginTop: 6, letterSpacing: 1, whiteSpace: 'nowrap' }}>
             第 {Math.min(placed + 1, meta.parts.length)} / {meta.parts.length} 块 · 得分 {score}

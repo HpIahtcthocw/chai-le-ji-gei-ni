@@ -1,0 +1,14 @@
+{
+  "generate": {
+    "kind": "img-to-3d",
+    "file": "E:\\gitproject\\chai-le-ji-gei-ni\\.tmp\\phone-src.jpg",
+    "taskId": 8435483
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/lux3dPbrEmbedResult/98ba3a838577471c8d7384a503ca9214/textured.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 8436448
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL7M7RYKTKLBCAABAAAAAEA8.glb",
+  "splitStatus": 3
+}

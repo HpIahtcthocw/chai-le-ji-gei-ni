@@ -1,0 +1,14 @@
+{
+  "generate": {
+    "kind": "img-to-3d",
+    "file": "E:\\gitproject\\chai-le-ji-gei-ni\\.tmp\\clock-src.jpg",
+    "taskId": 8435484
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/lux3dPbrEmbedResult/dc50089d0180468cb54bf4759cb25fd3/textured.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 8436396
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL7M77IKTKLYYAABAAAAABY8.glb",
+  "splitStatus": 3
+}

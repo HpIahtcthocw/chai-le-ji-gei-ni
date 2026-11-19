@@ -1,0 +1,14 @@
+{
+  "generate": {
+    "kind": "img-to-3d",
+    "file": "E:\\gitproject\\chai-le-ji-gei-ni\\.tmp\\sew-src.jpg",
+    "taskId": 8454170
+  },
+  "generateUrl": "https://qhsmodel.kujiale.com/lux3dPbrEmbedResult/3a138a33c1054fdf8ab1134eb97ff696/textured.glb",
+  "generateStatus": 3,
+  "split": {
+    "taskId": 8456993
+  },
+  "splitUrl": "https://qhsmodel.kujiale.com/glbPartsReconstructResult/NL7O5RIKTLBSIAABAAAAABY8.glb",
+  "splitStatus": 3
+}

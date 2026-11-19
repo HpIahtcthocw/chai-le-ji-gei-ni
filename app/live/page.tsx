@@ -223,7 +223,7 @@ export default function LivePage() {
         <div className="rt-win">
           <header className="rt-titlebar">
             <span className="rt-titlebar-icon" aria-hidden="true">▣</span>
-            <span className="rt-titlebar-text">无名件 拆件台 — 台灯.glb（七件）</span>
+            <span className="rt-titlebar-text">拆了寄给你 · 无名件 拆件台 — 台灯.glb（七件）</span>
             <span className="rt-titlebar-btns" aria-hidden="true"><b>_</b><b>□</b><b>×</b></span>
           </header>
 

@@ -1,0 +1,26 @@
+{
+  "id": "phone",
+  "name": "拨盘电话",
+  "riddle": "它响了二十年，接的人越来越少了。",
+  "story": "寄件人留言：这个号我拨了二十年，家里没人接的时候，它响得最久。",
+  "sender": "阿岚",
+  "partCount": 3,
+  "parts": [
+    {
+      "partId": "part-0",
+      "label": "底座"
+    },
+    {
+      "partId": "part-1",
+      "label": "听筒和线"
+    },
+    {
+      "partId": "part-2",
+      "label": "机身外壳"
+    }
+  ],
+  "sourceImage": "/items/phone/source.jpg",
+  "glb": "/items/phone/model-1024.glb",
+  "oldest": "听筒和线",
+  "oldestWhy": "线是最先被扯坏的那一段。"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "sew",
+  "name": "老缝纫机",
+  "riddle": "它踩了四十年，缝的都是别人的日子。",
+  "story": "寄件人留言：这台机子在我妈手里踩了四十年，她说布边要对齐，日子也一样。",
+  "sender": "陈姨",
+  "partCount": 7,
+  "parts": [],
+  "sourceImage": "/items/sew/source.jpg",
+  "glb": "/items/sew/model-1024.glb"
+}

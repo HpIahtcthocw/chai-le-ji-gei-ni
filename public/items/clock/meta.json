@@ -1,0 +1,42 @@
+{
+  "id": "clock",
+  "name": "双铃闹钟",
+  "riddle": "它每天把人从梦里拽出来，再被一巴掌按回去。",
+  "story": "寄件人留言：它每天早上六点把我叫起来，六点半我又把它按回去。",
+  "sender": "老周",
+  "partCount": 7,
+  "parts": [
+    {
+      "partId": "part-0",
+      "label": "指针"
+    },
+    {
+      "partId": "part-1",
+      "label": "支脚"
+    },
+    {
+      "partId": "part-2",
+      "label": "表盘"
+    },
+    {
+      "partId": "part-3",
+      "label": "右铃"
+    },
+    {
+      "partId": "part-4",
+      "label": "左铃"
+    },
+    {
+      "partId": "part-5",
+      "label": "机身"
+    },
+    {
+      "partId": "part-6",
+      "label": "提手"
+    }
+  ],
+  "sourceImage": "/items/clock/source.jpg",
+  "glb": "/items/clock/model-1024.glb",
+  "oldest": "指针",
+  "oldestWhy": "指针走过的地方，漆掉得最早。"
+}

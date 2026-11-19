@@ -38,7 +38,7 @@ export default async function Home() {
   }
 
   // 门口还放着别的包裹：都能拆，说明这套流程不是只对一件东西成立
-  const others = items.filter((it) => it.id !== demo.id && it.parts?.some((p) => p.label));
+  const others = items.filter((it) => it.id !== demo.id);
   // 线上版走无状态的现生成（提交 + 轮询）；本机版直接进本机生成流程
   const online = process.env.NEXT_PUBLIC_ONLINE_GEN === '1';
   const canSend = online || process.env.NEXT_PUBLIC_DEMO !== '1';

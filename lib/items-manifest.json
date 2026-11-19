@@ -1,4 +1,46 @@
 {
+  "clock": {
+    "id": "clock",
+    "name": "双铃闹钟",
+    "riddle": "它每天把人从梦里拽出来，再被一巴掌按回去。",
+    "story": "寄件人留言：它每天早上六点把我叫起来，六点半我又把它按回去。",
+    "sender": "老周",
+    "partCount": 7,
+    "parts": [
+      {
+        "partId": "part-0",
+        "label": "指针"
+      },
+      {
+        "partId": "part-1",
+        "label": "支脚"
+      },
+      {
+        "partId": "part-2",
+        "label": "表盘"
+      },
+      {
+        "partId": "part-3",
+        "label": "右铃"
+      },
+      {
+        "partId": "part-4",
+        "label": "左铃"
+      },
+      {
+        "partId": "part-5",
+        "label": "机身"
+      },
+      {
+        "partId": "part-6",
+        "label": "提手"
+      }
+    ],
+    "sourceImage": "/items/clock/source.jpg",
+    "glb": "/items/clock/model-1024.glb",
+    "oldest": "指针",
+    "oldestWhy": "指针走过的地方，漆掉得最早。"
+  },
   "fan": {
     "id": "fan",
     "name": "台扇",
@@ -44,7 +86,7 @@
   },
   "genmwkpt3mu8o6hb": {
     "id": "genmwkpt3mu8o6hb",
-    "name": "无名件",
+    "name": "台灯 · 现场件",
     "riddle": "它每天最后一个关掉自己。",
     "story": "寄件人留言：这盏灯陪我熬过整个毕业季，拆开你就知道它哪块最旧。",
     "partCount": 7,
@@ -165,6 +207,32 @@
     ],
     "glb": "/items/lamp/model-1024.glb"
   },
+  "phone": {
+    "id": "phone",
+    "name": "拨盘电话",
+    "riddle": "它响了二十年，接的人越来越少了。",
+    "story": "寄件人留言：这个号我拨了二十年，家里没人接的时候，它响得最久。",
+    "sender": "阿岚",
+    "partCount": 3,
+    "parts": [
+      {
+        "partId": "part-0",
+        "label": "底座"
+      },
+      {
+        "partId": "part-1",
+        "label": "听筒和线"
+      },
+      {
+        "partId": "part-2",
+        "label": "机身外壳"
+      }
+    ],
+    "sourceImage": "/items/phone/source.jpg",
+    "glb": "/items/phone/model-1024.glb",
+    "oldest": "听筒和线",
+    "oldestWhy": "线是最先被扯坏的那一段。"
+  },
   "radio": {
     "id": "radio",
     "name": "收音机",
@@ -219,5 +287,16 @@
     "oldest": "旋钮",
     "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。",
     "glb": "/items/radio/model-1024.glb"
+  },
+  "sew": {
+    "id": "sew",
+    "name": "老缝纫机",
+    "riddle": "它踩了四十年，缝的都是别人的日子。",
+    "story": "寄件人留言：这台机子在我妈手里踩了四十年，她说布边要对齐，日子也一样。",
+    "sender": "陈姨",
+    "partCount": 7,
+    "parts": [],
+    "sourceImage": "/items/sew/source.jpg",
+    "glb": "/items/sew/model-1024.glb"
   }
 }

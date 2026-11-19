@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '拆了寄给你',
+  title: '拆了寄给你 · 无名件',
   description: '一件物品被拆成零件，你把它拼回去，每拼一块猜一次这是什么。',
 };
 
