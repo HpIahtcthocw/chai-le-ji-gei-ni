@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import HandInput, { type HandControls } from './HandInput';
 
@@ -101,6 +102,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
   const [elapsed, setElapsed] = useState<number | null>(null);
   // 上一次拆同一件的成绩，存在本机：拆得快一点、少拽一次，都值得被记着
   const [record, setRecord] = useState<string | null>(null);
+  // 摊开后能把每块零件导成 STL：切片软件里按零件摆盘，这一件就真能打印出来
+  const [stlNote, setStlNote] = useState<string | null>(null);
   const damageRef = useRef(0);
   const startRef = useRef(0);
   const ctrlRef = useRef<{
@@ -108,8 +111,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     fold: () => void;
     finish: (f: Finish) => void;
     resize: () => void;
+    exportStl: () => number;
     hand?: HandControls;
-  }>({ spread: () => {}, fold: () => {}, finish: () => {}, resize: () => {} });
+  }>({ spread: () => {}, fold: () => {}, finish: () => {}, resize: () => {}, exportStl: () => 0 });
   const [handsOn, setHandsOn] = useState(false);
   /** 硬拉被压住的件、朝错方向拽，都会在件上留下撬痕；纸条能否读全看这个 */
   const [damage, setDamage] = useState(0);
@@ -958,6 +962,37 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       spreadTarget = spreadTarget > 0.5 ? 0 : 1;
     };
 
+    /**
+     * 导出 STL：按零件一块一个文件，几何中心归零，切片软件打开就能摆盘。
+     * 拆出来的 3D 件本来就带着真实比例，所以这一件可以直接拿去打印，不用另做模型。
+     */
+    ctrlRef.current.exportStl = () => {
+      if (!parts.length) return 0;
+      const exporter = new STLExporter();
+      const made: string[] = [];
+      parts.forEach((p, i) => {
+        try {
+          const geo = p.mesh.geometry.clone();
+          geo.translate(-p.center.x, -p.center.y, -p.center.z);
+          const data = exporter.parse(new THREE.Mesh(geo), { binary: true }) as unknown as DataView;
+          const blob = new Blob([data.buffer as ArrayBuffer], { type: 'model/stl' });
+          const name = `${String(i + 1).padStart(2, '0')}-${p.label ?? `第${i + 1}块`}`;
+          made.push(name);
+          const url = URL.createObjectURL(blob);
+          setTimeout(() => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name}.stl`;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+          }, i * 380);
+        } catch {
+          /* 单块失败不影响其它块 */
+        }
+      });
+      return made.length;
+    };
+
     const onWheel = (e: WheelEvent) => {
       if (!spreadArmed) return;
       e.preventDefault();
@@ -989,6 +1024,8 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
         }),
     };
 
+
+    (window as any).__PROTO_EXPORT__ = () => ctrlRef.current.exportStl();
 
     const onResize = () => {
       camera.aspect = host.clientWidth / host.clientHeight;
@@ -1206,6 +1243,17 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             )}
             <button type="button" className="lp-cta lp-cta-line" onClick={() => ctrlRef.current.fold()}>
               {spreadDone ? '装回去' : '摊开'}
+            </button>
+            <button
+              type="button"
+              className="lp-cta lp-cta-line"
+              onClick={() => {
+                const n = ctrlRef.current.exportStl();
+                setStlNote(n ? `已导出 ${n} 个 STL` : '零件还没准备好');
+                window.setTimeout(() => setStlNote(null), 3600);
+              }}
+            >
+              {stlNote ?? '下载 STL 去打印'}
             </button>
             <a className="lp-door" href="/">
               门口
