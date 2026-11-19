@@ -12,13 +12,14 @@
 
 | 入口 | 地址 |
 |---|---|
-| 线上体验（Vercel） | https://chai-le-ji-gei-ni.vercel.app |
+| 国内直连（魔搭创空间 Docker） | https://www.modelscope.cn/studios/HpIahtcthocw/wumingjian |
+| 线上体验（Vercel，含现场生成） | https://chai-le-ji-gei-ni.vercel.app |
 | 拆件台 / 寄件端 | https://chai-le-ji-gei-ni.vercel.app/live |
 | 收件拆件（示例包裹） | https://chai-le-ji-gei-ni.vercel.app/p/lamp · /p/radio · /p/fan |
 | 成片（139 秒全流程） | [docs/demo/wumingjian-demo.mp4](docs/demo/wumingjian-demo.mp4) |
 | 项目报告书 | [docs/无名件-项目报告书.pdf](docs/无名件-项目报告书.pdf) |
 
-> 线上版本已接好三个真实生成出来的包裹（台灯 / 收音机 / 台扇），可直接拆。现场"拍照即生成"需要 `AHOLO_API_KEY`，仓库不自带密钥。
+> 两个入口：魔搭是国内可直连的 Docker 部署，打开就能拆预生成的三件包裹（能回信、能导出 STL）；Vercel 那份带现场生成。现场"拍照即生成"需要 `AHOLO_API_KEY`，仓库不自带密钥。
 
 ## 怎么玩
 
@@ -77,5 +78,6 @@ docs/                报告书、成片、过程截图
 ## 已知限制
 
 - 现场"拍照即生成"是分钟级任务：线上以轮询任务状态呈现，不在请求里同步等待。
-- `*.vercel.app` 在境内部分网络不可直连；评委如打不开，请以仓库内成片与报告书为准，或本地 `npm run dev` 复现。
+- `*.vercel.app` 在境内被解析污染、边缘拒绝 TLS；境内请走魔搭入口，或本地 `npm run dev` 复现。
+- 魔搭那份是 Docker 部署、无密钥，只跑预生成包裹，不做现场生成。
 - 手势对光线和手部距离敏感，鼠标/触控同样可完成全部操作。
