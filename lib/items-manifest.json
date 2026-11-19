@@ -40,7 +40,7 @@
     ],
     "oldest": "底座",
     "oldestWhy": "搬来搬去，底座上的漆掉得最厉害。",
-    "glb": "/items/fan/model-slim.glb"
+    "glb": "/items/fan/model-1024.glb"
   },
   "genmwkpt3mu8o6hb": {
     "id": "genmwkpt3mu8o6hb",
@@ -81,7 +81,7 @@
     "sourceImage": "https://holo-cos.aholo3d.cn/resource/platform/temp/2026/11/17/NL6FGSAKTLGAMAABAAAAACY8.jpg",
     "oldest": "灯泡",
     "oldestWhy": "换了两次灯罩，灯泡一直没换。",
-    "glb": "/items/genmwkpt3mu8o6hb/model-slim.glb"
+    "glb": "/items/genmwkpt3mu8o6hb/model-1024.glb"
   },
   "lamp": {
     "id": "lamp",
@@ -163,7 +163,7 @@
         "answerIndex": 1
       }
     ],
-    "glb": "/items/lamp/model-slim.glb"
+    "glb": "/items/lamp/model-1024.glb"
   },
   "radio": {
     "id": "radio",
@@ -218,6 +218,6 @@
     ],
     "oldest": "旋钮",
     "oldestWhy": "三个旋钮里，左边那个被拧得最狠，刻度磨没了。",
-    "glb": "/items/radio/model-slim.glb"
+    "glb": "/items/radio/model-1024.glb"
   }
 }

@@ -67,15 +67,27 @@ export default async function Home() {
             <span className="home-jump-lead">这三件都是真寄过来的，随便拆</span>
           </div>
         )}
+        <div className="home-wall-head">
+          一件东西拆成零件寄过来，最后一块底下压着一句话。门口这几件都能拆：
+        </div>
         {others.length > 0 && (
-          <div className="home-shelf">
-            <span>门口还放着：</span>
-            {others.map((it) => (
-              <Link key={it.id} href={`/p/${it.id}`} className="home-shelf-item">
-                {it.name}
-              </Link>
+          <ul className="home-wall">
+            {others.map((it, index) => (
+              <li key={it.id} className="home-wall-card">
+                <span className="home-wall-no">{String(index + 2).padStart(2, '0')}</span>
+                <Link href={`/p/${it.id}`} className="home-wall-name">
+                  {it.name}
+                </Link>
+                <span className="home-wall-meta">
+                  {it.partCount} 块
+                  {it.sourceImage ? ' · 有原图' : ''}
+                </span>
+                <Link href={`/p/${it.id}`} className="home-wall-go">
+                  拆开
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </>
