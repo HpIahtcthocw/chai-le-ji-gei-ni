@@ -1415,6 +1415,11 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 @keyframes lp-slip { from { opacity: 0; transform: translateY(-38%) rotate(-4deg) scale(0.96); } to { opacity: 1; transform: translateY(-50%) rotate(-1deg); } }
 @keyframes lp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes lp-fade { from { opacity: 0; } to { opacity: 1; } }
+/* 纸条是从那一块底下抽出来的：先露一条边，再整张摊开，不是直接弹出一张卡片 */
+@keyframes lp-paper {
+  from { opacity: 0; transform: translateY(-14px) rotate(-2.6deg) scaleY(0.62); transform-origin: 50% 0; clip-path: inset(0 0 46% 0); }
+  to { opacity: 1; transform: none; transform-origin: 50% 0; clip-path: inset(0 0 0 0); }
+}
 @media (max-width: 680px) {
   .lp-rule { left: 16px; right: 16px; font-size: 12px; }
   .lp-note { right: 16px; left: 16px; top: auto; bottom: 24px; width: auto; animation: lp-fade 0.4s ease both; transform: rotate(-0.6deg); }
@@ -1671,7 +1676,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   bottom: auto;
   translate: none;
   transform: none;
-  animation: lp-fade 0.4s ease both;
+  animation: lp-paper 0.62s cubic-bezier(0.22, 0.7, 0.2, 1) both;
   width: min(440px, 36vw);
   box-sizing: border-box;
   max-height: calc(100% - 44px);

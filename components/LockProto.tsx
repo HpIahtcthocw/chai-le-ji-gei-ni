@@ -289,6 +289,29 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     const tween = (dur: number, step: (k: number) => void, done?: () => void, delay = 0) =>
       tweens.push({ t0: performance.now() + delay, dur, step, done });
 
+    /**
+     * 拆下一块，就把这一块的材质还给它。
+     * 开局整件是墨色剪影：看得出是"一件东西"，但认不出是台灯还是别的。
+     * 每块被拉下来时恢复原色，形状是被一块块认出来的，不是一进场就摊牌。
+     */
+    const revealPart = (index: number) => {
+      const o = originals[index];
+      if (!o) return;
+      if (o.m.map !== o.map) {
+        o.m.map = o.map;
+        o.m.needsUpdate = true;
+      }
+      const from = o.m.color.clone();
+      const fromRough = o.m.roughness;
+      const fromMetal = o.m.metalness;
+      tween(420, (k) => {
+        const e = easeInOut(k);
+        o.m.color.copy(from).lerp(o.color, e);
+        o.m.roughness = fromRough + (o.rough - fromRough) * e;
+        o.m.metalness = fromMetal + (o.metal - fromMetal) * e;
+      });
+    };
+
     const raycaster = new THREE.Raycaster();
     (raycaster as any).firstHitOnly = true;
 
@@ -501,7 +524,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
           setPhase('note');
         };
 
-        setCoreLabel(labels[coreIndex] ?? `第 ${coreIndex + 1} 块`);
+        setCoreLabel(labels[coreIndex] ?? '最里面那块');
         setTotal(parts.length);
         startRef.current = Date.now();
         setPhase('playing');
@@ -681,6 +704,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       clickUp(removedCount);
       setRemoved(removedCount);
       part.rimTarget = 0;
+      revealPart(part.index);
       const start = part.mesh.position.clone();
       const lift = start.clone().addScaledVector(axis, 0.12);
       lift.y += 0.2;
@@ -1081,7 +1105,7 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
       <div className="lp-rule lp-rule-top">
         <span>
           {sender} 寄来一件东西
-          <em className="lp-rule-sub">拆完，里面夹着一句话</em>
+          <em className="lp-rule-sub">{total > 0 ? `拆成 ${total} 块寄过来，最后一块里压着一句话` : '拆完，里面夹着一句话'}</em>
         </span>
         <span className="lp-rule-right">
           {total > 0 && (
