@@ -420,8 +420,17 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
     const draco = new DRACOLoader();
     draco.setDecoderPath('/draco/');
     loader.setDRACOLoader(draco);
+    // 魔搭创空间的静态资源要带 studio_token，否则同源的 /items/* 会被 403
+    const srcWithToken = (() => {
+      if (!src.startsWith('/') || typeof window === 'undefined') return src;
+      const token = new URLSearchParams(window.location.search).get('studio_token');
+      if (!token) return src;
+      const u = new URL(src, window.location.origin);
+      u.searchParams.set('studio_token', token);
+      return u.toString();
+    })();
     loader.load(
-      src,
+      srcWithToken,
       (gltf) => {
         if (disposed) return;
         const meshes: THREE.Mesh[] = [];
