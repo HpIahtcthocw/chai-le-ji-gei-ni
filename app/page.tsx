@@ -55,18 +55,14 @@ export default async function Home() {
       />
 
       <div className="home-jump">
-        {canSend ? (
-          <div className="home-jump-row">
-            <Link href={sendHref} className="home-jump-link">
-              寄一件你自己的
-            </Link>
-            <span className="home-jump-note">拍一张照，现场长出一件（要几分钟）</span>
-          </div>
-        ) : (
-          <div className="home-jump-row">
-            <span className="home-jump-lead">这三件都是真寄过来的，随便拆</span>
-          </div>
-        )}
+        <div className="home-jump-row">
+          <a href={sendHref} className="home-jump-link">
+            寄一件你自己的
+          </a>
+          <span className="home-jump-note">
+            {canSend ? '拍一张照，现场长出一件（要几分钟）' : '线上这版只放做好的件；现场生成在本机跑，拆件台可以先看流程'}
+          </span>
+        </div>
         <div className="home-wall-head">
           一件东西拆成零件寄过来，最后一块底下压着一句话。门口这几件都能拆：
         </div>
@@ -75,16 +71,16 @@ export default async function Home() {
             {others.map((it, index) => (
               <li key={it.id} className="home-wall-card">
                 <span className="home-wall-no">{String(index + 2).padStart(2, '0')}</span>
-                <Link href={`/p/${it.id}`} className="home-wall-name">
+                <a href={`/p/${it.id}`} className="home-wall-name">
                   {it.name}
-                </Link>
+                </a>
                 <span className="home-wall-meta">
                   {it.partCount} 块
                   {it.sourceImage ? ' · 有原图' : ''}
                 </span>
-                <Link href={`/p/${it.id}`} className="home-wall-go">
+                <a href={`/p/${it.id}`} className="home-wall-go">
                   拆开
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
