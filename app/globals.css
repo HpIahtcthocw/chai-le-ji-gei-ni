@@ -1514,6 +1514,8 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 .home-jump-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .home-jump-link {
   pointer-events: auto;
+  position: relative;
+  z-index: 9;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -1527,6 +1529,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 }
 .home-jump-link:hover { color: #8a2f22; border-color: #8a2f22; }
 .home-jump-note { font-size: 12.5px; line-height: 1.6; letter-spacing: 0.04em; color: #4c505a; max-width: 300px; }
+.home-jump-alt { color: #8a2f22; }
 .lp[data-phase="spread"] ~ .home-jump,
 .lp[data-phase="note"] ~ .home-jump { opacity: 0; pointer-events: none; }
 .home-jump { transition: opacity 0.3s ease; }

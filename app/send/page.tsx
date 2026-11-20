@@ -96,14 +96,14 @@ export default function SendPage() {
           <div className="send-top">
             <Link href="/" className="send-back">← 回到门口</Link>
           </div>
-          <h1 className="send-title">这一件<br />还在本机</h1>
+          <h1 className="send-title">寄一件<br />你自己的</h1>
           <p className="send-lead">
-            从照片长出一件东西，要跑分钟级的生成任务，还要把零件落到本地。<br />
-            线上这版只放已经寄到的三件：台灯、收音机、台扇，都能拆到底。
+            放进一张照片，写一句话，剩下的交给拆件台。<br />
+            五到十分钟，出来的是能拆的链接。
           </p>
           <div className="send-foot">
-            <div className="send-note">想寄自己的那件，要在本机跑生成：npm start -- -p 3100。</div>
-            <Link className="send-next" href="/">回门口拆一件</Link>
+            <div className="send-note">已经在线的七件都能拆：闹钟、台扇、台灯、拨盘电话、收音机、老缝纫机。</div>
+            <Link className="send-next" href="/live">去拆件台</Link>
           </div>
         </div>
       </main>

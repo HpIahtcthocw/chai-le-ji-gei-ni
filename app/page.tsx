@@ -40,9 +40,8 @@ export default async function Home() {
   // 门口还放着别的包裹：都能拆，说明这套流程不是只对一件东西成立
   const others = items.filter((it) => it.id !== demo.id);
   // 线上版走无状态的现生成（提交 + 轮询）；本机版直接进本机生成流程
-  const online = process.env.NEXT_PUBLIC_ONLINE_GEN === '1';
-  const canSend = online || process.env.NEXT_PUBLIC_DEMO !== '1';
-  const sendHref = online ? '/live' : '/send';
+  // 线上入口固定指向拆件台：那里能传照片、能生成、能拆；/send 是本机专用流程
+  const sendHref = '/live';
 
   return (
     <>
@@ -59,9 +58,10 @@ export default async function Home() {
           <a href={sendHref} className="home-jump-link">
             寄一件你自己的
           </a>
-          <span className="home-jump-note">
-            {canSend ? '拍一张照，现场长出一件（要几分钟）' : '线上这版只放做好的件；现场生成在本机跑，拆件台可以先看流程'}
-          </span>
+          <span className="home-jump-note">拍一张照，等五到十分钟，出来就是一条能拆的链接</span>
+          <a href="/show" className="home-jump-link home-jump-alt">
+            门口
+          </a>
         </div>
         <div className="home-wall-head">
           一件东西拆成零件寄过来，最后一块底下压着一句话。门口这几件都能拆：
