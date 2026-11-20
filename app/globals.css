@@ -3459,7 +3459,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   font-size: 11px;
   line-height: 1.55;
   color: #2a2620;
-  animation: rt-slip-in 0.22s ease-out both;
+  animation: none;
 }
 .rt-slip b {
   display: block;
@@ -3493,7 +3493,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
 
 /* 窗口开起来像被点开，不是硬出现 */
 .rt-win {
-  animation: rt-win-in 0.36s ease-out both;
+  animation: none;
 }
 @keyframes rt-win-in {
   from {
@@ -3528,7 +3528,7 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
   background: #c0c0c0;
   border: 1px solid #000000;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
-  animation: rt-pack-in 0.16s ease-out both;
+  animation: none;
 }
 .rt-pack-bar {
   display: flex;
