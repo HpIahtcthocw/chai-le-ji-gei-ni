@@ -67,6 +67,7 @@ export default function LivePage() {
   const [copied, setCopied] = useState(false);
   const [hold, setHold] = useState<'auto' | 'open' | 'closed'>('auto');
   const [packing, setPacking] = useState(false);
+  const [help, setHelp] = useState(false);
 
   const busy = stage === 'gen' || stage === 'split';
   const progress = stage === 'done' ? 100 : stage === 'split' ? 68 : stage === 'gen' ? 28 : 0;
@@ -218,10 +219,10 @@ export default function LivePage() {
             <span className="rt-icon-glyph" aria-hidden="true">✉</span>
             <span>寄件</span>
           </Link>
-          <a href="#how" className="rt-icon">
+          <button type="button" className="rt-icon" onClick={() => setHelp(true)}>
             <span className="rt-icon-glyph" aria-hidden="true">?</span>
             <span>怎么用</span>
-          </a>
+          </button>
         </nav>
 
         <div className="rt-win">
@@ -481,6 +482,48 @@ export default function LivePage() {
             <span className="rt-status-cell rt-status-right">收件那头螺丝是松的，得自己一块块拉开来</span>
           </footer>
         </div>
+
+        {help && (
+          <div className="rt-help" role="dialog" aria-modal="true" aria-label="怎么用">
+            <div className="rt-help-win">
+              <header className="rt-titlebar">
+                <span className="rt-titlebar-icon" aria-hidden="true">?</span>
+                <span className="rt-titlebar-text">怎么用 — 拆了寄给你 · 无名件</span>
+                <span className="rt-titlebar-btns">
+                  <button type="button" className="rt-help-x" onClick={() => setHelp(false)} aria-label="关掉">×</button>
+                </span>
+              </header>
+
+              <div className="rt-menubar">
+                <span>寄的人</span>
+                <span className="rt-menubar-gap" />
+                <span className="rt-menubar-note">三步，五到十分钟</span>
+              </div>
+
+              <div className="rt-help-body">
+                <ol className="rt-help-steps">
+                  <li><b>放一张照片</b><p>白底或浅底最认得出，别把东西裁得太紧。原图不上传，先压到 1600 宽。</p></li>
+                  <li><b>写一句话</b><p>它会压在最里面那块底下，对方拆到那儿才看得到。</p></li>
+                  <li><b>按「开始拆件」</b><p>照片先变成模型，模型再按轮廓切成零件，最后装成一条链接。五到十分钟，不用人看。</p></li>
+                </ol>
+
+                <div className="rt-help-note">
+                  <span>收件人那边</span>
+                  <p>打开链接就是一只盒子。一块块往外拉；被别的块压着的拉不动，硬拽会撕掉里面那张纸。</p>
+                </div>
+
+                <div className="rt-help-note">
+                  <span>左边这台拆解台</span>
+                  <p>合上、拆开、自动循环三种状态。点一下散开，拖住能转，两指缩放。</p>
+                </div>
+
+                <div className="rt-help-actions">
+                  <button type="button" onClick={() => setHelp(false)}>知道了</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
