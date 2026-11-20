@@ -10,7 +10,7 @@ export default async function ProtoPage() {
   for (const p of meta.parts) labels[Number(p.partId.replace('part-', ''))] = p.label;
   return (
     <LockProto
-      src="/items/lamp/model-slim.glb"
+      src="/items/lamp/model-1024.glb"
       sender="小周"
       itemName={meta.name}
       labels={labels}

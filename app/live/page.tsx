@@ -278,7 +278,7 @@ export default function LivePage() {
                 <div className="rt-pane-title">拆解台 — 台灯（7 件）</div>
                 <div className="rt-stage">
                   <HeroStage
-                    src="/items/lamp/model-slim.glb"
+                    src="/items/lamp/model-1024.glb"
                     mode={hold}
                     onUserToggle={(open) => setHold(open ? 'open' : 'closed')}
                   />
