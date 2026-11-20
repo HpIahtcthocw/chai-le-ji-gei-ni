@@ -1424,6 +1424,9 @@ button.home-cta { border: 0; cursor: pointer; font-family: inherit; }
 .lp-tag i { position: relative; width: 5px; height: 5px; border-radius: 50%; background: #111214; }
 .lp-tag i::before { content: ""; position: absolute; left: 2px; bottom: 5px; width: 1px; height: 13px; background: linear-gradient(rgba(17, 18, 20, 0.5), rgba(17, 18, 20, 0.12)); }
 .lp-tag-no { font-family: "Consolas", "SF Mono", monospace; font-size: 11px; letter-spacing: 0.12em; color: #71767e; }
+.lp-home { position: absolute; right: 24px; bottom: 22px; z-index: 5; font-size: 11px; letter-spacing: 0.14em; color: #8b9099; text-decoration: none; pointer-events: auto; }
+@media (max-width: 680px) { .lp-home { right: 14px; bottom: 12px; font-size: 10px; } }
+.lp-home:hover { color: #2f6bf2; }
 .lp-mark { position: absolute; left: 28px; top: 62px; font-size: 10px; letter-spacing: 0.14em; color: #7d828a; pointer-events: none; }
 
 .lp-tag-name { letter-spacing: 0.1em; }
@@ -3627,3 +3630,6 @@ html[data-open="1"] .home-copy { animation: none; opacity: 0.16; }
     transform: translate(-50%, -50%) scale(1);
   }
 }
+.sealed-links { display: flex; gap: 22px; margin-top: 22px; }
+.sealed-links a { font-size: 11px; letter-spacing: 0.14em; color: #7c8698; text-decoration: none; padding-bottom: 2px; border-bottom: 1px solid rgba(124, 134, 152, 0.35); }
+.sealed-links a:hover { color: #d6dbe6; border-color: #d6dbe6; }

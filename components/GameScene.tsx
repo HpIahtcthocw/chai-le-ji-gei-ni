@@ -783,6 +783,10 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           >
             拆 开
           </button>
+          <div className="sealed-links">
+            <a href="/live">回拆件台</a>
+            <a href="/show">门口</a>
+          </div>
         </div>
       )}
 
@@ -879,6 +883,22 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
           <div style={{ fontSize: 11, color: '#6d7688', marginTop: 6, letterSpacing: 1, whiteSpace: 'nowrap' }}>
             第 {Math.min(placed + 1, meta.parts.length)} / {meta.parts.length} 块 · 得分 {score}
           </div>
+          <a
+            href="/live"
+            style={{
+              display: 'inline-block',
+              marginTop: 10,
+              pointerEvents: 'auto',
+              fontSize: 11,
+              letterSpacing: 1,
+              color: '#8f98a8',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(143,152,168,0.35)',
+              paddingBottom: 2,
+            }}
+          >
+            回拆件台
+          </a>
         </div>
         <Track placed={placed} total={meta.parts.length} compact={narrow} />
       </header>

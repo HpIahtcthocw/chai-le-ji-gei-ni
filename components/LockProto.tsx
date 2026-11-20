@@ -1149,6 +1149,9 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
 
   return (
     <main className="lp" data-phase={phase} data-note={phase === 'note' ? '1' : '0'}>
+      {phase !== 'note' && (
+        <a className="lp-home" href="/live">← 拆件台 · 门口</a>
+      )}
       <div ref={hostRef} className="lp-stage" />
       <div ref={dirsRef} className="lp-dirs" aria-hidden="true" />
       <div className="lp-dots" aria-hidden="true" />
