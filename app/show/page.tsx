@@ -17,8 +17,8 @@ export default function ShowPage() {
         <div className="hero-bottom">
           <h1 className="hero-title">拆了寄给你 · 无名件</h1>
           <p className="hero-lede">有人把它拆成七块寄来。装完那一刻，它才真的有名字。</p>
-          <Link href="/item/lamp" className="hero-enter">
-            进去把它拼回来
+          <Link href="/live" className="hero-enter">
+            进去拆一件
           </Link>
         </div>
       </div>
