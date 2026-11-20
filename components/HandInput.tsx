@@ -75,8 +75,8 @@ export default function HandInput({ getControls, onClose }: Props) {
   const dotsRef = useRef<HTMLCanvasElement>(null);
   const cursorRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
   const meterRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState('正在打开摄像头');
-  const statusRef = useRef('正在打开摄像头');
+  const [status, setStatus] = useState('手势准备中，第一次约 15 秒');
+  const statusRef = useRef('手势准备中，第一次约 15 秒');
   // 每帧都 setState 会把 React 拖成瓶颈，只有文案变了才提交一次
   const say = (t: string) => {
     if (statusRef.current === t) return;
@@ -104,7 +104,7 @@ export default function HandInput({ getControls, onClose }: Props) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
       } catch {
-        say('没有拿到摄像头权限');
+        say('没拿到摄像头权限，点右上角全屏再试');
         return;
       }
       const video = videoRef.current!;
@@ -118,7 +118,7 @@ export default function HandInput({ getControls, onClose }: Props) {
         video.srcObject = stream;
         await video.play().catch(() => {});
       }
-      say('正在加载手部识别');
+      say('正在下载手部模型，第一次约 15 秒');
       const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
       const fileset = await FilesetResolver.forVisionTasks('/mediapipe/wasm');
       const options = (delegate: 'GPU' | 'CPU') => ({
