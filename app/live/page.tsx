@@ -206,7 +206,7 @@ export default function LivePage() {
     <main className="rt-page">
       <div className="rt-desktop">
         <nav className="rt-icons">
-          <Link href="/" className="rt-icon">
+          <Link href="/show" className="rt-icon">
             <span className="rt-icon-glyph" aria-hidden="true">⌂</span>
             <span>门口</span>
           </Link>
@@ -214,6 +214,10 @@ export default function LivePage() {
             <span className="rt-icon-glyph" aria-hidden="true">▤</span>
             <span>拆件台</span>
           </span>
+          <Link href="/send" className="rt-icon">
+            <span className="rt-icon-glyph" aria-hidden="true">✉</span>
+            <span>寄件</span>
+          </Link>
           <a href="#how" className="rt-icon">
             <span className="rt-icon-glyph" aria-hidden="true">?</span>
             <span>怎么用</span>

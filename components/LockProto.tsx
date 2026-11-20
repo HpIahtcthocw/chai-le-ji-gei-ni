@@ -1271,7 +1271,10 @@ export default function LockProto({ src, sender, itemName, message, labels, phot
             >
               {stlNote ?? '下载 STL 去打印'}
             </button>
-            <a className="lp-door" href="/">
+            <a className="lp-door" href="/live">
+              拆件台
+            </a>
+            <a className="lp-door" href="/show">
               门口
             </a>
           </span>

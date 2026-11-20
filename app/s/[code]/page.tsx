@@ -40,7 +40,7 @@ export default async function SharePage({ params }: { params: Promise<{ code: st
     <main className="share-page">
       <div className="share-panel">
         <div className="share-top">
-          <Link href="/" className="share-back">
+          <Link href="/show" className="share-back">
             ← 门口
           </Link>
           <span className="share-step">装盒完成</span>

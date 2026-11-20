@@ -94,7 +94,7 @@ export default function SendPage() {
       <main className="send-page">
         <div className="send-inner">
           <div className="send-top">
-            <Link href="/" className="send-back">← 回到门口</Link>
+            <Link href="/show" className="send-back">← 回到门口</Link>
           </div>
           <h1 className="send-title">寄一件<br />你自己的</h1>
           <p className="send-lead">
@@ -114,7 +114,7 @@ export default function SendPage() {
     <main className="send-page">
       <div className="send-inner">
         <div className="send-top">
-          <Link href="/" className="send-back">← 回到门口</Link>
+          <Link href="/show" className="send-back">← 回到门口</Link>
           
         </div>
 

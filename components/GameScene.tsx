@@ -1012,10 +1012,16 @@ export default function GameScene({ meta }: { meta: ItemMeta }) {
               下载 STL
             </a>
             <a
-              href="/"
+              href="/live"
               style={{ fontSize: 12, letterSpacing: 1, color: '#7c8698', textDecoration: 'none' }}
             >
               换一件
+            </a>
+            <a
+              href="/show"
+              style={{ fontSize: 12, letterSpacing: 1, color: '#7c8698', textDecoration: 'none' }}
+            >
+              门口
             </a>
           </div>
         </div>

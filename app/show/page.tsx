@@ -20,6 +20,10 @@ export default function ShowPage() {
           <Link href="/item/lamp" className="hero-enter">
             进去把它拼回来
           </Link>
+          <div className="hero-links">
+            <Link href="/live" className="hero-link">进拆件台</Link>
+            <Link href="/send" className="hero-link">寄一件你自己的</Link>
+          </div>
         </div>
       </div>
     </main>
